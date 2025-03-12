@@ -10,7 +10,7 @@ import org.bson.types.ObjectId;
 public class UserRepository implements PanacheMongoRepository<User> {
 
     public User findById(final ObjectId id) {
-        return find("id", id).firstResult();
+        return find("_id", id).firstResult();
     }
 
     public User findByTag(final String tag) {
@@ -27,5 +27,9 @@ public class UserRepository implements PanacheMongoRepository<User> {
 
     public void deleteUser(final User user) {
         delete(user);
+    }
+
+    public void clear() {
+        deleteAll();
     }
 }

@@ -4,16 +4,16 @@ import com.epita.controller.contracts.UserRequest;
 import com.epita.service.UserService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.jboss.logging.Logger;
 
 import java.util.List;
 
+@Slf4j
 @ApplicationScoped
 @Path("/api/users")
 public class UserController {
@@ -21,14 +21,18 @@ public class UserController {
     @Inject
     UserService userService;
 
+    @Inject
+    Logger logger;
+
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(UserRequest userRequest)
     {
-        if (!isRequestValid(userRequest, false))
+        if (!isRequestValid(userRequest, false)) {
+            logger.warnf("Invalid request %s", userRequest.toString());
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
-
+        }
         Boolean creationDone = userService.createUser(userRequest);
 
         if (creationDone) {
@@ -38,13 +42,16 @@ public class UserController {
         return Response.status(Response.Status.CONFLICT).build(); // 409 caused by tag not unique
     }
 
-    @POST
+    @PATCH
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateUser(UserRequest userRequest)
     {
         if (!isRequestValid(userRequest, false))
+        {
+            logger.warnf("Invalid request %s", userRequest.toString());
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
+        }
 
         Boolean updateDone = userService.updateUser(userRequest);
 
@@ -55,14 +62,16 @@ public class UserController {
     }
 
     @DELETE
-    @Path("/delete")
+    @Path("/delete/{userTag}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteUser(UserRequest userRequest) {
-        if (!isRequestValid(userRequest, false)) {
+    public Response deleteUser(@PathParam("userTag") String userTag) {
+        if (userTag == null || userTag.isEmpty())
+        {
+            logger.warnf("Invalid request %s", userTag);
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
-        Boolean deletionDone = userService.deleteUser(userRequest);
+        Boolean deletionDone = userService.deleteUser(userTag);
 
         if (deletionDone) {
             return Response.status(Response.Status.OK).build(); // 200
@@ -70,7 +79,7 @@ public class UserController {
         return Response.status(Response.Status.NOT_FOUND).build(); // 404 if user not found
     }
 
-
+    // I don't know if the second param will be used, but I expected it
     private Boolean isRequestValid(final UserRequest userRequest, final Boolean isBlockedListNeeded) {
         if (userRequest == null) {
             return Boolean.FALSE;

@@ -28,7 +28,7 @@ paths:
           description: Conflict - Tag is not unique.
 
   /api/users/update:
-    post:
+    patch:
       summary: Update an existing user
       description: Updates an existing user's information.
       requestBody:
@@ -45,16 +45,17 @@ paths:
         "404":
           description: User not found.
 
-  /api/users/delete:
-    post:  # You can change this to `delete` if using DELETE instead
+  /api/users/delete/{userTag}:
+    delete:
       summary: Delete a user
       description: Deletes an existing user from the system.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRequest'
+      parameters:
+        - name: userTag
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique tag of the user to delete.
       responses:
         "200":
           description: User deleted successfully.

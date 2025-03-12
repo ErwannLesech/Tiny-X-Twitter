@@ -35,8 +35,8 @@ public class UserService {
         return false;
     }
 
-    public Boolean deleteUser(final UserRequest userRequest) {
-        User userToDelete = userRepository.findByTag(userRequest.getTag());
+    public Boolean deleteUser(final String userTag) {
+        User userToDelete = userRepository.findByTag(userTag);
         if (userToDelete != null) {
             userRepository.deleteUser(userToDelete);
             return true;
