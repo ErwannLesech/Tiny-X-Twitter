@@ -1,0 +1,85 @@
+openapi: 3.1.0
+info:
+  title: UserService API
+  description: API for managing users in the Epitweet.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081
+    description: Production server
+
+paths:
+  /api/users/create:
+    post:
+      summary: Create a new user
+      description: Creates a new user if the tag is unique.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        "201":
+          description: User created successfully.
+        "400":
+          description: Invalid request payload.
+        "409":
+          description: Conflict - Tag is not unique.
+
+  /api/users/update:
+    post:
+      summary: Update an existing user
+      description: Updates an existing user's information.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        "200":
+          description: User updated successfully.
+        "400":
+          description: Invalid request payload.
+        "404":
+          description: User not found.
+
+  /api/users/delete:
+    post:  # You can change this to `delete` if using DELETE instead
+      summary: Delete a user
+      description: Deletes an existing user from the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        "200":
+          description: User deleted successfully.
+        "400":
+          description: Invalid request payload.
+        "404":
+          description: User not found.
+
+components:
+  schemas:
+    UserRequest:
+      type: object
+      required:
+        - tag
+        - pseudo
+      properties:
+        tag:
+          type: string
+          description: Unique tag identifier for the user.
+        pseudo:
+          type: string
+          description: Display name of the user.
+        blockedUsers:
+          type: array
+          items:
+            type: string
+            format: objectId
+          description: List of blocked user IDs (if applicable).

@@ -1,0 +1,5 @@
+# remove target build folders
+target/
+
+# remove all .idea files
+.idea/
