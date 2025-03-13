@@ -10,5 +10,5 @@ db.createUser(
         ]
     }
 );
-db.createCollection("Purchases");
-db.createCollection("Products");
+db.createCollection("Users");
+db.createCollection("Posts");
