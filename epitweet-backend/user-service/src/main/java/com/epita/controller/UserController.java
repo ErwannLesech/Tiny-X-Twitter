@@ -1,6 +1,7 @@
 package com.epita.controller;
 
 import com.epita.controller.contracts.UserRequest;
+import com.epita.controller.contracts.UserResponse;
 import com.epita.service.UserService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,6 +24,43 @@ public class UserController {
 
     @Inject
     Logger logger;
+
+    @GET
+    @Path("/getUser")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUser(@HeaderParam("userTag") String userTag) {
+        if (userTag == null || userTag.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).build(); // 400
+        }
+
+        UserResponse userResponse = userService.getUser(userTag);
+
+        if (userResponse == null) {
+            return Response.status(Response.Status.NOT_FOUND).build(); // 404
+        }
+
+        return Response.ok(userResponse).build();
+    }
+
+    @POST
+    @Path("/auth")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response authUser(UserRequest userRequest) {
+        if (!isRequestValid(userRequest, true))
+        {
+            logger.warnf("Invalid request: %s", userRequest.toString());
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        Integer authResult = userService.authUser(userRequest);
+
+        return switch (authResult) {
+            case 404 -> Response.status(Response.Status.NOT_FOUND).build();
+            case 401 -> Response.status(Response.Status.UNAUTHORIZED).build();
+            case 200 -> Response.ok().build();
+            default -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        };
+    }
 
     @POST
     @Path("/create")
@@ -62,9 +100,9 @@ public class UserController {
     }
 
     @DELETE
-    @Path("/delete/{userTag}")
+    @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteUser(@PathParam("userTag") String userTag) {
+    public Response deleteUser(@HeaderParam("userTag") String userTag) {
         if (userTag == null || userTag.isEmpty())
         {
             logger.warnf("Invalid request %s", userTag);
@@ -79,21 +117,21 @@ public class UserController {
         return Response.status(Response.Status.NOT_FOUND).build(); // 404 if user not found
     }
 
-    // I don't know if the second param will be used, but I expected it
-    private Boolean isRequestValid(final UserRequest userRequest, final Boolean isBlockedListNeeded) {
+    private Boolean isRequestValid(final UserRequest userRequest, final Boolean isPasswordNeeded) {
         if (userRequest == null) {
             return Boolean.FALSE;
         }
 
         String tag = userRequest.getTag();
         String pseudo = userRequest.getPseudo();
+        String password = userRequest.getPassword();
         List<ObjectId> blockedList = userRequest.getBlockedUsers();
 
         if (tag == null || tag.isEmpty() || pseudo == null || pseudo.isEmpty()) {
             return Boolean.FALSE;
         }
 
-        if (isBlockedListNeeded && (blockedList == null || blockedList.isEmpty())) {
+        if (isPasswordNeeded && (password == null || password.isEmpty())) {
             return Boolean.FALSE;
         }
 
