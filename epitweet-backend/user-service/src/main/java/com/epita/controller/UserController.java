@@ -109,12 +109,13 @@ public class UserController {
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
-        Boolean deletionDone = userService.deleteUser(userTag);
+        UserResponse userDeleted = userService.deleteUser(userTag);
 
-        if (deletionDone) {
-            return Response.status(Response.Status.OK).build(); // 200
+        if (userDeleted == null) {
+            return Response.status(Response.Status.NOT_FOUND).build(); // 404 if user not found
         }
-        return Response.status(Response.Status.NOT_FOUND).build(); // 404 if user not found
+
+        return Response.ok(userDeleted).build(); // 200
     }
 
     private Boolean isRequestValid(final UserRequest userRequest, final Boolean isPasswordNeeded) {

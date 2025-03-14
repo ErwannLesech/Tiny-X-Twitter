@@ -58,14 +58,14 @@ public class UserService {
         return false;
     }
 
-    public Boolean deleteUser(final String userTag) {
+    public UserResponse deleteUser(final String userTag) {
         User userToDelete = userRepository.findByTag(userTag);
         if (userToDelete != null) {
             userRepository.deleteUser(userToDelete);
-            return true;
+            return new UserResponse(userToDelete._id,userToDelete.tag, userToDelete.pseudo, userToDelete.password, userToDelete.blockedUsers);
         }
 
-        return false;
+        return null;
     }
 
     /***

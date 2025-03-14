@@ -119,15 +119,22 @@ public class UserControllerTest {
         newUser.pseudo = "grp3RPZ";
         userRepository.createUser(newUser);
 
-        given().contentType(ContentType.JSON)
+        UserResponse userResponse = given().contentType(ContentType.JSON)
                 .header("userTag", newUser.tag)
                 .when()
                 .delete("/api/users/delete")
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .extract()
+                .as(UserResponse.class);
 
         User user = userRepository.findByTag("group3");
         assert user == null;
+
+        assert userResponse != null;
+        assert userResponse.get_id() != null;
+        assert userResponse.getTag().equals("group3");
+        assert userResponse.getPseudo().equals("grp3RPZ");
     }
 
     @Test
