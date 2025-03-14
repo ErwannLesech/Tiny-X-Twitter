@@ -2,10 +2,14 @@ package com.epita.service;
 
 import com.epita.controller.contracts.UserRequest;
 import com.epita.controller.contracts.UserResponse;
+import com.epita.controller.subscriber.contracts.CreatePostRequest;
 import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;
+import com.epita.repository.publisher.CreatePostPublisher;
+import com.epita.repository.publisher.contracts.CreatePostResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
 @ApplicationScoped
@@ -13,6 +17,9 @@ public class UserService {
 
     @Inject
     UserRepository userRepository;
+
+    @Inject
+    CreatePostPublisher createPostPublisher;
 
     public UserResponse getUser(String userTag)
     {
@@ -94,4 +101,22 @@ public class UserService {
     private Boolean checkPassword(String passwordToCheck, String userPassword) {
         return BCrypt.checkpw(passwordToCheck, userPassword);
     }
+
+    /**
+     * This function check if the userId and the parentId blocked themselves
+     * @param message the CreatePostRequest from repo-post
+     */
+    public void createPostRequest(CreatePostRequest message) {
+        ObjectId userId = message.userId;
+        ObjectId parentId = message.parentId;
+
+        User user = userRepository.findById(userId);
+        User parentUser = userRepository.findById(parentId);
+
+        Boolean childBlockedParentUser = user.blockedUsers.contains(parentId);
+        Boolean parentUserBlockedUser = parentUser.blockedUsers.contains(userId);
+
+        createPostPublisher.publish(new CreatePostResponse(message.userId, message.postType, message.content, message.mediaUrl, message.parentId, parentUserBlockedUser, childBlockedParentUser));
+    }
+
 }
