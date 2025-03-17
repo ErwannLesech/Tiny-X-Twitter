@@ -39,7 +39,7 @@ public class CreatePostSubscriber implements Consumer<CreatePostRequest> {
 
     @Override
     public void accept(final CreatePostRequest message) {
-        logger.infof("Received purchase result: %s", message.toString());
+        logger.infof("Received CreatePostRequest result: %s", message.toString());
         vertx.executeBlocking(future -> {
             userService.createPostRequest(message);
             future.complete();

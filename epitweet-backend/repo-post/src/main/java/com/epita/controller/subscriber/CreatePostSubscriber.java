@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 @Startup
 @ApplicationScoped
 public class CreatePostSubscriber implements Consumer<CreatePostResponse> {
-    private PubSubCommands.RedisSubscriber subscriber;
+    private final PubSubCommands.RedisSubscriber subscriber;
     private final Vertx vertx;
 
     @Inject
@@ -39,7 +39,7 @@ public class CreatePostSubscriber implements Consumer<CreatePostResponse> {
 
     @Override
     public void accept(final CreatePostResponse message) {
-        logger.infof("Received purchase result: %s", message.toString());
+        logger.infof("Received CreationPostResponse result: %s", message.toString());
         vertx.executeBlocking(future -> {
             postService.createPostResponse(message);
             future.complete();

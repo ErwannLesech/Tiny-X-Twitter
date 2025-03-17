@@ -13,14 +13,14 @@ public class CreatePostPublisher {
     @Inject
     Logger logger;
 
-    private PubSubCommands<CreatePostRequest> publisher;
+    private final PubSubCommands<CreatePostRequest> publisher;
 
     public CreatePostPublisher(RedisDataSource ds) {
         this.publisher = ds.pubsub(CreatePostRequest.class);
     }
 
     public void publish(final CreatePostRequest message) {
-        logger.infof("Publishing FROM repo-post TO user-service ON isPostBlockedRequest FOR createPostRequest: %s", message);
+        logger.infof("Publishing FROM repo-post TO user-service ON isPostBlockedRequest FOR createPostRequest: %s", message.toString());
         publisher.publish("isPostBlockedRequest", message);
     }
 }

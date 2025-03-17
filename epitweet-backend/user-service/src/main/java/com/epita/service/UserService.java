@@ -10,6 +10,7 @@ import com.epita.repository.publisher.contracts.CreatePostResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
+import org.jboss.logging.Logger;
 import org.mindrot.jbcrypt.BCrypt;
 
 @ApplicationScoped
@@ -20,6 +21,8 @@ public class UserService {
 
     @Inject
     CreatePostPublisher createPostPublisher;
+    @Inject
+    Logger logger;
 
     public UserResponse getUser(String userTag)
     {
@@ -107,16 +110,24 @@ public class UserService {
      * @param message the CreatePostRequest from repo-post
      */
     public void createPostRequest(CreatePostRequest message) {
+        logger.infof("preparing pusblishing AAAAAAAAAAAAAA");
         ObjectId userId = message.userId;
         ObjectId parentId = message.parentId;
 
         User user = userRepository.findById(userId);
         User parentUser = userRepository.findById(parentId);
 
-        Boolean childBlockedParentUser = user.blockedUsers.contains(parentId);
-        Boolean parentUserBlockedUser = parentUser.blockedUsers.contains(userId);
+        if (user == null || parentUser == null) {
+            createPostPublisher.publish(new CreatePostResponse(message, false, false));
+        }
+        else {
+            Boolean childBlockedParentUser = user.blockedUsers.contains(parentId);
+            Boolean parentUserBlockedUser = parentUser.blockedUsers.contains(userId);
 
-        createPostPublisher.publish(new CreatePostResponse(message.userId, message.postType, message.content, message.mediaUrl, message.parentId, parentUserBlockedUser, childBlockedParentUser));
+            logger.infof("preparing pusblishing AAAAAAAAAAAAAA");
+
+            createPostPublisher.publish(new CreatePostResponse(message, parentUserBlockedUser, childBlockedParentUser));
+        }
     }
 
 }

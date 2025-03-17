@@ -31,7 +31,7 @@ public class PostService {
 
         List<PostResponse> postResponses = new ArrayList<>();
         for (Post post : posts) {
-            postResponses.add(new PostResponse(post._id, post.userId, post.postType.toString(), post.content, post.mediaUrl, post.parentId));
+            postResponses.add(new PostResponse(post));
         }
 
         return postResponses;
@@ -43,7 +43,7 @@ public class PostService {
         if (post == null)
             return null;
 
-        return new PostResponse(post._id, post.userId, post.postType.toString(), post.content, post.mediaUrl, post.parentId);
+        return new PostResponse(post);
     }
 
     public PostResponse getReplyPost(ObjectId replyPostId) {
@@ -57,7 +57,7 @@ public class PostService {
         if (repliedPost == null)
             return null;
 
-        return new PostResponse(repliedPost._id, repliedPost.userId, repliedPost.postType.toString(), repliedPost.content, repliedPost.mediaUrl, post.parentId);
+        return new PostResponse(post);
     }
 
     public void createPostRequest(ObjectId userId, PostRequest postRequest) {
@@ -76,20 +76,13 @@ public class PostService {
             return;
 
         ObjectId userId = createPostResponse.userId;
-        PostRequest postRequest = new PostRequest(createPostResponse.postType, createPostResponse.content, createPostResponse.mediaUrl, createPostResponse.parentId);
+        PostRequest postRequest = new PostRequest(createPostResponse);
 
         createPost(userId, postRequest);
     }
 
     public void createPost(ObjectId userId, PostRequest postRequest) {
-        Post post = new Post();
-        post.userId = userId;
-        post.postType = PostType.valueOf(postRequest.postType);
-        post.content = postRequest.content;
-        post.mediaUrl = postRequest.mediaPath;
-        post.parentId = postRequest.parentId;
-        post.createdAt = Instant.now();
-        post.updatedAt = Instant.now();
+        Post post = new Post(userId, postRequest);
 
         postRepository.createPost(post);
     }
@@ -100,7 +93,7 @@ public class PostService {
         if (post == null)
             return null;
 
-        PostResponse postResponse = new PostResponse(post._id, post.userId, post.postType.toString(), post.content, post.mediaUrl, post.parentId);
+        PostResponse postResponse = new PostResponse(post);
 
         postRepository.deletePost(post);
 

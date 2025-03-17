@@ -20,7 +20,7 @@ public class CreatePostPublisher {
     }
 
     public void publish(final CreatePostResponse message) {
-        logger.infof("Publishing FROM user-service TO repo-post ON isPostBlockedResponse FOR createPostResponse: %s", message);
-        publisher.publish("isPostBlockedRequest", message);
+        logger.infof("Publishing FROM user-service TO repo-post ON isPostBlockedResponse FOR createPostResponse: %s", message.toString());
+        publisher.publish("isPostBlockedResponse", message);
     }
 }

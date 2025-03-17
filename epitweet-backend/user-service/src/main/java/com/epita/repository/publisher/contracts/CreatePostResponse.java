@@ -1,15 +1,14 @@
 package com.epita.repository.publisher.contracts;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.epita.controller.subscriber.contracts.CreatePostRequest;
+import lombok.*;
 import org.bson.types.ObjectId;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class CreatePostResponse {
     public ObjectId userId;
     public String postType;
@@ -18,5 +17,14 @@ public class CreatePostResponse {
     public ObjectId parentId;
     public Boolean parentUserBlockedUser;
     public Boolean userBlockedParentUser;
+
+    public CreatePostResponse(CreatePostRequest message, Boolean parentUserBlockedUser, Boolean childBlockedParentUser) {
+        this.userId = message.getUserId();
+        this.postType = message.getPostType();
+        this.content = message.getContent();
+        this.mediaUrl = message.getMediaUrl();
+        this.parentUserBlockedUser = parentUserBlockedUser;
+        this.userBlockedParentUser = parentUserBlockedUser;
+    }
 }
 

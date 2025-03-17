@@ -1,5 +1,6 @@
 package com.epita;
 
+import com.epita.controller.contracts.PostResponse;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
 import io.quarkus.test.junit.QuarkusTest;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 
@@ -40,7 +40,7 @@ public class PostControllerTest {
     @Test
     public void testCreatePost() {
         given().contentType(ContentType.JSON)
-                .header("userId", headerUserFirst)
+                .header("userId", headerUserFirst.toString())
                 .body(postContent)
                 .when()
                 .post("/api/posts/createPost")
@@ -54,9 +54,43 @@ public class PostControllerTest {
 
         Post post = posts.get(0);
         assert Objects.equals(post.postType.toString(), "post");
-        assert post.content.equals(postContent);
+        assert post.content.equals("This is my first post!");
         assert post.parentId == null;
     }
+
+    /*
+    @Test
+    public void testCreatePostReply() {
+        given().contentType(ContentType.JSON)
+                .header("userId", headerUserFirst.toString())
+                .body(postContent)
+                .when()
+                .post("/api/posts/createPost")
+                .then()
+                .statusCode(201);
+
+        ObjectId postId = postRepository.findByUser(headerUserFirst).get(0)._id;
+        postReplyContent = "{ \"content\": \"This is my reply!\", \"postType\": \"reply\", \"parentId\": \"" + postId.toString() + "\" }";
+
+        given().contentType(ContentType.JSON)
+                .header("userId", headerUserFirst.toString())
+                .body(postReplyContent)
+                .when()
+                .post("/api/posts/createReply")
+                .then()
+                .statusCode(202);
+
+        // Check if the post has been created
+        List<Post> posts = postRepository.findByUser(headerUserFirst);
+        assert posts != null;
+        assert posts.size() == 2;
+
+        Post post = posts.get(1);
+        assert Objects.equals(post.postType.toString(), "reply");
+        assert post.content.equals("This is my reply!");
+        assert post.parentId == postId;
+    }
+    */
 
     @Test
     public void testCreatePostInvalidInput() {
@@ -72,7 +106,7 @@ public class PostControllerTest {
     public void testGetPosts() {
         // Create a post
         given().contentType(ContentType.JSON)
-                .header("userId", headerUserFirst)
+                .header("userId", headerUserFirst.toString())
                 .body(postContent)
                 .when()
                 .post("/api/posts/createPost")
@@ -80,19 +114,19 @@ public class PostControllerTest {
                 .statusCode(201);
 
         // Get the list of posts
-        List<Post> posts = given().contentType(ContentType.JSON)
-                .header("userId", headerUserFirst)
+        List<PostResponse> posts = given().contentType(ContentType.JSON)
+                .header("userId", headerUserFirst.toString())
                 .when()
                 .get("/api/posts/getPosts")
                 .then()
                 .statusCode(200)
-                .extract().body().jsonPath().getList("", Post.class);
+                .extract().body().jsonPath().getList("", PostResponse.class);
 
         assert posts != null;
         assert posts.size() == 1;
-        Post post = posts.get(0);
-        assert Objects.equals(post.postType.toString(), "post");
-        assert post.content.equals(postContent);
+        PostResponse post = posts.get(0);
+        assert Objects.equals(post.postType, "post");
+        assert post.content.equals("This is my first post!");
         assert post.parentId == null;
     }
 
@@ -100,24 +134,26 @@ public class PostControllerTest {
     public void testGetPost() {
         // Create a post
         given().contentType(ContentType.JSON)
+                .header("userId", headerUserFirst.toString())
                 .body(postContent)
                 .when()
                 .post("/api/posts/createPost")
                 .then()
                 .statusCode(201);
 
-        // Get the post by ID
-        Post post = given().contentType(ContentType.JSON)
+        postId = postRepository.findByUser(headerUserFirst).get(0)._id;
+
+        PostResponse post = given().contentType(ContentType.JSON)
                 .when()
-                .get("/api/posts/getPost/{postId}", postId)
+                .get("/api/posts/getPost/" + postId)
                 .then()
                 .statusCode(200)
-                .extract().as(Post.class);
+                .extract().as(PostResponse.class);
 
         assert post != null;
-        assert post._id == postId;
-        assert Objects.equals(post.postType.toString(), "post");
-        assert post.content.equals(postContent);
+        assert post.get_id().toString().equals(postId.toString());
+        assert Objects.equals(post.postType, "post");
+        assert post.content.equals("This is my first post!");
     }
 
     @Test
@@ -126,7 +162,7 @@ public class PostControllerTest {
 
         given().contentType(ContentType.JSON)
                 .when()
-                .get("/api/posts/getPost/{postId}", unknownPostId)
+                .get("/api/posts/getPost/" + unknownPostId)
                 .then()
                 .statusCode(404);
     }

@@ -1,16 +1,14 @@
 package com.epita.repository.publisher.contracts;
 
 import com.epita.controller.contracts.PostRequest;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.bson.types.ObjectId;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class CreatePostRequest {
     public ObjectId userId;
     public String postType;
@@ -22,7 +20,7 @@ public class CreatePostRequest {
         this.userId = userId;
         this.postType = postRequest.getPostType();
         this.content = postRequest.getContent();
-        this.mediaUrl = postRequest.getMediaPath();
+        this.mediaUrl = postRequest.getMediaUrl();
         this.parentId = postRequest.getParentId();
     }
 }

@@ -1,15 +1,13 @@
 package com.epita.controller.subscriber.contracts;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.bson.types.ObjectId;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class CreatePostRequest {
     public ObjectId userId;
     public String postType;

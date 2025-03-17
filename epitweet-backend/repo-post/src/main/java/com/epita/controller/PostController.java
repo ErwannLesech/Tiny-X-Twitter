@@ -8,19 +8,15 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 
 import java.util.List;
+import java.util.Objects;
 
-@Slf4j
 @ApplicationScoped
 @Path("/api/posts/")
 public class PostController {
-
-    @Inject
-    PostController postController;
 
     @Inject
     Logger logger;
@@ -87,7 +83,10 @@ public class PostController {
 
         postService.createPostRequest(userId, postRequest); // send redis queue for user-service
 
-        return Response.status(Response.Status.ACCEPTED).build(); // 202 asynchronous
+        if (Objects.equals(postRequest.postType, "post"))
+            return Response.status(Response.Status.CREATED).build(); // 201 directly created
+        else
+            return Response.status(Response.Status.ACCEPTED).build(); // 202 asynchronous
     }
 
     @DELETE
@@ -114,7 +113,7 @@ public class PostController {
 
         String postType = postRequest.getPostType();
         String content = postRequest.getContent();
-        String mediaUrl = postRequest.mediaPath;
+        String mediaUrl = postRequest.mediaUrl;
         ObjectId parentId = postRequest.parentId;
 
         if (postType == null || postType.isEmpty()) {
