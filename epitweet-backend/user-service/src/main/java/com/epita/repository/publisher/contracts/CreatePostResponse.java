@@ -23,6 +23,7 @@ public class CreatePostResponse {
         this.postType = message.getPostType();
         this.content = message.getContent();
         this.mediaUrl = message.getMediaUrl();
+        this.parentId = message.getParentId();
         this.parentUserBlockedUser = parentUserBlockedUser;
         this.userBlockedParentUser = parentUserBlockedUser;
     }

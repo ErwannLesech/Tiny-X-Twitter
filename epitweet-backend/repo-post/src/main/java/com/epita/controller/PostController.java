@@ -114,7 +114,7 @@ public class PostController {
         String postType = postRequest.getPostType();
         String content = postRequest.getContent();
         String mediaUrl = postRequest.mediaUrl;
-        ObjectId parentId = postRequest.parentId;
+        String parentId = postRequest.parentId;
 
         if (postType == null || postType.isEmpty()) {
             return Boolean.FALSE;
@@ -136,7 +136,7 @@ public class PostController {
         if (mediaUrl == null || mediaUrl.isEmpty())
             nullFields++;
 
-        if (parentId == null || parentId.toString().isEmpty())
+        if (parentId == null || parentId.isEmpty())
             nullFields++;
 
         if (nullFields < 1 || nullFields > 2)

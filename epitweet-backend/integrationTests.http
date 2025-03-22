@@ -81,7 +81,7 @@ GET http://localhost:8082/api/posts/getPosts
 userId:67dae40c9c38e63a0a5c5992
 
 ### 10. Test Get Post by ID (replace end of url with _id)
-GET http://localhost:8082/api/posts/getPost/67dae42aecc276377f341e59
+GET http://localhost:8082/api/posts/getPost/67de9cfadd93cb3e69d73c65
 
 ### 11. Test Create Repost (replace parentId with _id)
 POST http://localhost:8082/api/posts/createPost
@@ -90,12 +90,30 @@ Content-Type: application/json
 
 {
   "postType": "repost",
-  "content": "This is my first Repost!",
-  "parentId": "67dae42aecc276377f341e59"
+  "content": "This is my second Repost!",
+  "parentId": "67de9cfadd93cb3e69d73c65"
 }
 
+### 12. Test Create Reply (replace parentId with _id)
+POST http://localhost:8082/api/posts/createPost
+userId:67dae40c9c38e63a0a5c5992
+Content-Type: application/json
+
+{
+  "postType": "reply",
+  "content": "This is my first Reply!",
+  "parentId": "67de9cfadd93cb3e69d73c65"
+}
+
+### Get reply and post Ids
+GET http://localhost:8082/api/posts/getPosts
+userId:67dae40c9c38e63a0a5c5992
+
+### 13. Test Get Reply (replace id with _id)
+GET http://localhost:8082/api/posts/getPostReply/67de9fce9ead3b458fa2a7af
+
 ### 12. Test Delete Post by ID
-DELETE http://localhost:8082/api/posts/deletePost/67dae42aecc276377f341e59
+DELETE http://localhost:8082/api/posts/deletePost/67dae580ecc276377f341e5a
 
 ### 13. Test Get Post by userId after delete
 GET http://localhost:8082/api/posts/getPosts

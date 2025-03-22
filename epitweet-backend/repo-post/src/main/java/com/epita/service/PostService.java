@@ -11,6 +11,7 @@ import com.epita.repository.entity.PostType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
+import org.jboss.logging.Logger;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -52,10 +53,10 @@ public class PostService {
         if (post == null || post.postType != PostType.REPLY)
             return null;
 
+        // check if parent post still exists
         Post repliedPost = postRepository.findById(post.parentId);
-
         if (repliedPost == null)
-            return null;
+            post.parentId = null;
 
         return new PostResponse(post);
     }

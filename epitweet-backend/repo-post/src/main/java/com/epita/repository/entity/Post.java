@@ -29,7 +29,7 @@ public class Post {
         this.postType = PostType.fromString(postRequest.getPostType());
         this.content = postRequest.content;
         this.mediaUrl = postRequest.mediaUrl;
-        this.parentId = postRequest.parentId;
+        this.parentId = postRequest.getParentObjectId();
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
     }

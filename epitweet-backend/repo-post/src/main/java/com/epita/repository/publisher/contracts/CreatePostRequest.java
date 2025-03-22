@@ -21,6 +21,6 @@ public class CreatePostRequest {
         this.postType = postRequest.getPostType();
         this.content = postRequest.getContent();
         this.mediaUrl = postRequest.getMediaUrl();
-        this.parentId = postRequest.getParentId();
+        this.parentId = postRequest.getParentObjectId();
     }
 }
