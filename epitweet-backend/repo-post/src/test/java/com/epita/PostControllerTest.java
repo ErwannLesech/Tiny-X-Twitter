@@ -58,40 +58,6 @@ public class PostControllerTest {
         assert post.parentId == null;
     }
 
-    /*
-    @Test
-    public void testCreatePostReply() {
-        given().contentType(ContentType.JSON)
-                .header("userId", headerUserFirst.toString())
-                .body(postContent)
-                .when()
-                .post("/api/posts/createPost")
-                .then()
-                .statusCode(201);
-
-        ObjectId postId = postRepository.findByUser(headerUserFirst).get(0)._id;
-        postReplyContent = "{ \"content\": \"This is my reply!\", \"postType\": \"reply\", \"parentId\": \"" + postId.toString() + "\" }";
-
-        given().contentType(ContentType.JSON)
-                .header("userId", headerUserFirst.toString())
-                .body(postReplyContent)
-                .when()
-                .post("/api/posts/createReply")
-                .then()
-                .statusCode(202);
-
-        // Check if the post has been created
-        List<Post> posts = postRepository.findByUser(headerUserFirst);
-        assert posts != null;
-        assert posts.size() == 2;
-
-        Post post = posts.get(1);
-        assert Objects.equals(post.postType.toString(), "reply");
-        assert post.content.equals("This is my reply!");
-        assert post.parentId == postId;
-    }
-    */
-
     @Test
     public void testCreatePostInvalidInput() {
         given().contentType(ContentType.JSON)
@@ -166,29 +132,4 @@ public class PostControllerTest {
                 .then()
                 .statusCode(404);
     }
-
-    @Test
-    public void testGetPostReply() {
-        // TODO
-    }
-
-    @Test
-    public void testGetPostReplyNotFound() {
-        // TODO
-    }
-
-    @Test
-    public void testDeletePost() {
-        // TODO
-    }
-
-    @Test
-    public void testDeletePostNotFound() {
-        // TODO
-    }
-
-    /***
-     * If we arrive to test reply and repost creations by redis queues here,
-     * I expect more tests
-     **/
 }
