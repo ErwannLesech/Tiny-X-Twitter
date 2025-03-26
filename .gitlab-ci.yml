@@ -20,18 +20,19 @@ build:
     - mvn $MAVEN_CLI_OPTS clean compile
   artifacts:
     paths:
-      - target/*.jar
+      - epitweet-backend/target/*.jar
     expire_in: 1 week
 
 test:
   stage: test
   script:
+    - cd epitweet-backend
     - mvn $MAVEN_CLI_OPTS test
   dependencies:
     - build
   artifacts:
     reports:
-      junit: target/surefire-reports/*.xml
+      junit: epitweet-backed/target/surefire-reports/*.xml
     paths:
-      - target/*.jar
+      - epitweet-backend/target/*.jar
     expire_in: 1 week
