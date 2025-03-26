@@ -1,0 +1,191 @@
+openapi: 3.0.1
+
+info:
+  title: Repo-Post
+  description: Repo-Post endpoints
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8082
+    description: Repo Post Service
+
+paths:
+  /api/posts/getPosts:
+    get:
+      summary: Get a list of posts
+      operationId: getPosts
+      tags:
+        - Repo Post
+      parameters:
+        - name: userId
+          in: header
+          required: true
+          schema:
+            type: string
+          description: The unique tag of the user to delete.
+      responses:
+        '200':
+          description: List of posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostResponse'
+
+  /api/posts/getPost/{postId}:
+    get:
+      summary: Get a post by ID
+      operationId: getPost
+      tags:
+        - Repo Post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '404':
+          description: Post not found
+
+  /api/posts/getPostReply/{postReplyId}:
+    get:
+      summary: Get a post reply by ID
+      operationId: getPostReply
+      tags:
+        - Repo Post
+      parameters:
+        - name: postReplyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post reply retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '404':
+          description: Post reply not found
+
+  /api/posts/createPost:
+    post:
+      summary: Create a new post
+      operationId: createPost
+      tags:
+        - Repo Post
+      parameters:
+        - in: header
+          name: userId
+          required: true
+          schema:
+            type: string
+            description: The ID of the user making the request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRequest'
+      responses:
+        '201':
+          description: Post created successfully
+        '202':
+          description: Post creation accepted (asynchronous)
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+
+  /api/posts/deletePost/{postId}:
+    delete:
+      summary: Delete a post by ID
+      operationId: deletePost
+      tags:
+        - Repo Post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the post to delete.
+      responses:
+        '200':
+          description: Post deleted successfully, returns the deleted post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '404':
+          description: Post not found
+
+components:
+  schemas:
+    PostRequest:
+      type: object
+      required:
+        - postType
+      properties:
+        content:
+          type: string
+          maxLength: 160
+          example: "This is my reply!"
+        mediaPath:
+          type: string
+          nullable: true
+          example: "https://cdn.example.com/image.jpg"
+        parentId:
+          type: string
+          nullable: true
+          example: "654321"
+        postType:
+          type: string
+          enum: [ "post", "reply", "repost" ]
+          example: "reply"
+
+    PostResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "123456"
+        userId:
+          type: string
+          example: "987654"
+        content:
+          type: string
+          maxLength: 160
+          example: "This is my first post!"
+        mediaPath:
+          type: string
+          nullable: true
+          example: "https://cdn.example.com/image.jpg"
+        parentId:
+          type: string
+          nullable: true
+          example: "654321"
+        postType:
+          type: string
+          enum: [ "post", "reply", "repost" ]
+          example: "reply"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-03-13T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-03-14T14:30:00Z"

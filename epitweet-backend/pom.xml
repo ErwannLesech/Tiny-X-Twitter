@@ -32,7 +32,7 @@
 
     <modules>
         <module>user-service</module>
-        <!--<module>repo-post</module>-->
+        <module>repo-post</module>
     </modules>
 
     <dependencyManagement>
@@ -51,10 +51,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -86,10 +82,17 @@
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
         </dependency>
-        <!-- auto swagger -->
+
+        <!-- SmallRye OpenAPI for OpenAPI docs generation -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
+
+        <!-- Swagger UI for displaying API docs -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-swagger-ui</artifactId>
         </dependency>
     </dependencies>
 

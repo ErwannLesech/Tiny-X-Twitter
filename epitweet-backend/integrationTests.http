@@ -1,0 +1,120 @@
+# ================== User Service ==================
+
+### 1. Test Create User
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "User One",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+### 2. Test Authenticate User
+POST http://localhost:8081/api/users/auth
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "User One",
+  "password": "password123"
+}
+
+### 3. Test Get User by Tag
+GET http://localhost:8081/api/users/getUser
+userTag: user1
+
+### 4. Test Update User
+PATCH http://localhost:8081/api/users/update
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "User One Updated",
+  "password": "newpassword123",
+  "blockedUsers": []
+}
+
+### 5. Test Get User by Tag After Update
+GET http://localhost:8081/api/users/getUser
+userTag: user1
+
+### 6. Test Delete User
+DELETE http://localhost:8081/api/users/delete
+userTag: user1
+
+### 7. Test Get User After Delete
+GET http://localhost:8081/api/users/getUser
+userTag: user1
+
+# ================== Repo Post Service ==================
+
+### Prepare data
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user2",
+  "pseudo": "User Two",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+### Get userId
+GET http://localhost:8081/api/users/getUser
+userTag:user2
+
+### 8. Test Create Post
+POST http://localhost:8082/api/posts/createPost
+userId:67dae40c9c38e63a0a5c5992
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "This is my first post!",
+  "mediaPath": "https://cdn.example.com/image.jpg"
+}
+
+### 9. Test Get Posts by User (replace userId with _id)
+GET http://localhost:8082/api/posts/getPosts
+userId:67dae40c9c38e63a0a5c5992
+
+### 10. Test Get Post by ID (replace end of url with _id)
+GET http://localhost:8082/api/posts/getPost/67de9cfadd93cb3e69d73c65
+
+### 11. Test Create Repost (replace parentId with _id)
+POST http://localhost:8082/api/posts/createPost
+userId:67dae40c9c38e63a0a5c5992
+Content-Type: application/json
+
+{
+  "postType": "repost",
+  "content": "This is my second Repost!",
+  "parentId": "67de9cfadd93cb3e69d73c65"
+}
+
+### 12. Test Create Reply (replace parentId with _id)
+POST http://localhost:8082/api/posts/createPost
+userId:67dae40c9c38e63a0a5c5992
+Content-Type: application/json
+
+{
+  "postType": "reply",
+  "content": "This is my first Reply!",
+  "parentId": "67de9cfadd93cb3e69d73c65"
+}
+
+### Get reply and post Ids
+GET http://localhost:8082/api/posts/getPosts
+userId:67dae40c9c38e63a0a5c5992
+
+### 13. Test Get Reply (replace id with _id)
+GET http://localhost:8082/api/posts/getPostReply/67de9fce9ead3b458fa2a7af
+
+### 12. Test Delete Post by ID
+DELETE http://localhost:8082/api/posts/deletePost/67dae580ecc276377f341e5a
+
+### 13. Test Get Post by userId after delete
+GET http://localhost:8082/api/posts/getPosts
+userId:67dae40c9c38e63a0a5c5992
