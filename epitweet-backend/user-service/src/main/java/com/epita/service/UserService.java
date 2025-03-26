@@ -1,8 +1,8 @@
 package com.epita.service;
 
+import com.epita.payloads.post.CreatePostRequest;
 import com.epita.controller.contracts.UserRequest;
 import com.epita.controller.contracts.UserResponse;
-import com.epita.controller.subscriber.contracts.CreatePostRequest;
 import com.epita.converter.CreatePostConverter;
 import com.epita.converter.UserConverter;
 import com.epita.repository.UserRepository;

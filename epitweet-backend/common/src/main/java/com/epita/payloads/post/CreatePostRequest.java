@@ -1,6 +1,5 @@
-package com.epita.repository.publisher.contracts;
+package com.epita.payloads.post;
 
-import com.epita.controller.subscriber.contracts.CreatePostRequest;
 import lombok.*;
 import org.bson.types.ObjectId;
 
@@ -9,13 +8,10 @@ import org.bson.types.ObjectId;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class CreatePostResponse {
+public class CreatePostRequest {
     public ObjectId userId;
     public String postType;
     public String content;
     public String mediaUrl;
     public ObjectId parentId;
-    public Boolean parentUserBlockedUser;
-    public Boolean userBlockedParentUser;
 }
-

@@ -74,6 +74,7 @@ public class PostController {
     @POST
     @Path("/createPost")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createPost(@HeaderParam("userId") ObjectId userId, PostRequest postRequest) {
         if (userId == null || userId.toString().isEmpty() || !isRequestValid(postRequest))
         {
@@ -81,10 +82,10 @@ public class PostController {
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
-        postService.createPostRequest(userId, postRequest); // send redis queue for user-service
+        PostResponse postResponse = postService.createPostRequest(userId, postRequest); // send redis queue for user-service
 
-        if (Objects.equals(postRequest.postType, "post"))
-            return Response.status(Response.Status.CREATED).build(); // 201 directly created
+        if (Objects.equals(postRequest.postType, "post") && postResponse != null)
+            return Response.status(Response.Status.CREATED).entity(postResponse).build(); // 201 directly created
         else
             return Response.status(Response.Status.ACCEPTED).build(); // 202 asynchronous
     }

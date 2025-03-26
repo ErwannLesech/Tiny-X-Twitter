@@ -1,6 +1,6 @@
 package com.epita.repository.publisher;
 
-import com.epita.repository.publisher.contracts.CreatePostResponse;
+import com.epita.payloads.post.CreatePostResponse;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import jakarta.enterprise.context.ApplicationScoped;

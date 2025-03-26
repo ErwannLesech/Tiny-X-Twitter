@@ -1,7 +1,7 @@
 package com.epita.converter;
 
-import com.epita.controller.subscriber.contracts.CreatePostRequest;
-import com.epita.repository.publisher.contracts.CreatePostResponse;
+import com.epita.payloads.post.CreatePostResponse;
+import com.epita.payloads.post.CreatePostRequest;
 
 public class CreatePostConverter {
 

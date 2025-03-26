@@ -2,10 +2,10 @@ package com.epita.converter;
 
 import com.epita.controller.contracts.PostRequest;
 import com.epita.controller.contracts.PostResponse;
-import com.epita.controller.subscriber.contracts.CreatePostResponse;
+import com.epita.payloads.post.CreatePostRequest;
+import com.epita.payloads.post.CreatePostResponse;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
-import com.epita.repository.publisher.contracts.CreatePostRequest;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;

@@ -2,7 +2,7 @@ package com.epita.service;
 
 import com.epita.controller.contracts.PostRequest;
 import com.epita.controller.contracts.PostResponse;
-import com.epita.controller.subscriber.contracts.CreatePostResponse;
+import com.epita.payloads.post.CreatePostResponse;
 import com.epita.converter.PostConverter;
 import com.epita.repository.publisher.CreatePostPublisher;
 import com.epita.repository.PostRepository;
@@ -59,14 +59,16 @@ public class PostService {
         return PostConverter.toResponse(post);
     }
 
-    public void createPostRequest(ObjectId userId, PostRequest postRequest) {
+    public PostResponse createPostRequest(ObjectId userId, PostRequest postRequest) {
         if (Objects.equals(postRequest.postType, PostType.POST.toString())) // Independent post, no need block check
         {
-            createPost(userId, postRequest);
+            Post createdPost = createPost(userId, postRequest);
+            return PostConverter.toResponse(createdPost);
         }
         else
         {
             createPostPublisher.publish(PostConverter.toCreatePostRequest(userId, postRequest));
+            return null;
         }
     }
 
@@ -80,10 +82,12 @@ public class PostService {
         createPost(userId, postRequest);
     }
 
-    public void createPost(ObjectId userId, PostRequest postRequest) {
+    public Post createPost(ObjectId userId, PostRequest postRequest) {
         Post post = PostConverter.toEntity(userId, postRequest);
 
         postRepository.createPost(post);
+
+        return post;
     }
 
     public PostResponse deletePost(ObjectId postId) {

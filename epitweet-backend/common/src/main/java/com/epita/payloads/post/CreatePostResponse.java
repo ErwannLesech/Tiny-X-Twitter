@@ -1,4 +1,4 @@
-package com.epita.controller.subscriber.contracts;
+package com.epita.payloads.post;
 
 import lombok.*;
 import org.bson.types.ObjectId;
@@ -8,10 +8,14 @@ import org.bson.types.ObjectId;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class CreatePostRequest {
+public class CreatePostResponse {
     public ObjectId userId;
     public String postType;
     public String content;
     public String mediaUrl;
     public ObjectId parentId;
+    public Boolean parentUserBlockedUser;
+    public Boolean userBlockedParentUser;
 }
+
+

@@ -3,7 +3,6 @@ package com.epita.converter;
 import com.epita.controller.contracts.UserRequest;
 import com.epita.controller.contracts.UserResponse;
 import com.epita.repository.entity.User;
-import lombok.*;
 import org.bson.types.ObjectId;
 import java.util.ArrayList;
 

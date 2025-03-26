@@ -1,6 +1,5 @@
 package com.epita.controller.contracts;
 
-import com.epita.controller.subscriber.contracts.CreatePostResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

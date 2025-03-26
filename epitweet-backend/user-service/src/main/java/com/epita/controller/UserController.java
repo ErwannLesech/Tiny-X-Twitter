@@ -75,7 +75,7 @@ public class UserController {
         UserResponse userCreated = userService.createUser(userRequest);
 
         if (userCreated != null) {
-            return Response.accepted(userCreated).build();
+            return Response.status(Response.Status.CREATED).entity(userCreated).build();
         }
 
         return Response.status(Response.Status.CONFLICT).build(); // 409 caused by tag not unique

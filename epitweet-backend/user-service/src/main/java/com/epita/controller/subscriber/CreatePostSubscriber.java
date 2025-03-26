@@ -1,6 +1,6 @@
 package com.epita.controller.subscriber;
 
-import com.epita.controller.subscriber.contracts.CreatePostRequest;
+import com.epita.payloads.post.CreatePostRequest;
 import com.epita.service.UserService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
