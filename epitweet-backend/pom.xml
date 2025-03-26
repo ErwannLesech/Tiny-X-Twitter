@@ -33,6 +33,7 @@
     <modules>
         <module>user-service</module>
         <module>repo-post</module>
+        <module>search-service</module>
     </modules>
 
     <dependencyManagement>
@@ -93,6 +94,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-swagger-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-elasticsearch-java-client</artifactId>
         </dependency>
     </dependencies>
 
