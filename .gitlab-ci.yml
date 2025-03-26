@@ -3,10 +3,9 @@ image: maven:3.8.3-openjdk-17
 variables:
   MAVEN_CLI_OPTS: "-B -V"
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
-  # Disable TLS for Docker-in-Docker. Adjust if needed.
   DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: "tcp://docker:2375"   # Explicitly set the Docker host
 
-# Add the Docker-in-Docker service
 services:
   - docker:dind
 
@@ -21,6 +20,7 @@ stages:
 
 build:
   stage: build
+  privileged: true        # Enable privileged mode
   script:
     - cd epitweet-backend
     - mvn $MAVEN_CLI_OPTS clean compile
@@ -31,6 +31,7 @@ build:
 
 test:
   stage: test
+  privileged: true        # Enable privileged mode here as well
   script:
     - cd epitweet-backend
     - mvn $MAVEN_CLI_OPTS test
