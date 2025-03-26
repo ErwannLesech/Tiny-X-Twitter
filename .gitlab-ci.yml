@@ -20,7 +20,6 @@ stages:
 
 build:
   stage: build
-  privileged: true        # Enable privileged mode
   script:
     - cd epitweet-backend
     - mvn $MAVEN_CLI_OPTS clean compile
@@ -31,7 +30,6 @@ build:
 
 test:
   stage: test
-  privileged: true        # Enable privileged mode here as well
   script:
     - cd epitweet-backend
     - mvn $MAVEN_CLI_OPTS test
