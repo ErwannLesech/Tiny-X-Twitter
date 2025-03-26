@@ -6,6 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.bson.types.ObjectId;
 
+/**
+ * Represents a request to create or update a Post entity, used in controller contracts.
+ */
 @Getter
 @Setter
 @ToString

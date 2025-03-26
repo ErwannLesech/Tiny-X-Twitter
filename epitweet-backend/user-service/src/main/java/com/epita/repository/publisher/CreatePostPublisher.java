@@ -7,6 +7,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
+/**
+ * Publisher for sending CreatePostResponse messages to a Redis Pub/Sub channel.
+ */
 @ApplicationScoped
 public class CreatePostPublisher {
 
@@ -20,7 +23,8 @@ public class CreatePostPublisher {
     }
 
     public void publish(final CreatePostResponse message) {
-        logger.infof("Publishing FROM user-service TO repo-post ON isPostBlockedResponse FOR createPostResponse: %s", message.toString());
+        logger.infof("Publishing FROM user-service TO repo-post ON " +
+                "isPostBlockedResponse FOR createPostResponse: %s", message.toString());
         publisher.publish("isPostBlockedResponse", message);
     }
 }

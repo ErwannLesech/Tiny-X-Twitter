@@ -1,7 +1,5 @@
 package com.epita.controller.contracts;
 
-import com.epita.repository.entity.Post;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,8 +7,10 @@ import lombok.ToString;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
-import java.util.List;
 
+/**
+ * Represents the response for a Post entity, used in controller contracts.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

@@ -14,6 +14,9 @@ import org.jboss.logging.Logger;
 
 import java.util.function.Consumer;
 
+/**
+ * Subscriber for handling CreatePostRequest messages from a Redis Pub/Sub channel.
+ */
 @Startup
 @ApplicationScoped
 public class CreatePostSubscriber implements Consumer<CreatePostRequest> {
@@ -39,7 +42,7 @@ public class CreatePostSubscriber implements Consumer<CreatePostRequest> {
 
     @Override
     public void accept(final CreatePostRequest message) {
-        logger.infof("Received CreatePostRequest result: %s", message.toString());
+        logger.infof("Received CreatePostRequest on IsPostBlockedRequest: %s", message.toString());
         vertx.executeBlocking(future -> {
             userService.createPostRequest(message);
             future.complete();

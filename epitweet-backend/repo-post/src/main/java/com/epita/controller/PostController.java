@@ -14,96 +14,140 @@ import org.jboss.logging.Logger;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * REST controller for managing posts.
+ * Provides endpoints for retrieving, creating, and deleting posts.
+ */
 @ApplicationScoped
 @Path("/api/posts/")
 public class PostController {
 
     @Inject
     Logger logger;
+
     @Inject
     PostService postService;
 
+    /**
+     * Retrieves all posts for a given user.
+     * @param userId User ID
+     * @return A list of posts or a 400 error if userId is invalid.
+     */
     @GET
     @Path("/getPosts")
     public Response getPosts(@HeaderParam("userId") ObjectId userId) {
-        if (userId == null || userId.toString().isEmpty())
-        {
-            logger.warn("userId is null");
+        if (userId == null || userId.toString().isEmpty()) {
+            logger.warn("getPosts - userId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
+        logger.infof("Fetching posts for userId: %s", userId);
         List<PostResponse> posts = postService.getPosts(userId);
+        logger.debugf("Posts retrieved: %s", posts);
 
         return Response.ok(posts).build(); // 200
     }
 
+    /**
+     * Retrieves a specific post by its ID.
+     * @param postId Post ID
+     * @return The post or a 404 error if not found.
+     */
     @GET
     @Path("/getPost/{postId}")
     public Response getPost(@PathParam("postId") ObjectId postId) {
-        if (postId == null || postId.toString().isEmpty())
-        {
-            logger.warn("postId is null");
+        if (postId == null || postId.toString().isEmpty()) {
+            logger.warn("getPost - postId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
+        logger.infof("Fetching post with ID: %s", postId);
         PostResponse post = postService.getPost(postId);
 
-        if (post == null)
+        if (post == null) {
+            logger.warnf("Post not found for ID: %s", postId);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404
+        }
 
+        logger.debugf("Post retrieved: %s", post);
         return Response.ok(post).build(); // 200
     }
 
+    /**
+     * Retrieves a reply to a post.
+     * @param replyPostId Reply post ID
+     * @return The reply post or a 404 error if not found.
+     */
     @GET
     @Path("/getPostReply/{replyPostId}")
     public Response getPostReply(@PathParam("replyPostId") ObjectId replyPostId) {
-        if (replyPostId == null || replyPostId.toString().isEmpty())
-        {
-            logger.warn("replyPostId is null");
+        if (replyPostId == null || replyPostId.toString().isEmpty()) {
+            logger.warn("getPostReply - replyPostId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
+        logger.infof("Fetching reply post with ID: %s", replyPostId);
         PostResponse post = postService.getReplyPost(replyPostId);
 
-        if (post == null)
+        if (post == null) {
+            logger.warnf("Reply post not found for ID: %s", replyPostId);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404
+        }
 
+        logger.debugf("Reply post retrieved: %s", post);
         return Response.ok(post).build(); // 200
     }
 
+    /**
+     * Creates a new post.
+     * @param userId User ID creating the post
+     * @param postRequest Object containing post-details
+     * @return The created post (201) or an accepted response for processing (202).
+     */
     @POST
     @Path("/createPost")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createPost(@HeaderParam("userId") ObjectId userId, PostRequest postRequest) {
-        if (userId == null || userId.toString().isEmpty() || !isRequestValid(postRequest))
-        {
-            logger.warnf("userId is null or request is invalid : %s", postRequest.toString());
+        if (userId == null || userId.toString().isEmpty() || !isRequestValid(postRequest)) {
+            logger.warnf("createPost - Invalid request: userId=%s, postRequest=%s", userId, postRequest);
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
-        PostResponse postResponse = postService.createPostRequest(userId, postRequest); // send redis queue for user-service
+        logger.infof("Creating post for userId: %s with request: %s", userId, postRequest);
+        PostResponse postResponse = postService.createPostRequest(userId, postRequest);
 
-        if (Objects.equals(postRequest.postType, "post") && postResponse != null)
-            return Response.status(Response.Status.CREATED).entity(postResponse).build(); // 201 directly created
-        else
-            return Response.status(Response.Status.ACCEPTED).build(); // 202 asynchronous
+        if (Objects.equals(postRequest.getPostType(), "post") && postResponse != null) {
+            logger.infof("Post created successfully: %s", postResponse);
+            return Response.status(Response.Status.CREATED).entity(postResponse).build(); // 201
+        } else {
+            logger.info("Post creation request accepted for processing.");
+            return Response.status(Response.Status.ACCEPTED).build(); // 202
+        }
     }
 
+    /**
+     * Deletes a specific post by its ID.
+     * @param postId Post ID to be deleted
+     * @return The deleted post or a 404 error if not found.
+     */
     @DELETE
     @Path("/deletePost/{postId}")
     public Response deletePost(@PathParam("postId") ObjectId postId) {
-        if (postId == null || postId.toString().isEmpty())
-        {
-            logger.warn("postId is null");
+        if (postId == null || postId.toString().isEmpty()) {
+            logger.warn("deletePost - postId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
+        logger.infof("Deleting post with ID: %s", postId);
         PostResponse deletedPost = postService.deletePost(postId);
 
-        if (deletedPost == null)
+        if (deletedPost == null) {
+            logger.warnf("Post not found for deletion with ID: %s", postId);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404
+        }
 
+        logger.infof("Post deleted successfully: %s", deletedPost);
         return Response.ok(deletedPost).build(); // 200
     }
 
