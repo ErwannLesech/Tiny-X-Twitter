@@ -3,10 +3,11 @@ package com.epita.service;
 import com.epita.controller.contracts.UserRequest;
 import com.epita.controller.contracts.UserResponse;
 import com.epita.controller.subscriber.contracts.CreatePostRequest;
+import com.epita.converter.CreatePostConverter;
+import com.epita.converter.UserConverter;
 import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;
 import com.epita.repository.publisher.CreatePostPublisher;
-import com.epita.repository.publisher.contracts.CreatePostResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
@@ -34,7 +35,7 @@ public class UserService {
         return new UserResponse(user._id, user.tag, user.pseudo, user.password, user.blockedUsers);
     }
 
-    public Boolean createUser(final UserRequest userRequest) {
+    public UserResponse createUser(final UserRequest userRequest) {
         if (userRepository.findByTag(userRequest.getTag()) == null) {
 
             // password hash handling
@@ -42,12 +43,13 @@ public class UserService {
                 userRequest.setPassword(hashPassword(userRequest.getPassword()));
             }
 
-            User newUser = new User(userRequest);
+            User newUser = UserConverter.toEntity(userRequest);
             userRepository.createUser(newUser);
-            return true;
+
+            return UserConverter.toResponse(newUser);
         }
 
-        return false;
+        return null;
     }
 
     public Boolean updateUser(final UserRequest userRequest) {
@@ -118,7 +120,7 @@ public class UserService {
         User parentUser = userRepository.findById(parentId);
 
         if (user == null || parentUser == null) {
-            createPostPublisher.publish(new CreatePostResponse(message, false, false));
+            createPostPublisher.publish(CreatePostConverter.toCreatePostResponse(message, false, false));
         }
         else {
             Boolean childBlockedParentUser = user.blockedUsers.contains(parentId);
@@ -126,7 +128,7 @@ public class UserService {
 
             logger.infof("preparing pusblishing AAAAAAAAAAAAAA");
 
-            createPostPublisher.publish(new CreatePostResponse(message, parentUserBlockedUser, childBlockedParentUser));
+            createPostPublisher.publish(CreatePostConverter.toCreatePostResponse(message, parentUserBlockedUser, childBlockedParentUser));
         }
     }
 

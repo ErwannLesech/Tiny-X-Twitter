@@ -24,15 +24,4 @@ public class PostResponse {
     public ObjectId parentId;
     public Instant createdAt;
     public Instant updatedAt;
-
-    public PostResponse(Post post) {
-        this._id = post._id;
-        this.userId = post.userId;
-        this.postType = post.postType.toString();
-        this.content = post.content;
-        this.mediaUrl = post.mediaUrl;
-        this.parentId = post.parentId;
-        this.createdAt = post.createdAt;
-        this.updatedAt = post.updatedAt;
-    }
 }

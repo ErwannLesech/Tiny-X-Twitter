@@ -3,17 +3,15 @@ package com.epita.service;
 import com.epita.controller.contracts.PostRequest;
 import com.epita.controller.contracts.PostResponse;
 import com.epita.controller.subscriber.contracts.CreatePostResponse;
+import com.epita.converter.PostConverter;
 import com.epita.repository.publisher.CreatePostPublisher;
 import com.epita.repository.PostRepository;
-import com.epita.repository.publisher.contracts.CreatePostRequest;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
-import org.jboss.logging.Logger;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +30,7 @@ public class PostService {
 
         List<PostResponse> postResponses = new ArrayList<>();
         for (Post post : posts) {
-            postResponses.add(new PostResponse(post));
+            postResponses.add(PostConverter.toResponse(post));
         }
 
         return postResponses;
@@ -44,7 +42,7 @@ public class PostService {
         if (post == null)
             return null;
 
-        return new PostResponse(post);
+        return PostConverter.toResponse(post);
     }
 
     public PostResponse getReplyPost(ObjectId replyPostId) {
@@ -58,7 +56,7 @@ public class PostService {
         if (repliedPost == null)
             post.parentId = null;
 
-        return new PostResponse(post);
+        return PostConverter.toResponse(post);
     }
 
     public void createPostRequest(ObjectId userId, PostRequest postRequest) {
@@ -68,7 +66,7 @@ public class PostService {
         }
         else
         {
-            createPostPublisher.publish(new CreatePostRequest(userId, postRequest));
+            createPostPublisher.publish(PostConverter.toCreatePostRequest(userId, postRequest));
         }
     }
 
@@ -77,13 +75,13 @@ public class PostService {
             return;
 
         ObjectId userId = createPostResponse.userId;
-        PostRequest postRequest = new PostRequest(createPostResponse);
+        PostRequest postRequest = PostConverter.toRequest(createPostResponse);
 
         createPost(userId, postRequest);
     }
 
     public void createPost(ObjectId userId, PostRequest postRequest) {
-        Post post = new Post(userId, postRequest);
+        Post post = PostConverter.toEntity(userId, postRequest);
 
         postRepository.createPost(post);
     }
@@ -94,7 +92,7 @@ public class PostService {
         if (post == null)
             return null;
 
-        PostResponse postResponse = new PostResponse(post);
+        PostResponse postResponse = PostConverter.toResponse(post);
 
         postRepository.deletePost(post);
 

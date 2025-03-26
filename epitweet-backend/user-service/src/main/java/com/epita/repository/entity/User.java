@@ -23,11 +23,4 @@ public class User {
     public String pseudo;
     public String password;
     public List<ObjectId> blockedUsers;
-
-    public User(UserRequest userRequest) {
-        this.tag = userRequest.getTag();
-        this.pseudo = userRequest.getPseudo();
-        this.password = userRequest.getPassword() != null ? userRequest.getPassword() : null;
-        this.blockedUsers = userRequest.getBlockedUsers() != null ? userRequest.getBlockedUsers() : new ArrayList<>();
-    }
 }

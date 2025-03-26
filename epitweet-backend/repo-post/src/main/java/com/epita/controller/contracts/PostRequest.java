@@ -17,13 +17,6 @@ public class PostRequest {
     public String mediaUrl;
     public String parentId;
 
-    public PostRequest(CreatePostResponse createPostResponse) {
-        this.postType = createPostResponse.postType;
-        this.content = createPostResponse.content;
-        this.mediaUrl = createPostResponse.mediaUrl;
-        this.parentId = String.valueOf(createPostResponse.parentId);
-    }
-
     public ObjectId getParentObjectId() {
         return (parentId != null && ObjectId.isValid(parentId)) ? new ObjectId(parentId) : null;
     }

@@ -17,15 +17,5 @@ public class CreatePostResponse {
     public ObjectId parentId;
     public Boolean parentUserBlockedUser;
     public Boolean userBlockedParentUser;
-
-    public CreatePostResponse(CreatePostRequest message, Boolean parentUserBlockedUser, Boolean childBlockedParentUser) {
-        this.userId = message.getUserId();
-        this.postType = message.getPostType();
-        this.content = message.getContent();
-        this.mediaUrl = message.getMediaUrl();
-        this.parentId = message.getParentId();
-        this.parentUserBlockedUser = parentUserBlockedUser;
-        this.userBlockedParentUser = parentUserBlockedUser;
-    }
 }
 

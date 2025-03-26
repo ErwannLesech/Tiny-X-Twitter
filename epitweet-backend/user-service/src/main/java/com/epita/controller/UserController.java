@@ -65,16 +65,17 @@ public class UserController {
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createUser(UserRequest userRequest)
     {
         if (!isRequestValid(userRequest, false)) {
             logger.warnf("Invalid request %s", userRequest.toString());
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
-        Boolean creationDone = userService.createUser(userRequest);
+        UserResponse userCreated = userService.createUser(userRequest);
 
-        if (creationDone) {
-            return Response.status(Response.Status.CREATED).build(); // 201
+        if (userCreated != null) {
+            return Response.accepted(userCreated).build();
         }
 
         return Response.status(Response.Status.CONFLICT).build(); // 409 caused by tag not unique
