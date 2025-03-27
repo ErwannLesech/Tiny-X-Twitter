@@ -21,8 +21,12 @@ stages:
 
 build:
   stage: build
+  before_script:
+    - apt-get update && apt-get install -y docker-compose
   script:
-    - cd epitweet-backend
+    - cd epitweet-backend/docker
+    - docker-compose up -d
+    - cd ..
     - mvn $MAVEN_CLI_OPTS clean compile
   artifacts:
     paths:
