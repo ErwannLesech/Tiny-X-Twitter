@@ -63,15 +63,18 @@ public class SearchService {
         text = Normalizer.normalize(text, Normalizer.Form.NFD)
                 .replaceAll("[^\\p{ASCII}]", "");
 
-        // Regex to keep hashtags and remove other punctuation
+        // Tokenize and transform
         List<String> tokens = Arrays.stream(text.split("\\s+"))
-                .map(token -> token.startsWith("#") && token.length() > 1
-                        ? token.replaceAll("[^#\\w]", "") // Remove non-word characters except #
-                        : token.replaceAll("[\\p{Punct}&&[^#]]", "")) // Remove punctuation except #
-                .filter(token -> !token.isBlank()) // Remove empty tokens
+                .map(token -> {
+                    if (token.startsWith("#") && token.length() > 1) {
+                        return token.replaceAll("[^#\\w]", ""); // Keep case as-is for hashtags
+                    } else {
+                        return token.replaceAll("[\\p{Punct}&&[^#]]", "").toLowerCase(); // Lowercase others
+                    }
+                })
+                .filter(token -> !token.isBlank())
                 .collect(Collectors.toList());
 
         return tokens;
     }
-
 }
