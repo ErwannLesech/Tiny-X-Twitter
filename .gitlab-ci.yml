@@ -2,6 +2,7 @@ image: maven:3.8.3-openjdk-17
 
 services:
   - redis:6.2
+    alias: redis
 
 variables:
   MAVEN_CLI_OPTS: "-B -V"
@@ -32,7 +33,7 @@ test:
   stage: test
   script:
     - cd epitweet-backend
-    - mvn $MAVEN_CLI_OPTS verify -Dquarkus.redis.host=${REDIS_HOST}
+    - mvn $MAVEN_CLI_OPTS verify -Dquarkus.redis.host=${REDIS_HOST} -Dquarkus.redis.port=$REDIS_PORT
   dependencies:
     - build
   artifacts:
