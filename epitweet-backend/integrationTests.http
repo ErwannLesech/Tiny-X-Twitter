@@ -81,7 +81,7 @@ GET http://localhost:8082/api/posts/getPosts
 userId:67dae40c9c38e63a0a5c5992
 
 ### 10. Test Get Post by ID (replace end of url with _id)
-GET http://localhost:8082/api/posts/getPost/67de9cfadd93cb3e69d73c65
+GET http://localhost:8082/api/posts/getPost/67e4363af729df6e7fb465b0
 
 ### 11. Test Create Repost (replace parentId with _id)
 POST http://localhost:8082/api/posts/createPost
@@ -91,7 +91,7 @@ Content-Type: application/json
 {
   "postType": "repost",
   "content": "This is my second Repost!",
-  "parentId": "67de9cfadd93cb3e69d73c65"
+  "parentId": "67e4363af729df6e7fb465b0"
 }
 
 ### 12. Test Create Reply (replace parentId with _id)
@@ -102,7 +102,7 @@ Content-Type: application/json
 {
   "postType": "reply",
   "content": "This is my first Reply!",
-  "parentId": "67de9cfadd93cb3e69d73c65"
+  "parentId": "67e4363af729df6e7fb465b0"
 }
 
 ### Get reply and post Ids

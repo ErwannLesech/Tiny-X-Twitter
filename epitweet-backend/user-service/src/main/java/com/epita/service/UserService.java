@@ -1,16 +1,16 @@
 package com.epita.service;
 
+import com.epita.payloads.post.CreatePostRequest;
 import com.epita.controller.contracts.UserRequest;
 import com.epita.controller.contracts.UserResponse;
-import com.epita.controller.subscriber.contracts.CreatePostRequest;
+import com.epita.converter.CreatePostConverter;
+import com.epita.converter.UserConverter;
 import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;
 import com.epita.repository.publisher.CreatePostPublisher;
-import com.epita.repository.publisher.contracts.CreatePostResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
-import org.jboss.logging.Logger;
 import org.mindrot.jbcrypt.BCrypt;
 
 @ApplicationScoped
@@ -21,11 +21,14 @@ public class UserService {
 
     @Inject
     CreatePostPublisher createPostPublisher;
-    @Inject
-    Logger logger;
 
-    public UserResponse getUser(String userTag)
-    {
+    /**
+     * Retrieves a user by their tag.
+     *
+     * @param userTag the tag of the user
+     * @return a UserResponse object if the user is found, or null
+     */
+    public UserResponse getUser(String userTag) {
         User user = userRepository.findByTag(userTag);
         if (user == null) {
             return null;
@@ -34,22 +37,35 @@ public class UserService {
         return new UserResponse(user._id, user.tag, user.pseudo, user.password, user.blockedUsers);
     }
 
-    public Boolean createUser(final UserRequest userRequest) {
+    /**
+     * Creates a new user based on the provided request.
+     *
+     * @param userRequest the user request containing user details
+     * @return a UserResponse object for the created user, or null if the tag already exists
+     */
+    public UserResponse createUser(final UserRequest userRequest) {
         if (userRepository.findByTag(userRequest.getTag()) == null) {
 
-            // password hash handling
+            // Password hash handling
             if (userRequest.getPassword() != null) {
                 userRequest.setPassword(hashPassword(userRequest.getPassword()));
             }
 
-            User newUser = new User(userRequest);
+            User newUser = UserConverter.toEntity(userRequest);
             userRepository.createUser(newUser);
-            return true;
+
+            return UserConverter.toResponse(newUser);
         }
 
-        return false;
+        return null;
     }
 
+    /**
+     * Updates an existing user based on the provided request.
+     *
+     * @param userRequest the user request containing updated user details
+     * @return true if the user was updated successfully, false otherwise
+     */
     public Boolean updateUser(final UserRequest userRequest) {
         User userToUpdate = userRepository.findByTag(userRequest.getTag());
         if (userToUpdate != null) {
@@ -68,20 +84,27 @@ public class UserService {
         return false;
     }
 
+    /**
+     * Deletes a user by their tag.
+     *
+     * @param userTag the tag of the user to delete
+     * @return a UserResponse object for the deleted user, or null if the user was not found
+     */
     public UserResponse deleteUser(final String userTag) {
         User userToDelete = userRepository.findByTag(userTag);
         if (userToDelete != null) {
             userRepository.deleteUser(userToDelete);
-            return new UserResponse(userToDelete._id,userToDelete.tag, userToDelete.pseudo, userToDelete.password, userToDelete.blockedUsers);
+            return UserConverter.toResponse(userToDelete);
         }
 
         return null;
     }
 
-    /***
-     * Fonction to get access if tag and passowrd valids
-     * @param userRequest the body of the request
-     * @return 404 if user unknown, 401 if password doesn't match, 200 if it matches
+    /**
+     * Authenticates a user based on the provided request.
+     *
+     * @param userRequest the user request containing authentication details
+     * @return 404 if the user is unknown, 401 if the password doesn't match, 200 if it matches
      */
     public Integer authUser(UserRequest userRequest) {
         User user = userRepository.findByTag(userRequest.getTag());
@@ -97,37 +120,48 @@ public class UserService {
         return 401;
     }
 
+    /**
+     * Hashes a password using BCrypt.
+     *
+     * @param password the password to hash
+     * @return the hashed password
+     */
     private String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
+    /**
+     * Checks if a password matches the hashed password.
+     *
+     * @param passwordToCheck the password to check
+     * @param userPassword the hashed password
+     * @return true if the passwords match, false otherwise
+     */
     private Boolean checkPassword(String passwordToCheck, String userPassword) {
         return BCrypt.checkpw(passwordToCheck, userPassword);
     }
 
     /**
-     * This function check if the userId and the parentId blocked themselves
+     * Checks if the userId and the parentId have blocked each other.
+     *
      * @param message the CreatePostRequest from repo-post
      */
     public void createPostRequest(CreatePostRequest message) {
-        logger.infof("preparing pusblishing AAAAAAAAAAAAAA");
-        ObjectId userId = message.userId;
-        ObjectId parentId = message.parentId;
+        ObjectId userId = message.getUserId();
+        ObjectId parentId = message.getParentId();
 
         User user = userRepository.findById(userId);
         User parentUser = userRepository.findById(parentId);
 
         if (user == null || parentUser == null) {
-            createPostPublisher.publish(new CreatePostResponse(message, false, false));
-        }
-        else {
+            createPostPublisher.publish(CreatePostConverter.toCreatePostResponse(message,
+                    false, false));
+        } else {
             Boolean childBlockedParentUser = user.blockedUsers.contains(parentId);
             Boolean parentUserBlockedUser = parentUser.blockedUsers.contains(userId);
 
-            logger.infof("preparing pusblishing AAAAAAAAAAAAAA");
-
-            createPostPublisher.publish(new CreatePostResponse(message, parentUserBlockedUser, childBlockedParentUser));
+            createPostPublisher.publish(CreatePostConverter.toCreatePostResponse(message,
+                    parentUserBlockedUser, childBlockedParentUser));
         }
     }
-
 }
