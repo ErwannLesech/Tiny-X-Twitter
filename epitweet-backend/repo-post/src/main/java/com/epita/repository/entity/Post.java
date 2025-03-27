@@ -16,14 +16,44 @@ import java.time.Instant;
 @ToString
 @MongoEntity(collection = "Posts")
 public class Post {
-
+    /**
+     * Unique mongo identifier of the Post
+     */
     public ObjectId _id;
+
+    /**
+     * The ID of the user who created the post.
+     */
     public ObjectId userId;
+
+    /**
+     * The type of post (post, repost, reply)
+     */
     public PostType postType;
+
+    /**
+     * The content of the Post (max 160 char)
+     */
     public String content;
+
+    /**
+     * The URL of the media attached to the post (optional).
+     */
     public String mediaUrl;
+
+    /**
+     * The ID of the parent post if this is a reply to another post.
+     */
     public ObjectId parentId;
+
+    /**
+     * Timestamp of creation instant of the post
+     */
     public Instant createdAt;
+
+    /**
+     * Timestamp of last update instant of the post
+     */
     public Instant updatedAt;
 
     /**

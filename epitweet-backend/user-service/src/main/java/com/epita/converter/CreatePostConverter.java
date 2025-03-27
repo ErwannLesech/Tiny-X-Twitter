@@ -8,6 +8,12 @@ import com.epita.payloads.post.CreatePostRequest;
  */
 public class CreatePostConverter {
 
+    /**
+     * Converts a CreatePostRequest to a CreatePostResponse
+     *
+     * @param request the CreatePostRequest object to convert
+     * @return a CreatePostResponse containing the converted data
+     */
     public static CreatePostResponse toCreatePostResponse(CreatePostRequest request,
                                                           Boolean parentUserBlockedUser,
                                                           Boolean parentUserBlockedParentUser) {

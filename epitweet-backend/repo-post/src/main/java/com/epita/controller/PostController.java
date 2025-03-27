@@ -36,14 +36,15 @@ public class PostController {
     @GET
     @Path("/getPosts")
     public Response getPosts(@HeaderParam("userId") ObjectId userId) {
+        logger.infof("getPosts Request: %s", userId);
         if (userId == null || userId.toString().isEmpty()) {
-            logger.warn("getPosts - userId is null");
+            logger.warn("getPosts response 400 - userId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
-        logger.infof("Fetching posts for userId: %s", userId);
+
         List<PostResponse> posts = postService.getPosts(userId);
-        logger.debugf("Posts retrieved: %s", posts);
+        logger.debugf("getPosts response 200: %s", posts);
 
         return Response.ok(posts).build(); // 200
     }
@@ -56,8 +57,9 @@ public class PostController {
     @GET
     @Path("/getPost/{postId}")
     public Response getPost(@PathParam("postId") ObjectId postId) {
+        logger.infof("getPost Request: %s", postId);
         if (postId == null || postId.toString().isEmpty()) {
-            logger.warn("getPost - postId is null");
+            logger.warn("getPost response 400 - postId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
@@ -65,11 +67,11 @@ public class PostController {
         PostResponse post = postService.getPost(postId);
 
         if (post == null) {
-            logger.warnf("Post not found for ID: %s", postId);
+            logger.warnf("getPost response 404 - Post not found for ID: %s", postId);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404
         }
 
-        logger.debugf("Post retrieved: %s", post);
+        logger.debugf("getPost response 200: %s", post);
         return Response.ok(post).build(); // 200
     }
 
@@ -81,8 +83,9 @@ public class PostController {
     @GET
     @Path("/getPostReply/{replyPostId}")
     public Response getPostReply(@PathParam("replyPostId") ObjectId replyPostId) {
+        logger.infof("getPostReply Request: %s", replyPostId);
         if (replyPostId == null || replyPostId.toString().isEmpty()) {
-            logger.warn("getPostReply - replyPostId is null");
+            logger.warn("getPostReply response 400 - replyPostId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
@@ -90,11 +93,11 @@ public class PostController {
         PostResponse post = postService.getReplyPost(replyPostId);
 
         if (post == null) {
-            logger.warnf("Reply post not found for ID: %s", replyPostId);
+            logger.warnf("getPostReply response 404 - Reply post not found for ID: %s", replyPostId);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404
         }
 
-        logger.debugf("Reply post retrieved: %s", post);
+        logger.debugf("getPostReply response 200: %s", post);
         return Response.ok(post).build(); // 200
     }
 
@@ -109,8 +112,9 @@ public class PostController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createPost(@HeaderParam("userId") ObjectId userId, PostRequest postRequest) {
+        logger.infof("createPost Request: userId=%s, postRequest=%s", userId, postRequest);
         if (userId == null || userId.toString().isEmpty() || !isRequestValid(postRequest)) {
-            logger.warnf("createPost - Invalid request: userId=%s, postRequest=%s", userId, postRequest);
+            logger.warnf("createPost response 400 - Invalid request: userId=%s, postRequest=%s", userId, postRequest);
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
@@ -118,10 +122,10 @@ public class PostController {
         PostResponse postResponse = postService.createPostRequest(userId, postRequest);
 
         if (Objects.equals(postRequest.getPostType(), "post") && postResponse != null) {
-            logger.infof("Post created successfully: %s", postResponse);
+            logger.infof("createPost response 201 - Post created successfully: %s", postResponse);
             return Response.status(Response.Status.CREATED).entity(postResponse).build(); // 201
         } else {
-            logger.info("Post creation request accepted for processing.");
+            logger.info("createPost response 202 - Post creation request accepted for processing.");
             return Response.status(Response.Status.ACCEPTED).build(); // 202
         }
     }
@@ -134,8 +138,9 @@ public class PostController {
     @DELETE
     @Path("/deletePost/{postId}")
     public Response deletePost(@PathParam("postId") ObjectId postId) {
+        logger.infof("deletePost Request: %s", postId);
         if (postId == null || postId.toString().isEmpty()) {
-            logger.warn("deletePost - postId is null");
+            logger.warn("deletePost response 400 - postId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
@@ -143,11 +148,11 @@ public class PostController {
         PostResponse deletedPost = postService.deletePost(postId);
 
         if (deletedPost == null) {
-            logger.warnf("Post not found for deletion with ID: %s", postId);
+            logger.warnf("deletePost response 404 - Post not found for deletion with ID: %s", postId);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404
         }
 
-        logger.infof("Post deleted successfully: %s", deletedPost);
+        logger.infof("deletePost response 200 - Post deleted successfully: %s", deletedPost);
         return Response.ok(deletedPost).build(); // 200
     }
 

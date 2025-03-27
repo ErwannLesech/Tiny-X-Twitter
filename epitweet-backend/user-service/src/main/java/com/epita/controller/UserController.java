@@ -33,8 +33,9 @@ public class UserController {
     @Path("/getUser")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@HeaderParam("userTag") String userTag) {
+        logger.infof("getUser Request: %s", userTag);
         if (userTag == null || userTag.isEmpty()) {
-            logger.warn("getUser - Invalid userTag");
+            logger.warn("getUser response 400 - Invalid userTag");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
@@ -42,10 +43,11 @@ public class UserController {
         UserResponse userResponse = userService.getUser(userTag);
 
         if (userResponse == null) {
-            logger.warnf("User not found for tag: %s", userTag);
+            logger.warnf("getUser response 404 - User not found for tag: %s", userTag);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404
         }
 
+        logger.debugf("getUser response 200: %s", userResponse);
         return Response.ok(userResponse).build();
     }
 
@@ -59,8 +61,9 @@ public class UserController {
     @Path("/auth")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response authUser(UserRequest userRequest) {
+        logger.infof("authUser Request: %s", userRequest);
         if (!isRequestValid(userRequest, true)) {
-            logger.warn("authUser - Invalid request");
+            logger.warn("authUser response 400 - Invalid request");
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
@@ -69,19 +72,19 @@ public class UserController {
 
         return switch (authResult) {
             case 404 -> {
-                logger.warn("User not found during authentication");
+                logger.warn("authUser response 404 - User not found during authentication");
                 yield Response.status(Response.Status.NOT_FOUND).build();
             }
             case 401 -> {
-                logger.warn("Unauthorized access attempt");
+                logger.warn("authUser response 401 - Unauthorized access attempt");
                 yield Response.status(Response.Status.UNAUTHORIZED).build();
             }
             case 200 -> {
-                logger.info("User authenticated successfully");
+                logger.info("authUser response 200 - User authenticated successfully");
                 yield Response.ok().build();
             }
             default -> {
-                logger.warn("Internal server error during authentication");
+                logger.warn("authUser response 500 - Internal server error during authentication");
                 yield Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
         };
@@ -98,8 +101,9 @@ public class UserController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createUser(UserRequest userRequest) {
+        logger.infof("createUser Request: %s", userRequest);
         if (!isRequestValid(userRequest, false)) {
-            logger.warn("createUser - Invalid request");
+            logger.warn("createUser response 400 - Invalid request");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
@@ -107,11 +111,11 @@ public class UserController {
         UserResponse userCreated = userService.createUser(userRequest);
 
         if (userCreated != null) {
-            logger.info("User created successfully");
+            logger.infof("createUser response 201 - User created successfully: %s", userCreated);
             return Response.status(Response.Status.CREATED).entity(userCreated).build();
         }
 
-        logger.warn("Conflict occurred during user creation");
+        logger.warn("createUser response 409 - Conflict occurred during user creation");
         return Response.status(Response.Status.CONFLICT).build(); // 409 caused by tag not unique
     }
 
@@ -125,8 +129,9 @@ public class UserController {
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateUser(UserRequest userRequest) {
+        logger.infof("updateUser Request: %s", userRequest);
         if (!isRequestValid(userRequest, false)) {
-            logger.warn("updateUser - Invalid request");
+            logger.warn("updateUser response 400 - Invalid request");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
@@ -134,11 +139,11 @@ public class UserController {
         Boolean updateDone = userService.updateUser(userRequest);
 
         if (updateDone) {
-            logger.info("User updated successfully");
+            logger.info("updateUser response 200 - User updated successfully");
             return Response.status(Response.Status.OK).build(); // 200
         }
 
-        logger.warn("User not found during update");
+        logger.warn("updateUser response 404 - User not found during update");
         return Response.status(Response.Status.NOT_FOUND).build(); // 404 caused by user not found
     }
 
@@ -152,8 +157,9 @@ public class UserController {
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteUser(@HeaderParam("userTag") String userTag) {
+        logger.infof("deleteUser Request: %s", userTag);
         if (userTag == null || userTag.isEmpty()) {
-            logger.warn("deleteUser - Invalid userTag");
+            logger.warn("deleteUser response 400 - Invalid userTag");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
@@ -161,11 +167,11 @@ public class UserController {
         UserResponse userDeleted = userService.deleteUser(userTag);
 
         if (userDeleted == null) {
-            logger.warnf("User not found for deletion with tag: %s", userTag);
+            logger.warnf("deleteUser response 404 - User not found for deletion with tag: %s", userTag);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404 if user not found
         }
 
-        logger.info("User deleted successfully");
+        logger.infof("deleteUser response 200 - User deleted successfully: %s", userDeleted);
         return Response.ok(userDeleted).build(); // 200
     }
 
