@@ -1,8 +1,13 @@
 image: maven:3.8.3-openjdk-17
 
+services:
+  - redis:6.2
+
 variables:
   MAVEN_CLI_OPTS: "-B -V"
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
 
 cache:
   key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
@@ -27,7 +32,7 @@ test:
   stage: test
   script:
     - cd epitweet-backend
-    - mvn $MAVEN_CLI_OPTS verify
+    - mvn $MAVEN_CLI_OPTS verify -Dquarkus.redis.host=${REDIS_HOST}
   dependencies:
     - build
   artifacts:
