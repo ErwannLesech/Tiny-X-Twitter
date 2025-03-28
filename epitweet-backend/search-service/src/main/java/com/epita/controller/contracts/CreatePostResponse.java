@@ -12,6 +12,6 @@ public class CreatePostResponse {
     public ObjectId userId;
     public String postType;
     public String content;
-    public String mediaUrl;
+    public String mediaPath;
     public ObjectId parentId;
 }

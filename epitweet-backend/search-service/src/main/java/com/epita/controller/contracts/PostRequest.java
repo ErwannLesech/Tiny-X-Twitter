@@ -6,20 +6,24 @@ import lombok.Setter;
 import lombok.ToString;
 import org.bson.types.ObjectId;
 
+import java.util.List;
+import java.util.UUID;
+
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 public class PostRequest {
+    public String id;
     public String postType;
     public String content;
-    public String mediaUrl;
+    public String mediaPath;
     public String parentId;
 
     public PostRequest(CreatePostResponse createPostResponse) {
         this.postType = createPostResponse.postType;
         this.content = createPostResponse.content;
-        this.mediaUrl = createPostResponse.mediaUrl;
+        this.mediaPath = createPostResponse.mediaPath;
         this.parentId = String.valueOf(createPostResponse.parentId);
     }
 

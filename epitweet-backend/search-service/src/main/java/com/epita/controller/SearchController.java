@@ -1,6 +1,7 @@
 package com.epita.controller;
 
 import com.epita.controller.contracts.PostRequest;
+import com.epita.controller.contracts.PostResponse;
 import com.epita.service.SearchService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -8,6 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
+import java.util.UUID;
 
 @Path("/api/search")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,7 +29,7 @@ public class SearchController {
     @Path("/searchPosts")
     public Response searchPosts(String request) {
         try {
-            List<PostRequest> results = searchService.searchPosts(request);
+            List<PostResponse> results = searchService.searchPosts(request);
             if (results.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("No results found").build();
             }
@@ -68,9 +70,9 @@ public class SearchController {
 
     @POST
     @Path("/deletePost")
-    public Response deletePost(PostRequest request) {
+    public Response deletePost(UUID postId) {
         try {
-            searchService.deletePost(request.getParentId());
+            searchService.deletePost(postId.toString());
             return Response.ok().entity("Post deleted successfully").build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)

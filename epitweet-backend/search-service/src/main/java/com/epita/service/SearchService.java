@@ -2,12 +2,12 @@ package com.epita.service;
 
 import com.epita.controller.contracts.PostDocument;
 import com.epita.controller.contracts.PostRequest;
+import com.epita.controller.contracts.PostResponse;
 import com.epita.repository.SearchRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.text.Normalizer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,11 +24,9 @@ public class SearchService {
      * @param request the search request.
      * @return list of matching posts.
      */
-    public List<PostRequest> searchPosts(String request) {
-        // FIXME: Implémentation de la recherche dans MongoDB
-        List<PostDocument> documents =  searchRepository.search(request);
-        List<PostRequest> results = new ArrayList<>();
-        return results;
+    public List<PostResponse> searchPosts(String request) {
+        List<PostDocument> documents =  searchRepository.search(tokenizeText(request));
+        return PostResponse.getPostResponses(documents);
     }
 
     /**

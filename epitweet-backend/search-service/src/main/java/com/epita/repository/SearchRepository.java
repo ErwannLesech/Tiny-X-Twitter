@@ -1,6 +1,7 @@
 package com.epita.repository;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch.core.DeleteRequest;
 import co.elastic.clients.elasticsearch.core.DeleteResponse;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
@@ -30,28 +31,27 @@ public class SearchRepository {
     /**
      * Search for posts based on a text query.
      *
-     * @param request the search criteria.
+     * @param tokenizedRequest the search criteria.
      * @return list of matching posts.
      */
-    public List<PostDocument> search(String request) {
+    public List<PostDocument> search(List<String> tokenizedRequest) {
         try {
-            // Construction de la requête de recherche dans Elasticsearch
             SearchRequest searchRequest = SearchRequest.of(s -> s
                     .index(INDEX)
                     .query(q -> q
-                            .match(m -> m
-                                    .field("tokenized_text")
-                                    .query(request)
+                            .terms(t -> t
+                                    .field("tokenizedText")
+                                    .terms(ts -> ts.value(tokenizedRequest.stream()
+                                            .map(FieldValue::of)
+                                            .collect(Collectors.toList())))
                             )
                     )
             );
 
-            LOGGER.info("Executing search with query: " + request);
+            LOGGER.info("Executing search with tokenized request: " + tokenizedRequest);
 
-            // Exécuter la requête dans Elasticsearch
             SearchResponse<PostDocument> response = client.search(searchRequest, PostDocument.class);
 
-            // Mapper la réponse Elasticsearch vers une liste de PostDocument
             return response.hits().hits().stream()
                     .map(Hit::source)
                     .collect(Collectors.toList());
@@ -61,6 +61,8 @@ public class SearchRepository {
             throw new RuntimeException("Failed to search posts", e);
         }
     }
+
+
 
     /**
      * Index a new post in Elasticsearch.
