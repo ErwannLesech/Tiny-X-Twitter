@@ -1,6 +1,7 @@
 package com.epita;
 
 import com.epita.controller.contracts.PostRequest;
+import com.epita.controller.contracts.PostResponse;
 import com.epita.service.SearchService;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -23,6 +24,9 @@ class IndexingTest {
 
     private static final Logger LOGGER = Logger.getLogger(IndexingTest.class.getName());
 
+    /**
+     * Test for indexing posts
+     */
     @Test
     void a_testIndexRandomPosts() {
         for (int i = 0; i < 5; i++) { // Génère 5 posts aléatoires
@@ -33,6 +37,9 @@ class IndexingTest {
         }
     }
 
+    /**
+     * Test for delete indexed posts
+     */
     @Test
     void b_deletePosts() {
         for (String postId : generatedPosts) {
@@ -55,5 +62,166 @@ class IndexingTest {
         String parentId = postType.equals("reply") ? UUID.randomUUID().toString() : "";
 
         return new PostRequest(id, postType, content, mediaPath, parentId);
+    }
+
+
+
+    /**
+     * Tests for searching
+     */
+    @Test
+    void c_searchPost_found() {
+        PostRequest post = new PostRequest(
+                UUID.randomUUID().toString(),
+                "post",
+                "Bonjour le monde #test",
+                "",
+                null
+        );
+
+        searchService.indexPost(post);
+
+        List<PostResponse> results = assertDoesNotThrow(() -> searchService.searchPosts("bonjour"));
+        assertFalse(results.isEmpty(), "Expected to find at least one result");
+        searchService.deletePost(post.getId());
+    }
+
+    @Test
+    void d_searchPost_notFound() {
+        List<PostResponse> results = assertDoesNotThrow(() -> searchService.searchPosts("termeintrouvable123"));
+        assertTrue(results.isEmpty(), "Expected to find no results");
+    }
+
+    @Test
+    void e_searchPost_hashtag() {
+        PostRequest post = new PostRequest(
+                UUID.randomUUID().toString(),
+                "post",
+                "Ce post parle de #Été2024",
+                "",
+                null
+        );
+
+        searchService.indexPost(post);
+
+        List<PostResponse> results = assertDoesNotThrow(() -> searchService.searchPosts("#Été2024"));
+        assertFalse(results.isEmpty(), "Expected to find post with hashtag #Été2024");
+
+        searchService.deletePost(post.getId());
+    }
+
+    @Test
+    void f_searchPost_caseInsensitive() {
+        PostRequest post = new PostRequest(
+                UUID.randomUUID().toString(),
+                "post",
+                "Le Java est puissant",
+                "",
+                null
+        );
+
+        searchService.indexPost(post);
+
+        List<PostResponse> results = assertDoesNotThrow(() -> searchService.searchPosts("JAVA"));
+        assertFalse(results.isEmpty(), "Expected to find result for 'JAVA' despite casing");
+
+        searchService.deletePost(post.getId());
+    }
+
+    @Test
+    void g_searchPost_accentNormalization() {
+        PostRequest post = new PostRequest(
+                UUID.randomUUID().toString(),
+                "post",
+                "C'était l'été à São Paulo",
+                "",
+                null
+        );
+
+        searchService.indexPost(post);
+
+        List<PostResponse> results = assertDoesNotThrow(() -> searchService.searchPosts("ete sao"));
+        assertFalse(results.isEmpty(), "Expected to find result with accent-normalized words");
+
+        searchService.deletePost(post.getId());
+    }
+
+    @Test
+    void i_searchPost_multipleTokens() {
+        PostRequest post = new PostRequest(
+                UUID.randomUUID().toString(),
+                "post",
+                "java quarkus elasticsearch",
+                "",
+                null
+        );
+
+        searchService.indexPost(post);
+
+        List<PostResponse> results = assertDoesNotThrow(() -> searchService.searchPosts("quarkus elasticsearch"));
+        assertFalse(results.isEmpty(), "Expected to find result matching both terms");
+
+        searchService.deletePost(post.getId());
+    }
+
+    @Test
+    void j_searchPost_multiplePostsAndStrictMatching() {
+        List<PostRequest> posts = List.of(
+                new PostRequest(UUID.randomUUID().toString(), "post", "This is a #tech post about #java", "", null),
+                new PostRequest(UUID.randomUUID().toString(), "post", "Exploring #java and #springboot projects", "", null),
+                new PostRequest(UUID.randomUUID().toString(), "post", "Learning about Java and tech in 2024", "", null),
+                new PostRequest(UUID.randomUUID().toString(), "post", "#java is awesome", "", null),
+                new PostRequest(UUID.randomUUID().toString(), "post", "Completely unrelated content", "", null)
+        );
+
+        // Index all posts
+        for (PostRequest post : posts) {
+            searchService.indexPost(post);
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Act + Assert 1: Search only for hashtag #java
+        List<PostResponse> result1 = searchService.searchPosts("#java");
+        assertEquals(3, result1.size(), "Expected 3 posts with #java only");
+
+        // Assert all returned posts actually contain #java (not just "java")
+        for (PostResponse post : result1) {
+            assertTrue(post.getContent().contains("#java"), "Post must contain #java as hashtag only");
+        }
+
+        // Act + Assert 2: Search for regular word "java" (should NOT match #java)
+        List<PostResponse> result2 = searchService.searchPosts("java");
+        assertEquals(1, result2.size(), "Expected only 1 post with word 'java' not hashtag");
+
+        for (PostResponse post : result2) {
+            assertTrue(post.getContent().contains("Java") && !post.getContent().contains("#java"),
+                    "Must match only plain 'java', not #java");
+        }
+
+        // Act + Assert 3: Search for both word 'tech' and hashtag #java
+        List<PostResponse> result3 = searchService.searchPosts("tech #java");
+        assertEquals(1, result3.size(), "Only one post should contain both word 'tech' and hashtag #java");
+
+        PostResponse matchedPost = result3.get(0);
+        assertTrue(matchedPost.getContent().contains("tech"), "Should contain 'tech' as plain word");
+        assertTrue(matchedPost.getContent().contains("#java"), "Should contain #java");
+
+        // Act + Assert 4: Search for two hashtags together #java #springboot
+        List<PostResponse> result4 = searchService.searchPosts("#java #springboot");
+        assertEquals(1, result4.size(), "Only one post should match both hashtags");
+
+        PostResponse hashtagMatch = result4.get(0);
+        assertTrue(hashtagMatch.getContent().contains("#java"), "Should contain #java");
+        assertTrue(hashtagMatch.getContent().contains("#springboot"), "Should contain #springboot");
+
+        // Cleanup
+        for (PostRequest post : posts) {
+            searchService.deletePost(post.getId());
+        }
     }
 }
