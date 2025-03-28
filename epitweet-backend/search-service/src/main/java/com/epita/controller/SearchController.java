@@ -62,7 +62,7 @@ public class SearchController {
     /**
      * Endpoint to delete a post from Elasticsearch by post ID.
      *
-     * @param request the ID of the post to delete.
+     * @param id the ID of the post to delete.
      * @return 200 OK if the post is deleted successfully.
      *         404 NOT FOUND if the post does not exist.
      *         400 BAD REQUEST if an error occurs during processing.
@@ -70,9 +70,9 @@ public class SearchController {
 
     @POST
     @Path("/deletePost")
-    public Response deletePost(UUID postId) {
+    public Response deletePost(String id) {
         try {
-            searchService.deletePost(postId.toString());
+            searchService.deletePost(id);
             return Response.ok().entity("Post deleted successfully").build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)

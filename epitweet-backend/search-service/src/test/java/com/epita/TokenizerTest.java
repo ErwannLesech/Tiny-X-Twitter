@@ -5,6 +5,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import jakarta.inject.Inject;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -104,6 +105,47 @@ class TokenizerTest {
         String input = "Great job 💪🔥 #Motivation!!! $$$";
         List<String> expected = List.of("great", "job", "#Motivation");
         assertEquals(expected, searchService.tokenizeText(input));
+    }
+
+    @Test
+    public void testContractions() {
+        String input = "C'est l'été";
+        List<String> expected = List.of("c", "est", "l", "ete");
+        assertEquals(expected, searchService.tokenizeText(input));
+    }
+
+    @Test
+    public void testHashtagWithAccentAndPunctuation() {
+        String input = "Vive #Été2024!";
+        List<String> expected = List.of("vive", "#Été2024");
+        assertEquals(expected, searchService.tokenizeText(input));
+    }
+
+    @Test
+    public void testTextWithEmoji() {
+        String input = "Incroyable été ☀️ à la plage 🏖️";
+        List<String> expected = List.of("incroyable", "ete", "a", "la", "plage");
+        assertEquals(expected, searchService.tokenizeText(input));
+    }
+
+    @Test
+    public void testMentions() {
+        String input = "Merci @Jean pour l'aide !";
+        List<String> expected = List.of("merci", "jean", "pour", "l", "aide");
+        assertEquals(expected, searchService.tokenizeText(input));
+    }
+
+    @Test
+    public void testHashtagWithUnderscore() {
+        String input = "On participe à #Open_AI_dev2025";
+        List<String> expected = List.of("on", "participe", "a", "#Open_AI_dev2025");
+        assertEquals(expected, searchService.tokenizeText(input));
+    }
+
+    @Test
+    public void testEmptyAndNullInput() {
+        assertEquals(Collections.emptyList(), searchService.tokenizeText(""));
+        assertNull(searchService.tokenizeText(null));
     }
 
 }

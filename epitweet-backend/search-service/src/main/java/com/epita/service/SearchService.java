@@ -11,6 +11,7 @@ import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class SearchService {
@@ -57,22 +58,29 @@ public class SearchService {
     public List<String> tokenizeText(String text) {
         if (text == null) return null;
 
-        // Normalize the text to remove accents and non-ASCII characters
-        text = Normalizer.normalize(text, Normalizer.Form.NFD)
-                .replaceAll("[^\\p{ASCII}]", "");
-
-        // Tokenize and transform
-        List<String> tokens = Arrays.stream(text.split("\\s+"))
+        return Arrays.stream(text.split("\\s+"))
+                .flatMap(token -> {
+                    // If not hashtag and contains apostrophe, split on it
+                    if (!token.startsWith("#") && token.contains("'")) {
+                        return Arrays.stream(token.split("'"));
+                    }
+                    return Stream.of(token);
+                })
                 .map(token -> {
                     if (token.startsWith("#") && token.length() > 1) {
-                        return token.replaceAll("[^#\\w]", ""); // Keep case as-is for hashtags
+                        // Hashtag: remove punctuation but keep accents
+                        return token.replaceAll("[^#\\p{L}\\p{N}_]", "");
                     } else {
-                        return token.replaceAll("[\\p{Punct}&&[^#]]", "").toLowerCase(); // Lowercase others
+                        // Normalize accents and lowercase for regular words
+                        // remove accents
+                        // remove punctuation
+                        return Normalizer.normalize(token, Normalizer.Form.NFD)
+                                .replaceAll("[^\\p{ASCII}]", "") // remove accents
+                                .replaceAll("[\\p{Punct}&&[^#]]", "") // remove punctuation
+                                .toLowerCase();
                     }
                 })
                 .filter(token -> !token.isBlank())
                 .collect(Collectors.toList());
-
-        return tokens;
     }
 }
