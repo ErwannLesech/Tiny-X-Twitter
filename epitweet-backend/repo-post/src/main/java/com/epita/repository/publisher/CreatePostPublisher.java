@@ -1,12 +1,15 @@
 package com.epita.repository.publisher;
 
-import com.epita.repository.publisher.contracts.CreatePostRequest;
+import com.epita.payloads.post.CreatePostRequest;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
+/**
+ * Publisher for sending create post-requests to the "isPostBlockedRequest" channel.
+ */
 @ApplicationScoped
 public class CreatePostPublisher {
 
@@ -20,7 +23,8 @@ public class CreatePostPublisher {
     }
 
     public void publish(final CreatePostRequest message) {
-        logger.infof("Publishing FROM repo-post TO user-service ON isPostBlockedRequest FOR createPostRequest: %s", message.toString());
+        logger.infof("Publishing FROM repo-post TO user-service ON " +
+                "isPostBlockedRequest FOR createPostRequest: %s", message.toString());
         publisher.publish("isPostBlockedRequest", message);
     }
 }

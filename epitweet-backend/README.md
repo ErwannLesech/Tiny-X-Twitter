@@ -17,6 +17,10 @@ Epitweet/
 │   ├── docker-compose.yml
 │   ├── init_mongo.js
 │
+├── common/                # Common utils 
+│   ├── src/               
+│   ├── pom.xml
+│
 ├── repo-post/             # Post management microservice
 │   ├── src/               # Port 8082
 │   ├── pom.xml
@@ -50,6 +54,11 @@ To build the `user-service`:
 cd user-service
 mvn clean install
 ```
+To build the `common`:
+```sh
+cd common
+mvn clean install
+```
 
 ## Running the Project
 
@@ -64,6 +73,9 @@ This will start MongoDB, ElasticSearch, Neo4j and Redis.
 ### 2. Start services
 To start all backend services, open separate terminal windows and run the following commands:
 ```sh
+# Start the common module
+./mvnw quarkus:dev -pl common/
+
 # Start the user-service
 ./mvnw quarkus:dev -pl user-service/
 

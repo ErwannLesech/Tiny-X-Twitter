@@ -1,6 +1,6 @@
 package com.epita.controller.subscriber;
 
-import com.epita.controller.subscriber.contracts.CreatePostResponse;
+import com.epita.payloads.post.CreatePostResponse;
 import com.epita.service.PostService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
@@ -14,6 +14,10 @@ import org.jboss.logging.Logger;
 
 import java.util.function.Consumer;
 
+/**
+ * A subscriber that listens to 'isPostBlockedResponse'
+ * channel related to post-creation response with user-service module.
+ */
 @Startup
 @ApplicationScoped
 public class CreatePostSubscriber implements Consumer<CreatePostResponse> {
@@ -39,7 +43,7 @@ public class CreatePostSubscriber implements Consumer<CreatePostResponse> {
 
     @Override
     public void accept(final CreatePostResponse message) {
-        logger.infof("Received CreationPostResponse result: %s", message.toString());
+        logger.infof("Received CreationPostResponse from IsPostBlockedResponse: %s", message.toString());
         vertx.executeBlocking(future -> {
             postService.createPostResponse(message);
             future.complete();
