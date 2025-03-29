@@ -1,14 +1,10 @@
 package com.epita.controller.contracts;
 
-import com.epita.payloads.post.CreatePostResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.bson.types.ObjectId;
-
-import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,10 +18,10 @@ public class PostRequest {
     public String parentId;
 
     public PostRequest(CreatePostResponse createPostResponse) {
-        this.postType = createPostResponse.getPostType();
-        this.content = createPostResponse.getContent();
-        this.mediaPath = createPostResponse.getMediaUrl();
-        this.parentId = String.valueOf(createPostResponse.getParentId());
+        this.postType = createPostResponse.postType;
+        this.content = createPostResponse.content;
+        this.mediaPath = createPostResponse.mediaPath;
+        this.parentId = String.valueOf(createPostResponse.parentId);
     }
 
     public ObjectId getParentObjectId() {
