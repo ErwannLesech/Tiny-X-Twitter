@@ -1,13 +1,17 @@
 package com.epita.service;
 
 import com.epita.controller.contracts.PostRequest;
-import com.epita.controller.contracts.PostResponse;
+import com.epita.contracts.post.PostResponse;
 import com.epita.payloads.post.CreatePostResponse;
 import com.epita.converter.PostConverter;
+import com.epita.payloads.search.GetPostSearchRequest;
+import com.epita.payloads.search.IndexPost;
 import com.epita.repository.publisher.CreatePostPublisher;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
+import com.epita.repository.publisher.GetPostSearchPublisher;
+import com.epita.repository.publisher.IndexPostPublisher;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
@@ -27,6 +31,12 @@ public class PostService {
 
     @Inject
     CreatePostPublisher createPostPublisher;
+
+    @Inject
+    IndexPostPublisher indexPostPublisher;
+
+    @Inject
+    GetPostSearchPublisher getPostSearchPublisher;
 
     /**
      * Retrieves a list of posts for a given user.
@@ -129,6 +139,9 @@ public class PostService {
 
         postRepository.createPost(post);
 
+        // declare to index service that we created a Post
+        indexPostPublisher.publish(PostConverter.toIndexPost(post, "creation"));
+
         return post;
     }
 
@@ -149,6 +162,24 @@ public class PostService {
 
         postRepository.deletePost(post);
 
+        // declare to index service that we deleted a Post
+        indexPostPublisher.publish(PostConverter.toIndexPost(post, "deletion"));
+
         return postResponse;
+    }
+
+    public void GetPostSearchResponse(GetPostSearchRequest message) {
+        List<PostResponse> postsResponse = new ArrayList<>();
+        for (String postId: message.getPostIds()){
+            Post post = postRepository.findById(new ObjectId(postId));
+
+            if (post == null) {
+                continue;
+            }
+
+            postsResponse.add(PostConverter.toResponse(post));
+        }
+
+        getPostSearchPublisher.publish(PostConverter.toGetPostSearchResponse(postsResponse));
     }
 }

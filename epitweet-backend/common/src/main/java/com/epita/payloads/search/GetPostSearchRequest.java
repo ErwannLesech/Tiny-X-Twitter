@@ -9,6 +9,6 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class getPostSearchRequest {
+public class GetPostSearchRequest {
     private List<String> postIds;
 }

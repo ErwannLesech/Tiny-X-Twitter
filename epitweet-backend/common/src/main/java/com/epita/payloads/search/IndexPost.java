@@ -18,7 +18,7 @@ import org.bson.types.ObjectId;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class indexPost {
+public class IndexPost {
     /**
      *  The id of the post
      */

@@ -10,6 +10,6 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class getPostSearchResponse {
+public class GetPostSearchResponse {
     private List<PostResponse> posts;
 }

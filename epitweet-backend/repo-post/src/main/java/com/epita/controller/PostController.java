@@ -1,7 +1,7 @@
 package com.epita.controller;
 
 import com.epita.controller.contracts.PostRequest;
-import com.epita.controller.contracts.PostResponse;
+import com.epita.contracts.post.PostResponse;
 import com.epita.service.PostService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
