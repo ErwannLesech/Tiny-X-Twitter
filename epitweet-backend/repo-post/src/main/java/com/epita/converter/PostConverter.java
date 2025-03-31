@@ -4,7 +4,6 @@ import com.epita.controller.contracts.PostRequest;
 import com.epita.contracts.post.PostResponse;
 import com.epita.payloads.post.CreatePostRequest;
 import com.epita.payloads.post.CreatePostResponse;
-import com.epita.payloads.search.GetPostSearchResponse;
 import com.epita.payloads.search.IndexPost;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
@@ -107,18 +106,6 @@ public class PostConverter {
                 post.mediaUrl,
                 post.parentId,
                 method
-        );
-    }
-
-    /**
-     * Converts a List of {@code PostResponse} to a {@code GetPostSearchResponse}.
-     *
-     * @param posts The list of PostResponse
-     * @return The converted {@code GetPostSearchResponse}.
-     */
-    public static GetPostSearchResponse toGetPostSearchResponse(List<PostResponse> posts) {
-        return new GetPostSearchResponse(
-            posts
         );
     }
 }

@@ -4,13 +4,10 @@ import com.epita.controller.contracts.PostRequest;
 import com.epita.contracts.post.PostResponse;
 import com.epita.payloads.post.CreatePostResponse;
 import com.epita.converter.PostConverter;
-import com.epita.payloads.search.GetPostSearchRequest;
-import com.epita.payloads.search.IndexPost;
 import com.epita.repository.publisher.CreatePostPublisher;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
-import com.epita.repository.publisher.GetPostSearchPublisher;
 import com.epita.repository.publisher.IndexPostPublisher;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -34,9 +31,6 @@ public class PostService {
 
     @Inject
     IndexPostPublisher indexPostPublisher;
-
-    @Inject
-    GetPostSearchPublisher getPostSearchPublisher;
 
     /**
      * Retrieves a list of posts for a given user.
@@ -166,20 +160,5 @@ public class PostService {
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "deletion"));
 
         return postResponse;
-    }
-
-    public void GetPostSearchResponse(GetPostSearchRequest message) {
-        List<PostResponse> postsResponse = new ArrayList<>();
-        for (String postId: message.getPostIds()){
-            Post post = postRepository.findById(new ObjectId(postId));
-
-            if (post == null) {
-                continue;
-            }
-
-            postsResponse.add(PostConverter.toResponse(post));
-        }
-
-        getPostSearchPublisher.publish(PostConverter.toGetPostSearchResponse(postsResponse));
     }
 }
