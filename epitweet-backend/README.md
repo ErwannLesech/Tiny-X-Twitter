@@ -4,6 +4,7 @@
 Epitweet Backend is a Twitter-like API developed using **Quarkus** and **Maven**. It is built with a **microservices architecture**, consisting of:
 - `user-service`: Handles user authentication and management.
 - `repo-post`: Manages post creation, retrieval, and interactions.
+- `search-service`: Handles post indexing and searching via Elasticsearch.
 
 ## API Documentation
 The APIs for Epitweet are documented using **Swagger**.
@@ -29,6 +30,10 @@ Epitweet/
 │   ├── src/               # Port 8081
 │   ├── pom.xml 
 │
+├── search-service/        # Search microservice
+│   ├── src/               # Port 8083
+│   ├── pom.xml 
+│
 ├── integrationTests.http   # HTTP test file for API calls
 ├── pom.xml                 # Parent Maven project configuration
 ├── README.md               # Project documentation
@@ -52,6 +57,11 @@ mvn clean install
 To build the `user-service`:
 ```sh
 cd user-service
+mvn clean install
+```
+To build the `srvc-search`:
+```sh
+cd search-service
 mvn clean install
 ```
 To build the `common`:
@@ -81,6 +91,9 @@ To start all backend services, open separate terminal windows and run the follow
 
 # Start the repo-post service
 ./mvnw quarkus:dev -pl repo-post/
+
+# Start the srvc-search service
+./mvnw quarkus:dev -pl search-service/
 ```
 
 ## Testing the Project
@@ -98,6 +111,11 @@ mvn test
 ```sh
 # Run tests for repo-post
 cd repo-post
+mvn test
+```
+```sh
+# Run tests for srvc-search
+cd search-service
 mvn test
 ```
 
