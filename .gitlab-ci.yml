@@ -33,15 +33,6 @@ test:
   stage: test
 
   script:
-    - echo "Installing Docker client..."
-    - curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-20.10.7.tgz | tar -xzv --strip-components=1 -C /usr/local/bin docker/docker
-    - docker --version
-    - echo "Downloading docker-compose..."
-    - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    - chmod +x /usr/local/bin/docker-compose
-    - cd epitweet-backend/docker
-    - docker-compose -H tcp://docker:2375 up -d
-    - cd ..
     - mvn $MAVEN_CLI_OPTS verify
   dependencies:
     - build
