@@ -5,8 +5,6 @@ services:
 
 
 variables:
-  MAVEN_CLI_OPTS: "-B -V"
-  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
 
@@ -34,12 +32,12 @@ test:
 
   script:
     - cd epitweet-backend/
-    - mvn $MAVEN_CLI_OPTS verify
+    - mvn  test
   dependencies:
     - build
   artifacts:
     reports:
-      junit: epitweet-backend/target/surefire-reports/*.xml
+      junit: epitweet-backend/target/user-service/surefire-reports/*.xml
     paths:
       - epitweet-backend/target/*.jar
     expire_in: 1 week
