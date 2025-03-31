@@ -33,6 +33,7 @@ test:
   stage: test
 
   script:
+    - cd epitweet-backend/
     - mvn $MAVEN_CLI_OPTS verify
   dependencies:
     - build
