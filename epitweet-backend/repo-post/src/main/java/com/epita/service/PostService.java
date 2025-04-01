@@ -1,6 +1,7 @@
 package com.epita.service;
 
 import com.epita.controller.contracts.PostRequest;
+import com.epita.converter.PostTimelineConverter;
 import com.epita.contracts.post.PostResponse;
 import com.epita.payloads.post.CreatePostResponse;
 import com.epita.converter.PostConverter;
@@ -8,11 +9,14 @@ import com.epita.repository.publisher.CreatePostPublisher;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
+import com.epita.repository.publisher.PostTimelinePublisher;
 import com.epita.repository.publisher.IndexPostPublisher;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +32,9 @@ public class PostService {
 
     @Inject
     CreatePostPublisher createPostPublisher;
+
+    @Inject
+    PostTimelinePublisher postTimelinePublisher;
 
     @Inject
     IndexPostPublisher indexPostPublisher;
@@ -133,6 +140,9 @@ public class PostService {
 
         postRepository.createPost(post);
 
+        // declare to user-timeline that we created a post
+        postTimelinePublisher.publish(PostTimelineConverter.toPostTimeline(post, "creation"));
+
         // declare to index service that we created a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "creation"));
 
@@ -152,9 +162,14 @@ public class PostService {
             return null;
         }
 
+        post.updatedAt = Instant.now();
+
         PostResponse postResponse = PostConverter.toResponse(post);
 
         postRepository.deletePost(post);
+
+        // declare to user-timeline that we deleted a post
+        postTimelinePublisher.publish(PostTimelineConverter.toPostTimeline(post, "deletion"));
 
         // declare to index service that we deleted a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "deletion"));

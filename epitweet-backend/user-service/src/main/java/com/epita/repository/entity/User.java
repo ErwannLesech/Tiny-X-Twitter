@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.bson.types.ObjectId;
-import java.util.List;
 
 /**
  * Represents a User entity stored in the MongoDB collection "Users".
@@ -35,9 +34,4 @@ public class User {
      * The hashed password of the user.
      */
     public String password;
-
-    /**
-     * A list of user IDs that this user has blocked.
-     */
-    public List<ObjectId> blockedUsers;
 }

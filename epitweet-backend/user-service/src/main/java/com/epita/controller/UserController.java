@@ -190,7 +190,6 @@ public class UserController {
         String tag = userRequest.getTag();
         String pseudo = userRequest.getPseudo();
         String password = userRequest.getPassword();
-        List<ObjectId> blockedList = userRequest.getBlockedUsers();
 
         if (tag == null || tag.isEmpty() || pseudo == null || pseudo.isEmpty()) {
             return Boolean.FALSE;
