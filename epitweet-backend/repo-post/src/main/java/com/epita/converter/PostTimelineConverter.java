@@ -1,12 +1,7 @@
 package com.epita.converter;
 
-import com.epita.controller.contracts.PostRequest;
 import com.epita.payloads.userTimeline.PostTimeline;
 import com.epita.repository.entity.Post;
-import com.epita.repository.entity.PostType;
-import org.bson.types.ObjectId;
-
-import java.time.Instant;
 
 public class PostTimelineConverter {
     /**

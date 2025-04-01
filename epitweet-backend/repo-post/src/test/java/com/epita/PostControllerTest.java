@@ -1,6 +1,6 @@
 package com.epita;
 
-import com.epita.controller.contracts.PostResponse;
+import com.epita.contracts.post.PostResponse;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
 import io.quarkus.test.junit.QuarkusTest;
