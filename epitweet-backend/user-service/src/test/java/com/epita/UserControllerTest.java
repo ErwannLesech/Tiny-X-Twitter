@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedList;
 
 import static io.restassured.RestAssured.given;
-/*
+
 @QuarkusTest
 public class UserControllerTest {
 
@@ -130,7 +130,6 @@ public class UserControllerTest {
         assert user != null;
         logger.info(user.toString());
         assert user.pseudo.equals("grp3RPZ");
-        assert user.blockedUsers.isEmpty();
     }
 
     @Test
@@ -153,7 +152,6 @@ public class UserControllerTest {
         User user = userRepository.findByTag("group3");
         assert user != null;
         assert user.pseudo.equals("grp3RPZ");
-        assert user.blockedUsers.isEmpty();
     }
 
     @Test
@@ -190,8 +188,6 @@ public class UserControllerTest {
         assert user != null;
         assert user.tag.equals("group3"); // tag should not change
         assert user.pseudo.equals("grp3RPZLaFamille");
-        assert user.blockedUsers.size() == 1;
-        assert user.blockedUsers.contains(firstUserId);
     }
 
 
@@ -236,9 +232,7 @@ public class UserControllerTest {
         User newUser = new User();
         newUser.tag = "group3";
         newUser.pseudo = "grp3RPZ";
-        newUser.blockedUsers = new LinkedList<>();
         ObjectId randomObjectId = new ObjectId();
-        newUser.blockedUsers.add(randomObjectId);
         userRepository.createUser(newUser);
 
         UserResponse userResponse = given().contentType(ContentType.JSON)
@@ -252,9 +246,6 @@ public class UserControllerTest {
 
         assert userResponse != null;
         assert userResponse.get_id() != null;
-        assert userResponse.getBlockedUsers().size() == 1;
-        assert userResponse.getBlockedUsers().contains(randomObjectId);
         assert userResponse.getPseudo().equals("grp3RPZ");
     }
 }
-*/
