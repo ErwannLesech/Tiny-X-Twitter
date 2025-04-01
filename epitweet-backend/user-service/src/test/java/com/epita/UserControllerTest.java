@@ -232,7 +232,6 @@ public class UserControllerTest {
         User newUser = new User();
         newUser.tag = "group3";
         newUser.pseudo = "grp3RPZ";
-        ObjectId randomObjectId = new ObjectId();
         userRepository.createUser(newUser);
 
         UserResponse userResponse = given().contentType(ContentType.JSON)
@@ -247,5 +246,43 @@ public class UserControllerTest {
         assert userResponse != null;
         assert userResponse.get_id() != null;
         assert userResponse.getPseudo().equals("grp3RPZ");
+    }
+
+    @Test
+    public void testGetUserById()
+    {
+        User newUser = new User();
+        newUser.tag = "group3";
+        newUser.pseudo = "grp3RPZ";
+        userRepository.createUser(newUser);
+
+        UserResponse userResponse = given().contentType(ContentType.JSON)
+                .header("userTag", newUser.tag)
+                .when()
+                .get("/api/users/getUser")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(UserResponse.class);
+
+        assert userResponse != null;
+        assert userResponse.get_id() != null;
+        assert userResponse.getPseudo().equals("grp3RPZ");
+
+        ObjectId userId = userResponse.get_id();
+
+        UserResponse userResponse2 = given().contentType(ContentType.JSON)
+                .header("userId", userId.toString())
+                .when()
+                .get("/api/users/getUserById")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(UserResponse.class);
+
+        assert userResponse2 != null;
+        assert userResponse2.get_id() != null;
+        assert userResponse2.getTag().equals("group3");
+        assert userResponse2.getPseudo().equals("grp3RPZ");
     }
 }
