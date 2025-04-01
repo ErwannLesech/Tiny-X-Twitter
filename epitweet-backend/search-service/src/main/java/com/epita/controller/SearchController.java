@@ -1,7 +1,8 @@
 package com.epita.controller;
 
-import com.epita.controller.contracts.PostRequest;
 import com.epita.controller.contracts.PostResponse;
+import com.epita.controller.contracts.PostSearchResponse;
+import com.epita.payloads.search.IndexPost;
 import com.epita.service.SearchService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -26,8 +27,8 @@ public class SearchController {
      * @return a list of matching posts or appropriate error status.
      */
     @POST
-    @Path("/searchPosts")
-    public Response searchPosts(String request) {
+    @Path("/searchPosts/{request}")
+    public Response searchPosts(@PathParam("request") String request) {
         try {
             List<PostResponse> results = searchService.searchPosts(request);
             if (results.isEmpty()) {
@@ -48,7 +49,7 @@ public class SearchController {
      */
     @POST
     @Path("/addPost")
-    public Response addPost(PostRequest request) {
+    public Response addPost(IndexPost request) {
         try {
             searchService.indexPost(request);
             return Response.ok().entity("Post added successfully").build();

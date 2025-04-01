@@ -1,5 +1,6 @@
-package com.epita;
+package com.epita.repository.suscriber;
 
+import com.epita.payloads.search.IndexPost;
 import com.epita.controller.contracts.PostRequest;
 import com.epita.service.SearchService;
 import io.quarkus.redis.datasource.RedisDataSource;
@@ -15,7 +16,7 @@ import static io.quarkus.mongodb.runtime.dns.MongoDnsClientProvider.vertx;
 
 @Startup
 @ApplicationScoped
-public class SearchIndexSubscriber implements Consumer<PostRequest> {
+public class IndexPostSubscriber implements Consumer<IndexPost> {
 
     @Inject
     SearchService searchService;
@@ -27,16 +28,20 @@ public class SearchIndexSubscriber implements Consumer<PostRequest> {
      *
      * @param ds the Redis data source.
      */
-    public SearchIndexSubscriber(final RedisDataSource ds) {
-        subscriber = ds.pubsub(PostRequest.class)
-                .subscribe("search-index-post", this);
+    public IndexPostSubscriber(final RedisDataSource ds) {
+        subscriber = ds.pubsub(IndexPost.class)
+                .subscribe("indexPost", this);
     }
 
     @Override
-    public void accept(final PostRequest message) {
+    public void accept(final IndexPost message) {
         vertx.executeBlocking(promise -> {
             try {
-                searchService.indexPost(message);
+                if (message.getMethod().equals("creation")) {
+                    searchService.indexPost(message);
+                } else if (message.getMethod().equals("deletion")) {
+                    searchService.deletePost(message.getPostId());
+                }
                 promise.complete();
             } catch (Exception e) {
                 promise.fail(e);
