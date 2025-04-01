@@ -27,7 +27,7 @@ public class UserService {
             return null;
         }
 
-        return new UserResponse(user._id, user.tag, user.pseudo, user.password, user.blockedUsers);
+        return UserConverter.toResponse(user);
     }
 
     /**
@@ -63,7 +63,6 @@ public class UserService {
         User userToUpdate = userRepository.findByTag(userRequest.getTag());
         if (userToUpdate != null) {
             userToUpdate.pseudo = userRequest.getPseudo();
-            userToUpdate.blockedUsers = userRequest.getBlockedUsers();
 
             // Password hash handling
             if (userRequest.getPassword() != null) {

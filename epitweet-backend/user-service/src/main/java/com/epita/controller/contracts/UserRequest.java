@@ -29,9 +29,4 @@ public class UserRequest {
      * The password of the user.
      */
     String password;
-
-    /**
-     * A list of user IDs that this user has blocked.
-     */
-    List<ObjectId> blockedUsers;
 }
