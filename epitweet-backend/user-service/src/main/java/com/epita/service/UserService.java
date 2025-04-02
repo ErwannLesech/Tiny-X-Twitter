@@ -7,6 +7,7 @@ import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
 @ApplicationScoped
@@ -23,6 +24,21 @@ public class UserService {
      */
     public UserResponse getUser(String userTag) {
         User user = userRepository.findByTag(userTag);
+        if (user == null) {
+            return null;
+        }
+
+        return UserConverter.toResponse(user);
+    }
+
+    /**
+     * Retrieves a user by their Identifier.
+     *
+     * @param userId the id of the user
+     * @return a UserResponse object if the user is found, or null
+     */
+    public UserResponse getUserById(ObjectId userId) {
+        User user = userRepository.findById(userId);
         if (user == null) {
             return null;
         }
