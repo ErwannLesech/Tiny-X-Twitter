@@ -30,7 +30,7 @@ Epitweet/
 │   ├── src/               # Port 8081
 │   ├── pom.xml 
 │
-├── search-service/        # Search microservice
+├── search-service/        # Search management microservice
 │   ├── src/               # Port 8083
 │   ├── pom.xml 
 │
@@ -59,7 +59,7 @@ To build the `user-service`:
 cd user-service
 mvn clean install
 ```
-To build the `srvc-search`:
+To build the `search-service`:
 ```sh
 cd search-service
 mvn clean install
