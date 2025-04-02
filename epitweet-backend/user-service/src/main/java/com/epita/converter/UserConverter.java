@@ -23,8 +23,7 @@ public class UserConverter {
                 new ObjectId(),
                 userRequest.getTag(),
                 userRequest.getPseudo(),
-                userRequest.getPassword(),
-                userRequest.getBlockedUsers() != null ? userRequest.getBlockedUsers() : new ArrayList<>()
+                userRequest.getPassword()
         );
     }
 
@@ -39,8 +38,7 @@ public class UserConverter {
                 user._id,
                 user.tag,
                 user.pseudo,
-                user.password,
-                user.blockedUsers
+                user.password
         );
     }
 }

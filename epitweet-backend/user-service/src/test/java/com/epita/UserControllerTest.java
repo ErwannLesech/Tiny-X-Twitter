@@ -33,148 +33,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testCreateUser() {
-
-        given().contentType(ContentType.JSON)
-                .body(firstUser)
-                .when()
-                .post("/api/users/create")
-                .then()
-                .statusCode(201);
-
-        // Check in db if the user has been created
-        User user = userRepository.findByTag("group3");
-        assert user != null;
-        logger.info(user.toString());
-        assert user.pseudo.equals("grp3RPZ");
-        assert user.blockedUsers.isEmpty();
-    }
-
-    @Test
-    public void testCreateUserTagAlreadyExists() {
-        given().contentType(ContentType.JSON)
-                .body(firstUser)
-                .when()
-                .post("/api/users/create")
-                .then()
-                .statusCode(201);
-
-        given().contentType(ContentType.JSON)
-                .body(firstUser)
-                .when()
-                .post("/api/users/create")
-                .then()
-                .statusCode(409);
-
-        // Check in db if the user is still created
-        User user = userRepository.findByTag("group3");
-        assert user != null;
-        assert user.pseudo.equals("grp3RPZ");
-        assert user.blockedUsers.isEmpty();
-    }
-
-    @Test
-    public void testCreateUserWrongRequest() {
-
-        given().contentType(ContentType.JSON)
-                .body(wrongRequest)
-                .when()
-                .post("/api/users/create")
-                .then()
-                .statusCode(400);
-    }
-
-    @Test
-    public void testUpdateUser() {
-        // setup user to modify
-        User newUser = new User();
-        newUser.tag = "group3";
-        newUser.pseudo = "grp3RPZ";
-        userRepository.createUser(newUser);
-
-        ObjectId firstUserId = userRepository.findByTag("group3")._id;
-        String firstUserModification = "{ \"tag\": \"group3\", \"pseudo\": \"grp3RPZLaFamille\", \"blockedUsers\" : [ \"" + firstUserId.toHexString() + "\" ] }";
-
-        given().contentType(ContentType.JSON)
-                .body(firstUserModification)
-                .when()
-                .patch("/api/users/update")
-                .then()
-                .statusCode(200);
-
-        // Check if the user has been well updated
-        User user = userRepository.findById(firstUserId);
-        assert user != null;
-        assert user.tag.equals("group3"); // tag should not change
-        assert user.pseudo.equals("grp3RPZLaFamille");
-        assert user.blockedUsers.size() == 1;
-        assert user.blockedUsers.contains(firstUserId);
-    }
-
-
-    @Test
-    public void testDeleteUser() {
-        User newUser = new User();
-        newUser.tag = "group3";
-        newUser.pseudo = "grp3RPZ";
-        userRepository.createUser(newUser);
-
-        UserResponse userResponse = given().contentType(ContentType.JSON)
-                .header("userTag", newUser.tag)
-                .when()
-                .delete("/api/users/delete")
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(UserResponse.class);
-
-        User user = userRepository.findByTag("group3");
-        assert user == null;
-
-        assert userResponse != null;
-        assert userResponse.get_id() != null;
-        assert userResponse.getTag().equals("group3");
-        assert userResponse.getPseudo().equals("grp3RPZ");
-    }
-
-    @Test
-    public void testDeleteUserNotFound() {
-        given().contentType(ContentType.JSON)
-                .header("userTag", "unknown")
-                .when()
-                .delete("/api/users/delete")
-                .then()
-                .statusCode(404);
-    }
-
-    @Test
-    public void testGetUser()
-    {
-        User newUser = new User();
-        newUser.tag = "group3";
-        newUser.pseudo = "grp3RPZ";
-        newUser.blockedUsers = new LinkedList<>();
-        ObjectId randomObjectId = new ObjectId();
-        newUser.blockedUsers.add(randomObjectId);
-        userRepository.createUser(newUser);
-
-        UserResponse userResponse = given().contentType(ContentType.JSON)
-                .header("userTag", newUser.tag)
-                .when()
-                .get("/api/users/getUser")
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(UserResponse.class);
-
-        assert userResponse != null;
-        assert userResponse.get_id() != null;
-        assert userResponse.getBlockedUsers().size() == 1;
-        assert userResponse.getBlockedUsers().contains(randomObjectId);
-        assert userResponse.getPseudo().equals("grp3RPZ");
-    }
-
-    @Test
     public void testGetUserWrongRequest() {
         given().contentType(ContentType.JSON)
                 .when()
@@ -254,5 +112,140 @@ public class UserControllerTest {
                 .post("/api/users/auth")
                 .then()
                 .statusCode(404);
+    }
+
+
+    @Test
+    public void testCreateUser() {
+
+        given().contentType(ContentType.JSON)
+                .body(firstUser)
+                .when()
+                .post("/api/users/create")
+                .then()
+                .statusCode(201);
+
+        // Check in db if the user has been created
+        User user = userRepository.findByTag("group3");
+        assert user != null;
+        logger.info(user.toString());
+        assert user.pseudo.equals("grp3RPZ");
+    }
+
+    @Test
+    public void testCreateUserTagAlreadyExists() {
+        given().contentType(ContentType.JSON)
+                .body(firstUser)
+                .when()
+                .post("/api/users/create")
+                .then()
+                .statusCode(201);
+
+        given().contentType(ContentType.JSON)
+                .body(firstUser)
+                .when()
+                .post("/api/users/create")
+                .then()
+                .statusCode(409);
+
+        // Check in db if the user is still created
+        User user = userRepository.findByTag("group3");
+        assert user != null;
+        assert user.pseudo.equals("grp3RPZ");
+    }
+
+    @Test
+    public void testCreateUserWrongRequest() {
+
+        given().contentType(ContentType.JSON)
+                .body(wrongRequest)
+                .when()
+                .post("/api/users/create")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    public void testUpdateUser() {
+        // setup user to modify
+        User newUser = new User();
+        newUser.tag = "group3";
+        newUser.pseudo = "grp3RPZ";
+        userRepository.createUser(newUser);
+
+        ObjectId firstUserId = userRepository.findByTag("group3")._id;
+        String firstUserModification = "{ \"tag\": \"group3\", \"pseudo\": \"grp3RPZLaFamille\", \"blockedUsers\" : [ \"" + firstUserId.toHexString() + "\" ] }";
+
+        given().contentType(ContentType.JSON)
+                .body(firstUserModification)
+                .when()
+                .patch("/api/users/update")
+                .then()
+                .statusCode(200);
+
+        // Check if the user has been well updated
+        User user = userRepository.findById(firstUserId);
+        assert user != null;
+        assert user.tag.equals("group3"); // tag should not change
+        assert user.pseudo.equals("grp3RPZLaFamille");
+    }
+
+
+    @Test
+    public void testDeleteUser() {
+        User newUser = new User();
+        newUser.tag = "group3";
+        newUser.pseudo = "grp3RPZ";
+        userRepository.createUser(newUser);
+
+        UserResponse userResponse = given().contentType(ContentType.JSON)
+                .header("userTag", newUser.tag)
+                .when()
+                .delete("/api/users/delete")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(UserResponse.class);
+
+        User user = userRepository.findByTag("group3");
+        assert user == null;
+
+        assert userResponse != null;
+        assert userResponse.get_id() != null;
+        assert userResponse.getTag().equals("group3");
+        assert userResponse.getPseudo().equals("grp3RPZ");
+    }
+
+    @Test
+    public void testDeleteUserNotFound() {
+        given().contentType(ContentType.JSON)
+                .header("userTag", "unknown")
+                .when()
+                .delete("/api/users/delete")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    public void testGetUser()
+    {
+        User newUser = new User();
+        newUser.tag = "group3";
+        newUser.pseudo = "grp3RPZ";
+        ObjectId randomObjectId = new ObjectId();
+        userRepository.createUser(newUser);
+
+        UserResponse userResponse = given().contentType(ContentType.JSON)
+                .header("userTag", newUser.tag)
+                .when()
+                .get("/api/users/getUser")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(UserResponse.class);
+
+        assert userResponse != null;
+        assert userResponse.get_id() != null;
+        assert userResponse.getPseudo().equals("grp3RPZ");
     }
 }

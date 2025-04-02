@@ -35,20 +35,51 @@ public class SearchRepository {
      * @return list of matching posts.
      */
     public List<PostDocument> search(List<String> tokenizedRequest) {
+        LOGGER.info("Searching for: " + tokenizedRequest);
         try {
+            // Separate words and hashtags
+            List<String> hashtags = tokenizedRequest.stream()
+                    .filter(word -> word.startsWith("#"))
+                    .collect(Collectors.toList());
+
+            List<String> words = tokenizedRequest.stream()
+                    .filter(word -> !word.startsWith("#"))
+                    .collect(Collectors.toList());
+
+            // Build Elasticsearch query
             SearchRequest searchRequest = SearchRequest.of(s -> s
                     .index(INDEX)
                     .query(q -> q
-                            .terms(t -> t
-                                    .field("tokenizedText")
-                                    .terms(ts -> ts.value(tokenizedRequest.stream()
-                                            .map(FieldValue::of)
-                                            .collect(Collectors.toList())))
-                            )
+                            .bool(b -> {
+                                // Ensure ALL hashtags are present (strict match)
+                                for (String hashtag : hashtags) {
+                                    b.must(mq -> mq
+                                            .term(t -> t
+                                                    .field("tokenizedText.keyword") // Exact match
+                                                    .value(FieldValue.of(hashtag))
+                                            )
+                                    );
+                                }
+
+                                // Ensure AT LEAST ONE word is present (vague match)
+                                if (!words.isEmpty()) {
+                                    b.should(mq -> mq
+                                            .terms(t -> t
+                                                    .field("tokenizedText.keyword") // Exact match
+                                                    .terms(ts -> ts.value(words.stream()
+                                                            .map(FieldValue::of)
+                                                            .collect(Collectors.toList())))
+                                            )
+                                    ).minimumShouldMatch("1"); // At least one word must match
+                                }
+
+                                return b;
+                            })
                     )
             );
 
             LOGGER.info("Executing search with tokenized request: " + tokenizedRequest);
+            //LOGGER.info("Executing search with request: " + searchRequest);
 
             SearchResponse<PostDocument> response = client.search(searchRequest, PostDocument.class);
 
@@ -62,8 +93,6 @@ public class SearchRepository {
         }
     }
 
-
-
     /**
      * Index a new post in Elasticsearch.
      *
@@ -74,7 +103,7 @@ public class SearchRepository {
             // Construction de la requête d'indexation dans Elasticsearch
             IndexRequest<PostDocument> request = IndexRequest.of(i -> i
                     .index(INDEX)
-                    .id(postDocument.getId()) // Utilisation de l'ID du document comme clé
+                    .id(postDocument.getPostId()) // Utilisation de l'ID du document comme clé
                     .document(postDocument)
             );
 
