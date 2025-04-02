@@ -1,0 +1,107 @@
+<div class="profile-container">
+    <!-- Left Sidebar (same as home) -->
+    <div class="left-sidebar">
+      <div class="logo">
+        <img src="assets/images/tiny-twitter-logo.png" alt="Logo" class="logo-icon">
+        <span class="logo-text">TinyTwitter</span>
+      </div>
+      
+      <nav class="main-nav">
+        <a routerLink="/home" class="nav-link">
+          <mat-icon>home</mat-icon>
+          <span>Accueil</span>
+        </a>
+        <a [routerLink]="['/profile', targetUser.usertag]" class="nav-link active">
+          <mat-icon>person</mat-icon>
+          <span>Profile</span>
+        </a>
+        <button class="post-creation-button">
+          <mat-icon>edit</mat-icon>
+          <span>Poster</span>
+        </button>
+      </nav>
+      
+      <div class="user-profile">
+        <img src="assets/images/default-profile.png" alt="Profile" class="profile-pic">
+        <div class="user-info">
+          <span class="username">{{ loggedUser?.username }}</span>
+          <span class="userTag">&#64;{{ loggedUser?.userTag }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading">
+      Loading profile...
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error" class="error">
+      {{ error }}
+    </div>
+
+    <!-- Content -->
+    <div *ngIf="!isLoading && !error">
+      <!-- Profile Content -->
+      <div class="profile-content">
+        <div class="profile-header">
+          <div class="profile-banner"></div>
+          <div class="profile-info">
+            <img src="assets/images/profile1.png" alt="Profile" class="profile-picture">
+            <button class="edit-profile-button">Modifier le profile</button>
+          </div>
+          
+          <div class="profile-details">
+            <h2>{{ targetUser.username }}</h2>
+            <span class="userTag">&#64;{{ targetUser.usertag }}</span>
+            <p class="bio">{{ targetUser.bio }}</p>
+            
+            <div class="stats">
+              <span><strong>{{ targetUser.followingCount }}</strong> abonnements</span>
+              <span><strong>{{ targetUser.followersCount }}</strong> abonnés</span>
+            </div>
+            
+            <div class="tabs">
+              <button class="tab active">Posts</button>
+              <button class="tab">Réponses</button>
+              <button class="tab">Médias</button>
+              <button class="tab">J'aime</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-posts">
+          <div class="post">
+            <div class="post-header">
+              <img src="assets/images/profile1.png" alt="Profile" class="post-profile-pic">
+              <div class="post-user">
+                <span class="username">{{ targetUser.username }}</span>
+                <span class="handle">&#64;{{ targetUser.usertag }}</span>
+              </div>
+            </div>
+            <div class="post-content">
+              Haha ? Moi puceau ? Sérieusement ? ça faisait longtemps qu'on me l'avait pas sortie celle là...
+              Demande à mes potes si je suis puceau, tu verras ce que tu vas te prendre xD parce que tu m'as fait tout d'un bon gros puceau de merde.
+            </div>
+            <div class="post-actions">
+              <button><mat-icon>favorite_border</mat-icon> 1</button>
+              <button><mat-icon>chat_bubble_outline</mat-icon> 2</button>
+              <button><mat-icon>share</mat-icon> 3</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar (same as home) -->
+    <div class="right-sidebar">
+      <div class="search-bar">
+        <mat-form-field appearance="outline">
+          <input matInput placeholder="Rechercher">
+        </mat-form-field>
+      </div>
+      
+      <div class="trends">
+      </div>
+    </div>
+</div>

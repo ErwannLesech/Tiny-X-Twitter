@@ -1,0 +1,84 @@
+.login-container {
+    max-width: 75%;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+    color: #333;
+    max-width: 1000px; // Match this to your form container width
+    min-width: 400px;
+  }
+  
+  .welcome-section {
+    text-align: center;
+    margin-bottom: 2rem;
+  
+    h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #0f1419;
+    }
+  }
+  
+  .login-form {
+    width: 50%;
+    margin: 0 auto;
+    h3 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+  }
+  
+  .form-group {
+    width: 100%; // Ensure form group takes full width
+    margin: 0 auto; // Center the form groups
+    margin-bottom: 1.5rem;
+  
+    .form-input {
+      width: 100%; // Account for padding
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 15px;
+      font-size: 1rem;
+      display: block; // Ensure inputs are block-level
+      box-sizing: border-box; // Include padding in width calculation
+      background-color: #d3d3d3;
+  
+      &:focus {
+        outline: none;
+        border-color: #999;
+      }
+    }
+  }
+  
+  .signup-link {
+    text-align: center;
+    margin: 1.5rem 0;
+    
+    a {
+      color: #333;
+      text-decoration: underline;
+      font-weight: bold;
+      
+      &:hover {
+        color: #64a7f3;
+      }
+    }
+  }
+  
+  .submit-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #000;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  
+    &:hover {
+      background-color: #333;
+    }
+  }

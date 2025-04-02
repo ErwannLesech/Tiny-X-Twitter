@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { UserStateService } from '../../services/user-state.service';
 
 @Component({
   selector: 'app-login',
@@ -26,9 +27,20 @@ export class LoginComponent {
   username: string = '';
   password: string = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private userStateService: UserStateService
+  ) {}
 
   onSubmit(): void {
+    this.userStateService.setLoggedUser({
+      username: this.username,
+      userTag: this.username.toLowerCase(),
+      avatarUrl: `../avatars/${this.username}.svg`,
+      bio: '',
+      followersCount: 0,
+      followingCount: 0
+    });
     this.router.navigate(['/home']);
   }
 }

@@ -1,29 +1,32 @@
-<div class="container" style="max-width: 400px;">
-    <mat-card>
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="color: #1da1f2;">TinyTwitter</h1>
-        <h2>Bienvenue</h2>
-      </div>
-  
-      <form (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline">
-          <mat-label>Nom d'utilisateur</mat-label>
-          <input matInput [(ngModel)]="username" name="username" required>
-        </mat-form-field>
-  
-        <mat-form-field appearance="outline">
-          <mat-label>Mot de passe</mat-label>
-          <input matInput type="password" [(ngModel)]="password" name="password" required>
-        </mat-form-field>
-  
-        <button mat-raised-button color="primary" type="submit" style="width: 100%;">
-          Se connecter
-        </button>
-      </form>
-  
-      <div style="text-align: center; margin-top: 20px;">
-        <span>Vous n'avez pas de compte ? </span>
-        <a routerLink="/sign-up" style="color: #1da1f2;">Inscription</a>
-      </div>
-    </mat-card>
+<div class="container login-container">
+  <div class="header">
+    <div class="logo">
+      <img src="assets/images/tiny-twitter-logo.png" alt="TinyTwitter Logo" class="logo-image">
+      <span class="logo-text">TinyTwitter</span>
+    </div>
   </div>
+
+  <div class="welcome-section">
+    <h2>Bienvenue sur TinyTwitter</h2>
+  </div>
+
+  <div class="login-form">
+    <h3>Se connecter</h3>
+    
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input type="text" [(ngModel)]="username" name="username" placeholder="Nom d'utilisateur" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
+        <input type="password" [(ngModel)]="password" name="password" placeholder="Mot de passe*" class="form-input" required>
+      </div>
+      
+      <div class="signup-link">
+        Vous n'avez pas de compte ? <a routerLink="/sign-up">Inscription</a>
+      </div>
+      
+      <button type="submit" class="submit-btn">Se connecter</button>
+    </form>
+  </div>
+</div>

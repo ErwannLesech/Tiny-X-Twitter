@@ -1,23 +1,32 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { User, UserStateService } from '../../services/user-state.service';
 
 @Component({
   selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
+    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatDividerModule,
-    MatIconModule,
     RouterModule
-  ]
+  ],
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss']
 })
-export class HomeComponent {}
+export class HomeComponent implements OnInit {
+  loggedUser: User | null = null;
+  constructor(
+    private route: ActivatedRoute,
+    private userStateService: UserStateService
+  ) {}
+
+  ngOnInit() {
+    this.loggedUser = this.userStateService.getLoggedUser();
+  }
+}
