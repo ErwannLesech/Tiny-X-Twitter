@@ -15,15 +15,19 @@
     
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <input type="text" placeholder="Nom d'utilisateur*" class="form-input" required>
+        <input type="text" [(ngModel)]="username" name="username" placeholder="Nom d'utilisateur*" class="form-input" required>
       </div>
       
       <div class="form-group">
-        <input type="email" placeholder="Adresse e-mail*" class="form-input" required>
+        <input type="password" [(ngModel)]="password" name="password" placeholder="Mot de passe*" class="form-input" required>
       </div>
-      
+
       <div class="form-group">
-        <input type="password" placeholder="Mot de passe*" class="form-input" required>
+        <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirmer Mot de passe*" class="form-input" required>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
       </div>
       
       <div class="login-link">

@@ -26,10 +26,24 @@ export class SignUpComponent {
   username: string = '';
   email: string = '';
   password: string = '';
+  confirmPassword: string = '';
+  errorMessage: string | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router
+  ) {}
 
   onSubmit(): void {
+    if (!this.username || !this.password || !this.confirmPassword) {
+      this.errorMessage = 'Veuillez remplir tous les champs';
+      return;
+    }
+    else if (this.password !== this.confirmPassword) {
+      this.errorMessage = 'Mot de passe et Confirmation de mot de passe non identiques';
+      return;
+    }
+    this.errorMessage = null;
+
     this.router.navigate(['/login']);
   }
 }

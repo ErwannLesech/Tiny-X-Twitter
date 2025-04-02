@@ -26,6 +26,7 @@ import { UserStateService } from '../../services/user-state.service';
 export class LoginComponent {
   username: string = '';
   password: string = '';
+  errorMessage: string | null = null;
 
   constructor(
     private router: Router,
@@ -33,14 +34,21 @@ export class LoginComponent {
   ) {}
 
   onSubmit(): void {
+    if (!this.username || !this.password) {
+      this.errorMessage = 'Veuillez remplir tous les champs';
+      return;
+    }
+    this.errorMessage = null;
+    
     this.userStateService.setLoggedUser({
       username: this.username,
       userTag: this.username.toLowerCase(),
-      avatarUrl: `../avatars/${this.username}.svg`,
+      avatarUrl: `assets/avatars/${this.username}.svg`,
       bio: '',
       followersCount: 0,
       followingCount: 0
     });
+
     this.router.navigate(['/home']);
   }
 }
