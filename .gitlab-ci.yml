@@ -2,7 +2,7 @@ image: maven:3.8.3-openjdk-17
 
 services:
   - docker:dind
-
+  - redis:6-alpine
 
 variables:
   DOCKER_HOST: tcp://docker:2375
