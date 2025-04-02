@@ -1,7 +1,7 @@
 package com.epita.service;
 
+import com.epita.contracts.post.PostResponse;
 import com.epita.controller.contracts.PostDocument;
-import com.epita.controller.contracts.PostResponse;
 import com.epita.payloads.search.IndexPost;
 import com.epita.repository.PostRestClient;
 import com.epita.repository.SearchRepository;

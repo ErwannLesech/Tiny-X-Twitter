@@ -1,7 +1,6 @@
 package com.epita.controller;
 
-import com.epita.controller.contracts.PostResponse;
-import com.epita.controller.contracts.PostSearchResponse;
+import com.epita.contracts.post.PostResponse;
 import com.epita.payloads.search.IndexPost;
 import com.epita.service.SearchService;
 import jakarta.inject.Inject;
@@ -10,7 +9,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
-import java.util.UUID;
 
 @Path("/api/search")
 @Produces(MediaType.APPLICATION_JSON)
