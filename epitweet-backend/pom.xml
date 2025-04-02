@@ -35,6 +35,7 @@
         <module>user-service</module>
         <module>repo-post</module>
         <module>search-service</module>
+        <module>social-service</module>
     </modules>
 
     <dependencyManagement>
