@@ -2,6 +2,7 @@
 services:
 - name: docker:dind
   command: ["--tls=false"]
+
 - name: redis
 - name: mongo
 
@@ -41,6 +42,8 @@ docker-build-push:
   image: docker:20.10.16  # Docker CLI image
   services:
     - docker:20.10.16-dind  # Docker-in-Docker for building images
+    command: ["--insecure-registry=registry.local.vidoks.fr"]
+
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""  # disable TLS for dind
