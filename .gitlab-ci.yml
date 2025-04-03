@@ -4,7 +4,7 @@ services:
   command: ["--tls=false"]
 
 - name: redis
-- name: mongo
+- name: registry.local.vidoks.fr/epita-info8/info8
 - name: neo4j
 
 variables:
@@ -17,7 +17,7 @@ variables:
   DOCKER_DRIVER: overlay2
   REDIS_HOST: redis
   REDIS_PORT: 6379
-  MONGO_HOST: mongo
+  MONGO_HOST: info8
   MONGO_PORT: 27017
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
@@ -39,32 +39,6 @@ stages:
   - build
   - init
   - test
-
-docker-build-push:
-  stage: build
-  image: docker:20.10.16  # Docker CLI image
-  services:
-    - name: docker:20.10.16-dind  # Docker-in-Docker for building images
-      command: ["--insecure-registry=registry.local.vidoks.fr"]
-
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""  # disable TLS for dind
-  before_script:
-    # Log in to GitLab Container Registry using predefined CI variables
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
-  script:
-    # Build the image(s) defined in your docker-compose file
-    - cd epitweet-backend/docker
-    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
-    # Push the image(s) to the GitLab Container Registry
-    - docker  push $IMAGE_NAME:$IMAGE_TAG 
-
-init:
-  image: mongo:latest
-  script:
-    - cd epitweet-backend/
-    - mongosh --host mongo --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD < docker/init_mongo.js
 
 test:
   image: maven:3.8.3-openjdk-17
