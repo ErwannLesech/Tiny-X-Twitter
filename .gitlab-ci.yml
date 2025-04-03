@@ -32,7 +32,7 @@ test:
   stage: test
   script:
     - cd epitweet-backend/
-    - mvn $MAVEN_OPTS test
+    - mvn $MAVEN_CLI_OPTS test
   artifacts:
     reports:
       junit: epitweet-backend/target/user-service/surefire-reports/*.xml
