@@ -47,7 +47,7 @@ build_dind_maven:
   stage: build
   image: docker:latest
   services:
-    - docker:dind
+    - name: docker:dind
       command: ["--insecure-registry=registry.local.vidoks.fr"]
 
   variables:
