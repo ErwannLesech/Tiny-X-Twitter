@@ -25,6 +25,8 @@ public class SocialRepository {
             if (request.isFollowUnfollow()) {
                 session.executeWrite(tx -> {
                     tx.run(
+                            // "MERGE (u1:User {userId: $userFollowId}) " +
+                            // "MERGE (u2:User {userId: $userFollowedId}) " +
                             "MATCH (u1:User {userId: $userFollowId}), (u2:User {userId: $userFollowedId}) " +
                                     "MERGE (u1)-[:FOLLOWS]->(u2)",
                             Map.of(
