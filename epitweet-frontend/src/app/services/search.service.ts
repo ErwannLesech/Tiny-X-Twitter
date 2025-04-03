@@ -16,13 +16,17 @@ export class SearchService {
   ) {}
 
   searchPostsByContent(request: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/searchPosts/${request}`, this.httpOptions)
+    const encodedRequest = encodeURIComponent(request);
+    return this.http.post(`${this.apiUrl}/searchPosts/${encodedRequest}`, this.httpOptions)
       .pipe(
         catchError(this.handleSearchError)
       );
   }
 
   private handleSearchError(error: HttpErrorResponse) {
+    if (error.status == 404) {
+      return throwError(() => error.error);
+    }
     console.error('Error searching posts', error);
     return throwError(() => new Error('Error searching posts.'));
   }

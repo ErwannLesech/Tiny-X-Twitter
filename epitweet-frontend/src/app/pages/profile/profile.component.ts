@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,6 +8,7 @@ import { RouterModule } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { User, UserStateService } from '../../services/user-state.service';
 import { Post, PostService } from '../../services/post.service';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -38,7 +39,8 @@ export class ProfileComponent implements OnInit {
     private userStateService: UserStateService,
     private userService: UserService,
     private postService: PostService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {}
 
   ngOnInit() {
@@ -59,39 +61,37 @@ export class ProfileComponent implements OnInit {
     // If no userTag specified or same as logged user, show logged user profile
     if (!userTag || userTag === this.loggedUser?.userTag) {
       this.targetUser = this.loggedUser;
-      this.isLoading = false;
+      this.loadUserPosts(this.targetUser?.userId || '');
     } else {
-      this.loadUserData(userTag);
+      this.loadUserData(userTag).subscribe({
+        next: (user) => {
+          this.targetUser = user;
+          this.loadUserPosts(user.userId);
+        },
+        error: (err) => {
+          this.userError = 'User with tag '+userTag+' not found';
+          this.isLoading = false;
+        }
+      });
     }
-    this.loadUserPosts(this.targetUser?.userId || '');
   }
 
-  private loadUserData(userTag: string) {
-    this.isLoading = true;
-    //Fetch user infos
-    this.userService.getUser(userTag).subscribe({
-      next: (response) => {
-        this.targetUser = {
-          userId: response._id,
-          userName: response.pseudo,
-          userTag: response.tag,
-          bio: '',
-          followersCount: 0,
-          followingCount: 0
-        };
-
-        this.isLoading = false;
-
-        // Fetch user posts TODO
-        
-        // Fetch user responses TODO
-      },
-      error: (err) => {
-        this.userError = 'User with tag '+userTag+' not found';
-        this.isLoading = false;
+  private loadUserData(userTag: string): Observable<User> {
+    return this.userService.getUser(userTag).pipe(
+      map(response => ({
+        userId: response._id,
+        userName: response.pseudo,
+        userTag: response.tag,
+        avatarUrl: response.avatarUrl,
+        bio: '',
+        followersCount: 0,
+        followingCount: 0
+      })),
+      catchError(err => {
         console.error(err);
-      }
-    });
+        return throwError(err);
+      })
+    );
   }
 
   private loadUserPosts(userId: any) {
@@ -108,6 +108,14 @@ export class ProfileComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  goBack() {
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/home']);
+    }
   }
 
   setActiveTab(tab: string) {

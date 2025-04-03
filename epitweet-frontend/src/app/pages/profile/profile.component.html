@@ -11,7 +11,7 @@
           <mat-icon>home</mat-icon>
           <span>Accueil</span>
         </a>
-        <a [routerLink]="['/profile', loggedUser?.userTag || '']" class="nav-link active">
+        <a [routerLink]="['/profile', loggedUser?.userTag || '']" class="nav-link" [class.active]="targetUser === loggedUser">
           <mat-icon>person</mat-icon>
           <span>Profile</span>
         </a>
@@ -45,6 +45,12 @@
       <!-- Profile Content -->
       <div class="profile-content">
         <div class="profile-header">
+          <div class="profile-nav">
+            <button mat-icon-button (click)="goBack()">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <h1>Profile</h1>
+          </div>
           <div class="profile-banner"></div>
           <div class="profile-info">
             <img src="assets/images/default-profile.png" alt="Profile" class="profile-picture">
@@ -94,12 +100,12 @@
                   <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
                 </div>
               </div>
-              <div class="post-content">
+              <div class="post-content" [routerLink]="['/post', post._id]">
                 {{ post.content }}
               </div>
               <div class="post-actions">
                 <button><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
-                <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments || 0 }}</button>
+                <button [routerLink]="['/post', post._id]"><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments || 0 }}</button>
               </div>
             </div>
             <div *ngIf="posts.length === 0" class="no-posts">
@@ -116,12 +122,12 @@
                   <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
                 </div>
               </div>
-              <div class="post-content">
+              <div class="post-content" [routerLink]="['/post', reply._id]">
                 {{ reply.content }}
               </div>
               <div class="post-actions">
                 <button><mat-icon>favorite_border</mat-icon> {{ reply.likes || 0 }}</button>
-                <button><mat-icon>chat_bubble_outline</mat-icon> {{ reply.comments || 0 }}</button>
+                <button [routerLink]="['/post', reply._id]"><mat-icon>chat_bubble_outline</mat-icon> {{ reply.comments || 0 }}</button>
               </div>
             </div>
             <div *ngIf="replies.length === 0" class="no-posts">

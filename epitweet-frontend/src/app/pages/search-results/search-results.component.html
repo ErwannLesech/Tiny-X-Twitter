@@ -32,7 +32,10 @@
     
     <!-- Main Content -->
     <div class="main-content">
-      <div class="header">
+      <div class="search-header">
+        <button mat-icon-button (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
         <h1>Résultats pour "{{ searchQuery }}"</h1>
       </div>
       
@@ -57,8 +60,10 @@
             <div class="post-header">
               <img src='assets/images/default-profile.png' class="post-profile-pic">
               <div class="post-user">
-                <span class="userName">{{ post.userId || 'Unknown' }}</span>
-                <span class="userTag">&#64;{{ post.userId || 'unknown' }}</span>
+                <a [routerLink]="['/profile', post.user.userTag]" class="nav-link">
+                  <span class="userName">{{ post.user.userName || 'Unknown' }}</span>
+                  <span class="userTag">&#64;{{ post.user.userTag || 'unknown' }}</span>
+                </a>
                 <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
               </div>
             </div>

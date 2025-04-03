@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface User {
-  userId: number;
+  userId: string;
   userName: string;
   userTag: string;
-  avatarUrl?: string;
+  avatarUrl: string;
   bio: string;
   followersCount: number;
   followingCount: number;

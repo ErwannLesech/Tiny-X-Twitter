@@ -4,7 +4,7 @@ import { SearchService } from '../../services/search.service';
 import { Post } from '../../services/post.service';
 import { UserStateService } from '../../services/user-state.service';
 import { User } from '../../services/user-state.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -36,7 +36,8 @@ export class SearchResultsComponent implements OnInit {
     private searchService: SearchService,
     private userStateService: UserStateService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {}
 
   ngOnInit() {
@@ -55,13 +56,41 @@ export class SearchResultsComponent implements OnInit {
     this.searchService.searchPostsByContent(query).subscribe({
       next: (results) => {
         this.searchResults = results;
+        this.searchResults.forEach(post => {
+          this.userService.getUserById(post.userId).subscribe({
+            next: (userResponse) => {
+              const postUser = {
+                userId: post.userId,
+                userName: userResponse.pseudo,
+                userTag: userResponse.tag,
+                avatarUrl: userResponse.avatarUrl || 'assets/images/default-profile.png',
+                bio: userResponse.bio || '',
+                followersCount: userResponse.followersCount || 0,
+                followingCount: userResponse.followingCount || 0
+              }
+              post.user = postUser;
+            },
+            error: (err) => {
+              console.error('Error fetching user:', err);
+            }
+          });
+        });
+
         this.isLoading = false;
       },
       error: (err) => {
-        this.error = 'Failed to load search results';
+        this.error = err;
         this.isLoading = false;
       }
     });
+  }
+
+  goBack() {
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/home']);
+    }
   }
 
   formatPostDate(dateString: string): string {

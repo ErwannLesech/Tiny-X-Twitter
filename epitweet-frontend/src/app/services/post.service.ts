@@ -4,7 +4,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 import { User } from './user-state.service';
 
 export interface Post {
-  id: number;
+  _id: number;
   userId: string;
   postType: string;
   content: string;
@@ -44,6 +44,14 @@ export class PostService {
       );
   }
 
+  getPostById(postId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/getPost/${postId}`, this.httpOptions)
+      .pipe(
+        catchError(this.handleGetPostsError)
+      );
+  }
+  
+
   createPost(userId: any, postRequest: any): Observable<any> {
     this.httpOptions.headers = this.httpOptions.headers.set('userId', userId);
     return this.http.post(`${this.apiUrl}/createPost`, postRequest, this.httpOptions)
@@ -51,6 +59,8 @@ export class PostService {
         catchError(this.handleCreatePostError)
       );
   }
+
+  //TODO : add updatePost and deletePost methods
 
   private handleGetPostsError(error: HttpErrorResponse) {
     console.error('Error geting posts', error);

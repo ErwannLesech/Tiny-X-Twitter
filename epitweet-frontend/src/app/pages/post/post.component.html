@@ -1,0 +1,105 @@
+<div class="post-container">
+    <!-- Left Sidebar (same as home) -->
+    <div class="left-sidebar">
+        <div class="logo">
+            <img src="assets/images/tiny-twitter-logo.png" alt="Logo" class="logo-icon">
+            <span class="logo-text">TinyTwitter</span>
+        </div>
+        
+        <nav class="main-nav">
+            <a routerLink="/home" class="nav-link">
+                <mat-icon>home</mat-icon>
+                <span>Accueil</span>
+            </a>
+            <a [routerLink]="['/profile', loggedUser?.userTag || '']" class="nav-link">
+                <mat-icon>person</mat-icon>
+                <span>Profile</span>
+            </a>
+            <button class="post-creation-button">
+                <mat-icon>edit</mat-icon>
+                <span>Poster</span>
+            </button>
+        </nav>
+        
+        <div class="user-profile">
+            <img src="assets/images/default-profile.png" alt="Profile" class="profile-pic">
+            <div class="user-info">
+                <span class="userName">{{ loggedUser?.userName }}</span>
+                <span class="userTag">&#64;{{ loggedUser?.userTag }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="post-content-global">
+      <div class="post-header-global">
+        <button mat-icon-button class="back-button" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h1>Post</h1>
+      </div>
+
+      <!-- Main Post -->
+      <div class="post-view">
+        <div class="original-post">
+          <div class="post-header">
+            <img [src]="post.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+            <div class="post-user">
+              <span class="userName">{{ post.user?.userName }}</span>
+              <span class="userTag">&#64;{{ post.user?.userTag }}</span>
+              <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="post-content">
+            {{ post.content }}
+          </div>
+          <div class="post-actions">
+            <button><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
+            <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments?.length || 0 }}</button>
+          </div>
+        </div>
+
+        <!-- Reply Form -->
+        <div class="reply-form">
+          <textarea placeholder="Post your reply" [(ngModel)]="replyContent"></textarea>
+          <button class="reply-button" (click)="postReply()">Reply</button>
+        </div>
+
+        <!-- Replies List -->
+        <div class="replies">
+          <div *ngFor="let reply of post.comments" class="reply">
+            <div class="post-header">
+              <img [src]="reply.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+              <div class="post-user">
+                <span class="userName">{{ reply.user?.userName }}</span>
+                <span class="userTag">&#64;{{ reply.user?.userTag }}</span>
+                <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="post-content">
+              {{ reply.content }}
+            </div>
+            <div class="post-actions">
+              <button><mat-icon>favorite_border</mat-icon> {{ reply.likes || 0 }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar (same as home) -->
+    <div class="right-sidebar">
+        <div class="search-bar">
+        <mat-form-field appearance="outline">
+            <input 
+            matInput 
+            placeholder="Rechercher"
+            #searchInput
+            (keyup.enter)="search(searchInput.value)">
+        </mat-form-field>
+        </div>
+        
+        <div class="trends">
+        </div>
+    </div>
+</div>

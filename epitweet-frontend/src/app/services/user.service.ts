@@ -30,6 +30,14 @@ export class UserService {
     );
   }
 
+  getUserById(userId: string): Observable<any> {
+    this.httpOptions.headers = this.httpOptions.headers.set('userId', userId);
+    return this.http.get(`${this.apiUrl}/getUserById/`, this.httpOptions)
+    .pipe(
+      catchError(this.handleError)
+    );
+  }
+
   authUser(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth`, userData)
     .pipe(
