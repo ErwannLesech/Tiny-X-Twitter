@@ -32,7 +32,7 @@ cache:
     - .m2/repository
 
 stages:
-  - docker-build-push
+  - build
   - init
   - test
 
