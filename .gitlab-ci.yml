@@ -4,6 +4,7 @@ services:
 - name: docker:dind
   command: ["--tls=false"]
 - name: redis
+- name: mongo
 
 variables:
   DOCKER_HOST: "tcp://docker:2375"
@@ -11,6 +12,8 @@ variables:
   DOCKER_DRIVER: overlay2
   REDIS_HOST: redis
   REDIS_PORT: 6379
+  MONGO_HOST: mongo
+  MONGO_PORT: 27017
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
