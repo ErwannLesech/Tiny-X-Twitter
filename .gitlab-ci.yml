@@ -58,7 +58,7 @@ build_dind_maven:
   script:
     - cd epitweet-backend/docker/CI
     # Log in to your remote registry using CI environment variables
-    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $REGISTRY_URL
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     # Build the image using your Dockerfile in the repository root
     - docker build -t $IMAGE_NAME .
     # Push the built image to the registry
