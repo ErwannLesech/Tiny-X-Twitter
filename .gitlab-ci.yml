@@ -1,4 +1,3 @@
-image: maven:3.8.3-openjdk-17
 
 services:
 - name: docker:dind
@@ -43,6 +42,7 @@ init:
     - mongo --host mongo --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD < docker/init_mongo.js
 
 test:
+  image: maven:3.8.3-openjdk-17
   stage: test
   script:
     - cd epitweet-backend/
