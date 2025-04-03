@@ -3,7 +3,7 @@ image: maven:3.8.3-openjdk-17
 services:
 - name: docker:dind
   command: ["--tls=false"]
--name: redis
+- name: redis
 
 variables:
   DOCKER_HOST: "tcp://docker:2375"
