@@ -1,8 +1,16 @@
 package com.epita.controller.contracts;
 
-/**
- * FIXME : Commentaire à mettre
- */
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
 public class AppreciationRequest {
-    // FIXME
+    public boolean likeUnlike;
+    public String postId;
+    public String userId;
 }

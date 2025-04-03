@@ -1,8 +1,16 @@
 package com.epita.controller.contracts;
 
-/**
- * FIXME : Commentaire à mettre
- */
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
 public class FollowUnfollowRequest {
-    // FIXME
+    public boolean followUnfollow;
+    public String userFollowedId;
+    public String userFollowId;
 }

@@ -1,8 +1,15 @@
 package com.epita.repository.entity;
 
-/**
- * FIXME : commentaire à mettre
- */
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
 public class Block {
-    // FIXME
+    public String userId;
+    public String userBlockedId;
 }
