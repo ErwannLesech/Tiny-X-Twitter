@@ -9,6 +9,7 @@ import com.epita.repository.publisher.CreatePostPublisher;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
+import com.epita.repository.publisher.PostHomeTimelinePublisher;
 import com.epita.repository.publisher.PostTimelinePublisher;
 import com.epita.repository.publisher.IndexPostPublisher;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +36,9 @@ public class PostService {
 
     @Inject
     PostTimelinePublisher postTimelinePublisher;
+
+    @Inject
+    PostHomeTimelinePublisher postHomeTimelinePublisher;
 
     @Inject
     IndexPostPublisher indexPostPublisher;
@@ -143,6 +147,10 @@ public class PostService {
         // declare to user-timeline that we created a post
         postTimelinePublisher.publish(PostTimelineConverter.toPostTimeline(post, "creation"));
 
+        // declare to home-timeline that we deleted a post
+        postHomeTimelinePublisher.publish(PostTimelineConverter.toPostHomeTimeline(PostConverter.toResponse(post),
+                "deletion"));
+
         // declare to index service that we created a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "creation"));
 
@@ -171,8 +179,13 @@ public class PostService {
         // declare to user-timeline that we deleted a post
         postTimelinePublisher.publish(PostTimelineConverter.toPostTimeline(post, "deletion"));
 
+        // declare to home-timeline that we deleted a post
+        postHomeTimelinePublisher.publish(PostTimelineConverter.toPostHomeTimeline(PostConverter.toResponse(post),
+                "deletion"));
+
         // declare to index service that we deleted a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "deletion"));
+
 
         return postResponse;
     }
