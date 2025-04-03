@@ -101,6 +101,12 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-elasticsearch-java-client</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.quarkiverse.neo4j</groupId>
+            <artifactId>quarkus-neo4j</artifactId>
+            <version>3.0.3</version>
+        </dependency>
     </dependencies>
 
     <build>
