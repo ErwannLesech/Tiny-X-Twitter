@@ -50,6 +50,7 @@ test:
   artifacts:
     reports:
       junit: epitweet-backend/target/user-service/surefire-reports/*.xml
+      junit: epitweet-backend/repo-post/target/surefire-reports/*
     paths:
       - epitweet-backend/target/*.jar
     expire_in: 1 week
