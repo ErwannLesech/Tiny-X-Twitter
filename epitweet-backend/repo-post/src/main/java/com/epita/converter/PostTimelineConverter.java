@@ -16,9 +16,9 @@ public class PostTimelineConverter {
      */
     public static PostTimeline toPostTimeline(Post post, String method) {
         return new PostTimeline(
-                post.userId,
-                post._id.toString(),
-                post.updatedAt,
+                post.getUserId(),
+                post.getId().toString(),
+                post.getUpdatedAt(),
                 method
         );
     }

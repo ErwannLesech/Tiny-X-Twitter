@@ -85,14 +85,14 @@ public class PostService {
     public PostResponse getReplyPost(ObjectId replyPostId) {
         Post post = postRepository.findById(replyPostId);
 
-        if (post == null || post.postType != PostType.REPLY) {
+        if (post == null || post.getPostType() != PostType.REPLY) {
             return null;
         }
 
         // check if parent post still exists
-        Post repliedPost = postRepository.findById(post.parentId);
+        Post repliedPost = postRepository.findById(post.getParentId());
         if (repliedPost == null) {
-            post.parentId = null;
+            post.setParentId(null);
         }
 
         return PostConverter.toResponse(post);
@@ -170,7 +170,7 @@ public class PostService {
             return null;
         }
 
-        post.updatedAt = Instant.now();
+        post.setUpdatedAt(Instant.now());
 
         PostResponse postResponse = PostConverter.toResponse(post);
 
