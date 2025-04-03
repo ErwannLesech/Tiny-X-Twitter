@@ -38,7 +38,7 @@ stages:
 
 init:
   image: mongo:latest
-
+  script:
     - cd epitweet-backend/
     - mongo --host mongo --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD < docker/init_mongo.js
 
