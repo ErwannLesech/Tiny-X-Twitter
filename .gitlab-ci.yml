@@ -41,8 +41,8 @@ docker-build-push:
   stage: build
   image: docker:20.10.16  # Docker CLI image
   services:
-    - docker:20.10.16-dind  # Docker-in-Docker for building images
-    command: ["--insecure-registry=registry.local.vidoks.fr"]
+    - name: docker:20.10.16-dind  # Docker-in-Docker for building images
+      command: ["--insecure-registry=registry.local.vidoks.fr"]
 
   variables:
     DOCKER_HOST: tcp://docker:2375
