@@ -30,12 +30,9 @@ stages:
 
 test:
   stage: test
-
   script:
     - cd epitweet-backend/
     - mvn test
-  dependencies:
-    - build
   artifacts:
     reports:
       junit: epitweet-backend/target/user-service/surefire-reports/*.xml
