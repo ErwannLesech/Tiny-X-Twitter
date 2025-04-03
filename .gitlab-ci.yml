@@ -17,7 +17,7 @@ variables:
   DOCKER_DRIVER: overlay2
   REDIS_HOST: redis
   REDIS_PORT: 6379
-  MONGO_HOST: info8
+  MONGO_HOST: registry.local.vidoks.fr/epita-info8/info8
   MONGO_PORT: 27017
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
