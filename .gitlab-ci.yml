@@ -8,7 +8,7 @@ services:
 - name: neo4j
 
 variables:
-  IMAGE_NAME: $CI_REGISTRY_IMAGE-mongo
+  IMAGE_NAME: $CI_REGISTRY_IMAGE
   IMAGE_TAG: latest
   MONGO_INITDB_ROOT_USERNAME: root
   MONGO_INITDB_ROOT_PASSWORD: root
