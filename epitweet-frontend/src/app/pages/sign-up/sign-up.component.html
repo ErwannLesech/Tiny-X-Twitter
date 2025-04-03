@@ -15,7 +15,7 @@
     
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <input type="text" [(ngModel)]="username" name="username" placeholder="Nom d'utilisateur*" class="form-input" required>
+        <input type="text" [(ngModel)]="userName" name="userName" placeholder="Nom d'utilisateur*" class="form-input" required>
       </div>
       
       <div class="form-group">
@@ -34,7 +34,10 @@
         Vous avez déjà un compte ? <a routerLink="/login">Connexion</a>
       </div>
       
-      <button type="submit" class="submit-btn">Créer votre compte</button>
+      <button type="submit" [disabled]="isLoading" class="submit-btn">
+        <span *ngIf="!isLoading">S'inscrire</span>
+        <span *ngIf="isLoading">Création en cours...</span>
+      </button>
     </form>
   </div>
 </div>

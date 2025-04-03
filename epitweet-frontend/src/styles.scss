@@ -103,3 +103,17 @@ body {
     height: 35px;
   }
 }
+
+.loading {
+  text-align: center;
+  margin-top: 10px;
+  padding: 2rem;
+  color: #666;
+}
+
+.error-message {
+  margin-top: 10px;
+  color: #7c0000;
+  padding: 0.5rem;
+  text-align: center;
+}

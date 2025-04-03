@@ -24,7 +24,7 @@
     <div class="user-profile">
       <img src="assets/images/default-profile.png" alt="Profile" class="profile-pic">
       <div class="user-info">
-        <span class="username">{{ loggedUser?.username }}</span>
+        <span class="userName">{{ loggedUser?.userName }}</span>
         <span class="userTag">&#64;{{ loggedUser?.userTag }}</span>
       </div>
     </div>
@@ -51,7 +51,7 @@
         <div class="post-header">
           <img src="assets/images/profile1.png" alt="Profile" class="post-profile-pic">
           <div class="post-user">
-            <span class="username">Huschle</span>
+            <span class="userName">Huschle</span>
             <span class="userTag">&#64;huschle</span>
           </div>
         </div>
@@ -75,7 +75,11 @@
   <div class="right-sidebar">
     <div class="search-bar">
       <mat-form-field appearance="outline">
-        <input matInput placeholder="Rechercher">
+        <input 
+          matInput 
+          placeholder="Rechercher"
+          #searchInput
+          (keyup.enter)="search(searchInput.value)">
       </mat-form-field>
     </div>
     

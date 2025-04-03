@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface User {
-  username: string;
+  userId: number;
+  userName: string;
   userTag: string;
   avatarUrl?: string;
   bio: string;
@@ -17,9 +18,13 @@ export class UserStateService {
 
   setLoggedUser(user: User) {
     this.loggedUserSubject.next(user);
+    localStorage.setItem('loggedUser', JSON.stringify(user));
   }
 
   getLoggedUser(): User | null {
-    return this.loggedUserSubject.value;
+    if (this.loggedUserSubject.value !== null) {
+      return this.loggedUserSubject.value;
+    }
+    return localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')!) : null;
   }
 }
