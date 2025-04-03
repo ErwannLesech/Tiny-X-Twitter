@@ -10,16 +10,12 @@ import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import java.util.LinkedList;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 public class UserControllerTest {
-
-    @InjectMocks
     UserRepository userRepository;
 
     @Inject
