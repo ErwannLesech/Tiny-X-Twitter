@@ -5,8 +5,11 @@ services:
 
 - name: redis
 - name: mongo
+- name: neo4j
 
 variables:
+  IMAGE_NAME: $CI_REGISTRY_IMAGE-mongo
+  IMAGE_TAG: latest
   MONGO_INITDB_ROOT_USERNAME: root
   MONGO_INITDB_ROOT_PASSWORD: root
   DOCKER_HOST: "tcp://docker:2375"
@@ -53,9 +56,9 @@ docker-build-push:
   script:
     # Build the image(s) defined in your docker-compose file
     - cd epitweet-backend/docker
-    - docker-compose build
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
     # Push the image(s) to the GitLab Container Registry
-    - docker-compose push
+    - docker  push $IMAGE_NAME:$IMAGE_TAG 
 
 init:
   image: mongo:latest
