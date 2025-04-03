@@ -32,8 +32,27 @@ cache:
     - .m2/repository
 
 stages:
+  - docker-build-push
   - init
   - test
+
+docker-build-push:
+  stage: build
+  image: docker:20.10.16  # Docker CLI image
+  services:
+    - docker:20.10.16-dind  # Docker-in-Docker for building images
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""  # disable TLS for dind
+  before_script:
+    # Log in to GitLab Container Registry using predefined CI variables
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    # Build the image(s) defined in your docker-compose file
+    - cd epitweet-backend/docker
+    - docker-compose build
+    # Push the image(s) to the GitLab Container Registry
+    - docker-compose push
 
 init:
   image: mongo:latest
