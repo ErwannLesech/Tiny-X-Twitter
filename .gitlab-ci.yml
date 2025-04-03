@@ -1,7 +1,8 @@
 
 services:
 - name: docker:dind
-  command: ["--tls=false"]
+  command: ["--insecure-registry=registry.local.vidoks.fr"]
+
 
 - name: redis
 - name: registry.local.vidoks.fr/epita-info8/info8
