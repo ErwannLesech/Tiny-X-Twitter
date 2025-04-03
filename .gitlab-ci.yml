@@ -48,6 +48,8 @@ build_dind_maven:
   image: docker:latest
   services:
     - docker:dind
+      command: ["--insecure-registry=registry.local.vidoks.fr"]
+
   variables:
     # Points the Docker client to the Docker daemon provided by docker:dind service
     DOCKER_HOST: tcp://docker:2375/
