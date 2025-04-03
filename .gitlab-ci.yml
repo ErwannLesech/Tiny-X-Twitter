@@ -33,10 +33,11 @@ cache:
     - .m2/repository
 
 stages:
+  - init
   - test
 
-test:
-  stage: test
+init:
+  image: mongo:latest
   before_script:
     # Wait for MongoDB to be up and running
     - until mongo --host mongo --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD --eval "db.stats()" &>/dev/null; do
@@ -44,10 +45,14 @@ test:
         sleep 2;
       done
   script:
-    
+
     - cd epitweet-backend/
     - mongo --host mongo --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD < docker/init_mongo.js
 
+test:
+  stage: test
+  script:
+    - cd epitweet-backend/
     - mvn $MAVEN_CLI_OPTS test
   artifacts:
     reports:
