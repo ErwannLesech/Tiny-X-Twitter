@@ -7,6 +7,8 @@ services:
 - name: mongo
 
 variables:
+  MONGO_INITDB_ROOT_USERNAME: root
+  MONGO_INITDB_ROOT_PASSWORD: root
   DOCKER_HOST: "tcp://docker:2375"
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
@@ -35,8 +37,17 @@ stages:
 
 test:
   stage: test
+  before_script:
+    # Wait for MongoDB to be up and running
+    - until mongo --host mongo --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD --eval "db.stats()" &>/dev/null; do
+        echo "Waiting for MongoDB service...";
+        sleep 2;
+      done
   script:
+    
     - cd epitweet-backend/
+    - mongo --host mongo --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD < docker/init_mongo.js
+
     - mvn $MAVEN_CLI_OPTS test
   artifacts:
     reports:
