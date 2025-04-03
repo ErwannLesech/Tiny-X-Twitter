@@ -3,12 +3,14 @@ image: maven:3.8.3-openjdk-17
 services:
 - name: docker:dind
   command: ["--tls=false"]
-
+-name: redis
 
 variables:
   DOCKER_HOST: "tcp://docker:2375"
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
