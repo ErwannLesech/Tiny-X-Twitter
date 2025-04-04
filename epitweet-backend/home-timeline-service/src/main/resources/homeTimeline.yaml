@@ -1,0 +1,133 @@
+openapi: 3.0.1
+
+info:
+  title: Repo-Post
+  description: Repo-Post endpoints
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8084
+    description: Home Timeline Service
+
+paths:
+  /api/timeline/home/{userId}:
+    get:
+      tags:
+        - Home Timeline
+      summary: Récupérer la timeline d'accueil d'un utilisateur
+      description: |
+        Récupère les posts des utilisateurs suivis par l'utilisateur spécifié, ainsi que les posts likés par ces utilisateurs.
+        Les résultats sont triés par ordre chronologique (date de like pour les posts likés, date de publication pour les posts d'origine).
+      operationId: getHomeTimeline
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Identifiant de l'utilisateur dont on veut récupérer la timeline
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Opération réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomeTimelineResponse'
+        '400':
+          description: Requête invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non authentifié
+        '403':
+          description: Non autorisé
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    HomeTimelineResponse:
+      type: object
+      required:
+        - userID
+        - entryID
+        - type
+        - post
+      properties:
+        userID:
+          type: string
+          description: Identifiant de l'utilisateur propriétaire de la timeline
+          example: '987654'
+        entryID:
+          type: string
+          description: Identifiant de l'entrée dans la timeline
+        type:
+          type: string
+          enum:
+            - "post"
+            - "like"
+          description: Type d'entrée (publication originale ou like)
+        likedById:
+          type: string
+          description: Identitifiant du follow qui a like le post
+        post:
+          $ref: '#/components/schemas/PostResponse'
+
+    PostResponse:
+      type: object
+      properties:
+        postID:
+          type: string
+          example: '123456'
+        userId:
+          type: string
+          example: '987654'
+        content:
+          type: string
+          maxLength: 160
+          example: This is my first post!
+        mediaPath:
+          type: string
+          nullable: true
+          example: 'https://cdn.example.com/image.jpg'
+        parentId:
+          type: string
+          nullable: true
+          example: '654321'
+        postType:
+          type: string
+          enum:
+            - post
+            - reply
+            - repost
+          example: reply
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-03-13T12:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-03-14T14:30:00Z'
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Code d'erreur
+        message:
+          type: string
+          description: Message d'erreur
+        details:
+          type: string
+          description: Détails supplémentaires sur l'erreur
