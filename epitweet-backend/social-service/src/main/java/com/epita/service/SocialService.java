@@ -6,6 +6,7 @@ import com.epita.controller.contracts.FollowUnfollowRequest;
 import com.epita.repository.SocialRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
@@ -19,6 +20,13 @@ public class SocialService {
      * @param request the request indicating who follows or unfollows whom
      */
     public void followUnfollow(FollowUnfollowRequest request) {
+        if (!socialRepository.userExists(request.getUserFollowId())) {
+            throw new NotFoundException("User " + request.getUserFollowId() + " not found");
+        }
+        if (!socialRepository.userExists(request.getUserFollowedId())) {
+            throw new NotFoundException("User " + request.getUserFollowedId() + " not found");
+        }
+
         socialRepository.followUnfollow(request);
     }
 
@@ -53,6 +61,13 @@ public class SocialService {
      * @param request the request indicating who blocks or unblocks whom
      */
     public void blockUnblock(BlockUnblockRequest request) {
+        if (!socialRepository.userExists(request.getUserBlockId())) {
+            throw new NotFoundException("User " + request.getUserBlockId()+ " not found");
+        }
+        if (!socialRepository.userExists(request.getUserBlockedId())) {
+            throw new NotFoundException("User " + request.getUserBlockedId() + " not found");
+        }
+
         socialRepository.blockUnblock(request);
     }
 
@@ -87,6 +102,13 @@ public class SocialService {
      * @param request the request indicating who like or unlike which post
      */
     public void likeUnlike(AppreciationRequest request) {
+        if (!socialRepository.userExists(request.getUserId())) {
+            throw new NotFoundException("User " + request.getUserId() + " not found");
+        }
+        if (!socialRepository.postExists(request.getPostId())) {
+            throw new NotFoundException("User " + request.getPostId() + " not found");
+        }
+
         socialRepository.likeUnlike(request);
     }
 

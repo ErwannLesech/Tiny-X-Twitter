@@ -26,8 +26,15 @@ public class SocialController {
     @POST
     @Path("/follow")
     public Response followUnfollow(FollowUnfollowRequest followUnfollowRequest) {
-        socialService.followUnfollow(followUnfollowRequest);
-        return Response.ok().build(); // 200 OK
+        if (followUnfollowRequest == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        try {
+            socialService.followUnfollow(followUnfollowRequest);
+            return Response.ok().build(); // 200 OK
+        } catch (NotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 
     /**
@@ -38,6 +45,9 @@ public class SocialController {
     @GET
     @Path("/getFollows/{userId}")
     public Response getFollows(@PathParam("userId") String userId) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
         List<String> follows = socialService.getFollows(userId);
         if (follows == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -53,6 +63,9 @@ public class SocialController {
     @GET
     @Path("/getFollowers/{userId}")
     public Response getFollowers(@PathParam("userId") String userId) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
         List<String> followers = socialService.getFollowers(userId);
         if (followers == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -68,8 +81,15 @@ public class SocialController {
     @POST
     @Path("/block")
     public Response blockUnblock(BlockUnblockRequest blockUnblockRequest) {
-        socialService.blockUnblock(blockUnblockRequest);
-        return Response.ok().build();
+        if (blockUnblockRequest == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        try {
+            socialService.blockUnblock(blockUnblockRequest);
+            return Response.ok().build();
+        } catch (NotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 
     /**
@@ -80,6 +100,9 @@ public class SocialController {
     @GET
     @Path("/getBlocked/{userId}")
     public Response getBlocked(@PathParam("userId") String userId) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
         List<String> blockedUsers = socialService.getBlockedUsers(userId);
         if (blockedUsers == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -95,6 +118,9 @@ public class SocialController {
     @GET
     @Path("/getBlock/{userId}")
     public Response getBlock(@PathParam("userId") String userId) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
         List<String> usersWhoBlocked = socialService.getUsersWhoBlocked(userId);
         if (usersWhoBlocked == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -109,8 +135,15 @@ public class SocialController {
     @POST
     @Path("/like")
     public Response likeUnlike(AppreciationRequest request) {
-        socialService.likeUnlike(request);
-        return Response.ok().build();
+        if (request == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        try {
+            socialService.likeUnlike(request);
+            return Response.ok().build();
+        } catch (NotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 
     /**
@@ -121,6 +154,9 @@ public class SocialController {
     @GET
     @Path("/getLikeUsers/{postId}")
     public Response getLikeUsers(@PathParam("postId") String postId) {
+        if (postId == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
         List<String> users = socialService.getLikeUsers(postId);
         if (users == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -136,6 +172,9 @@ public class SocialController {
     @GET
     @Path("/getLikedPosts/{userId}")
     public Response getLikedPosts(@PathParam("userId") String userId) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
         List<String> likedPosts = socialService.getLikesPosts(userId);
         if (likedPosts == null) {
             return Response.status(Response.Status.NOT_FOUND).build();

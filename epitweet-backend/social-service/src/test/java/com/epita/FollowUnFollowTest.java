@@ -71,7 +71,7 @@ public class FollowUnFollowTest
             .when()
             .post("/api/social/follow")
             .then()
-            .statusCode(400);
+            .statusCode(404);
 
         List<String> followsId = socialRepository.getFollows("user123");
         List<String> expectedFollowsId = List.of();
@@ -95,7 +95,7 @@ public class FollowUnFollowTest
             .when()
             .post("/api/social/follow")
             .then()
-            .statusCode(400);
+            .statusCode(404);
 
         List<String> followsId = socialRepository.getFollowers("user456");
         List<String> expectedFollowsId = List.of();
@@ -205,7 +205,7 @@ public class FollowUnFollowTest
             .when()
             .get("/api/social/getFollows/unknown")
             .then()
-            .statusCode(400);
+            .statusCode(404);
     }
 
     /**
@@ -241,7 +241,7 @@ public class FollowUnFollowTest
             .when()
             .get("/api/social/getFollowers/unknown")
             .then()
-            .statusCode(400);
+            .statusCode(404);
     }
 
     /**

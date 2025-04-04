@@ -79,7 +79,7 @@ public class LikeUnlikeTest
             .when()
             .post("/api/social/like")
             .then()
-            .statusCode(400);
+            .statusCode(404);
 
         List<String> likePostsId = socialRepository.getLikesPosts("user123");
         List<String> expectedLikesId = List.of();
@@ -103,7 +103,7 @@ public class LikeUnlikeTest
             .when()
             .post("/api/social/like")
             .then()
-            .statusCode(400);
+            .statusCode(404);
 
         List<String> likeUsersId = socialRepository.getLikeUsers("post123");
         List<String> expectedLikesId = List.of();
@@ -214,7 +214,7 @@ public class LikeUnlikeTest
             .when()
             .get("/api/social/getLikedPosts/unknown")
             .then()
-            .statusCode(400);
+            .statusCode(404);
     }
 
     /**
@@ -250,7 +250,7 @@ public class LikeUnlikeTest
             .when()
             .get("/api/social/getLikeUsers/unknown")
             .then()
-            .statusCode(400);
+            .statusCode(404);
     }
 
     /**
