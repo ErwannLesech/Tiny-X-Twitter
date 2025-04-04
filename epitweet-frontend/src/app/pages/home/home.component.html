@@ -27,6 +27,9 @@
         <span class="userName">{{ loggedUser?.userName }}</span>
         <span class="userTag">&#64;{{ loggedUser?.userTag }}</span>
       </div>
+      <button mat-icon-button (click)="logout()">
+        <mat-icon>logout</mat-icon>
+      </button>
     </div>
     <!-- <button (click)="toggleTheme()">
       <mat-icon>{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>

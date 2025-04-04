@@ -199,4 +199,9 @@ export class ProfileComponent implements OnInit {
     console.log('Like button clicked');
     // TODO : Implement like functionality
   }
+
+  logout() {
+    this.userStateService.logout();
+    this.router.navigate(['/login']);
+  }
 }

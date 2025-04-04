@@ -56,7 +56,7 @@ export class UserStateService {
     });
   }
 
-  clearLoggedUser() {
+  logout() {
     this.loggedUserSubject.next(null);
     localStorage.removeItem('loggedUser');
   }

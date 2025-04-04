@@ -120,4 +120,9 @@ export class SearchResultsComponent implements OnInit {
   onCommentClick(event: Event): void {
     // TODO: Add comment logic here
   }
+
+  logout() {
+    this.userStateService.logout();
+    this.router.navigate(['/login']);
+  }
 }

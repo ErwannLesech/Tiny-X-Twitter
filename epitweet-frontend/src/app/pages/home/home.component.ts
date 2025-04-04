@@ -94,6 +94,11 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  logout() {
+    this.userStateService.logout();
+    this.router.navigate(['/login']);
+  }
+
   toggleTheme() {
     // Toggle between 'light' and 'dark'
     this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';

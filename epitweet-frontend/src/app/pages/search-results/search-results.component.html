@@ -22,11 +22,14 @@
       </nav>
       
       <div class="user-profile">
-        <img src="assets/images/default-profile.png" alt="Profile" class="profile-pic">
+        <img [src]="loggedUser?.avatarUrl" alt="Profile" class="profile-pic">
         <div class="user-info">
           <span class="userName">{{ loggedUser?.userName }}</span>
           <span class="userTag">&#64;{{ loggedUser?.userTag }}</span>
         </div>
+        <button mat-icon-button (click)="logout()">
+          <mat-icon>logout</mat-icon>
+        </button>
       </div>
     </div>
     

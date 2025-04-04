@@ -45,8 +45,11 @@ export class ProfileUpdateComponent {
   onSubmit() {
     const userRequest = {
       tag: this.logedUser?.userTag,
-      pseudo: this.userName,
-      password: this.password,
+      pseudo: this.userName.length > 0 ? this.userName : this.logedUser?.userName,
+      password: this.password.length > 0 ? this.password : null,
+      profilePictureUrl: this.logedUser?.avatarUrl,
+      profileBannerUrl: this.logedUser?.bannerUrl,
+      profileDescription: this.logedUser?.bio,
     };
     if (!this.userName || !this.password) {
       this.closePopup();
@@ -68,7 +71,7 @@ export class ProfileUpdateComponent {
     if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ?')) {
       this.userService.deleteUser(this.userTag).subscribe({
         next: () => {
-          this.userStateService.clearLoggedUser();
+          this.userStateService.logout();
           this.router.navigate(['/']);
         },
         error: (err) => {
