@@ -82,10 +82,19 @@ public class SocialService {
         return socialRepository.getUsersWhoBlocked(userId);
     }
 
+    /**
+     * Creates or updates the like relation between one user and one post.
+     * @param request the request indicating who like or unlike which post
+     */
     public void likeUnlike(AppreciationRequest request) {
         socialRepository.likeUnlike(request);
     }
 
+    /**
+     * Gets the users who liked a specific post.
+     * @param postId the post for which to get the users who liked it
+     * @return a list of userIds who liked the specified post
+     */
     public List<String> getLikeUsers(String postId) {
         if (!socialRepository.postExists(postId)) {
             return null;
@@ -94,6 +103,11 @@ public class SocialService {
         return socialRepository.getLikeUsers(postId);
     }
 
+    /**
+     * Gets the posts liked by a specific user.
+     * @param userId the user for whom to get the posts they liked
+     * @return a list of postIds that the specified userId liked
+     */
     public List<String> getLikesPosts(String userId) {
         if (!socialRepository.userExists(userId)) {
             return null;

@@ -185,6 +185,10 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Creates or updates the like relation between one user and one post.
+     * @param request the request indicating who like or unlike which post
+     */
     public void likeUnlike(AppreciationRequest request) {
         try (var session = neo4jDriver.session()) {
             if (request.isLikeUnlike()) {
@@ -220,6 +224,11 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Gets the users who liked a specific post.
+     * @param postId the post for which to get the users who liked it
+     * @return a list of userIds who liked the specified post
+     */
     public List<String> getLikeUsers(String postId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User)-[r:LIKES]->(p:Post {postId: $postId}) " +
@@ -237,6 +246,11 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Gets the posts liked by a specific user.
+     * @param userId the user for whom to get the posts they liked
+     * @return a list of postIds that the specified userId liked
+     */
     public List<String> getLikesPosts(String userId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User {userId: $userId})-[r:LIKES]->(p:Post) " +
@@ -254,6 +268,11 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Checks if a user exists in the database.
+     * @param userId the userId to check
+     * @return a boolean indicating whether the user exists
+     */
     public boolean userExists(String userId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User {userId: $userId}) RETURN count(u) as count";
@@ -266,6 +285,11 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Checks if a post exists in the database.
+     * @param postId the postId to check
+     * @return a boolean indicating whether the post exists
+     */
     public boolean postExists(String postId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (p:Post {postId: $postId}) RETURN count(p) as count";
@@ -280,16 +304,43 @@ public class SocialRepository {
     }
 
     /**
-     * Create a user (testing purpose).
-     *
-     * @param usersId the list of ID of the all user need to be created
+     * Enum to know with type of Resource to created
      */
-    public void createUser(List<String> usersId)
+    public static enum TypeCreate{
+        USER("User"),
+        POST("Post"),
+        ;
+
+        private final String typeStr;
+
+        TypeCreate(final String typeStr) {
+            this.typeStr = typeStr;
+        }
+
+        @Override
+        public String toString() {
+            return typeStr;
+        }
+    }
+
+    /**
+     * Create a resource (testing purpose).
+     *
+     * @param resourcesId the list of ID of the all resource need to be created
+     * @param typeCreate the type of resource to create
+     */
+    public void createResource(List<String> resourcesId, TypeCreate typeCreate)
     {
         try (var session = neo4jDriver.session())
         {
-            Optional<String> createCypher = usersId.stream()
-                .map(user -> String.format("MERGE (%s:User {userId: \"%s\"}) ", user, user))
+            Optional<String> createCypher = resourcesId.stream()
+                .map(resource -> String.format(
+                    "MERGE (%s:%s {%sId: \"%s\"}) ",
+                    resource,
+                    typeCreate.toString(),
+                    typeCreate.toString().toLowerCase(),
+                    resource)
+                )
                 .reduce((a, b) -> a + b);
 
             if (createCypher.isPresent())
@@ -301,8 +352,8 @@ public class SocialRepository {
                     );
                     return null;
                 });
-                usersId.forEach(user ->
-                    LOG.infof("User: %s created", user)
+                resourcesId.forEach(user ->
+                    LOG.infof("%s: %s created", typeCreate.toString(), user)
                 );
             }
         } catch (Exception e)
@@ -313,7 +364,6 @@ public class SocialRepository {
 
     /**
      * Clean/Drop Table (testing purpose).
-     *
      */
     public void clean()
     {

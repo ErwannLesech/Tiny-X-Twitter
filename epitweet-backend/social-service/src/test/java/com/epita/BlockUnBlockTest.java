@@ -33,7 +33,7 @@ public class BlockUnBlockTest
             "user789",
             "user999");
         socialRepository.clean();
-        socialRepository.createUser(usersId);
+        socialRepository.createResource(usersId, SocialRepository.TypeCreate.USER);
     }
 
     /**

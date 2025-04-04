@@ -102,6 +102,10 @@ public class SocialController {
         return Response.ok(usersWhoBlocked).build();
     }
 
+    /**
+     * Creates or updates the like relation between one user and one post.
+     * @param request the request indicating who like or unlike which post
+     */
     @POST
     @Path("/like")
     public Response likeUnlike(AppreciationRequest request) {
@@ -109,6 +113,11 @@ public class SocialController {
         return Response.ok().build();
     }
 
+    /**
+     * Gets the users who liked a specific post.
+     * @param postId the post for which to get the users who liked it
+     * @return a Response containing a list of userIds who liked the specified post
+     */
     @GET
     @Path("/getLikeUsers/{postId}")
     public Response getLikeUsers(@PathParam("postId") String postId) {
@@ -119,6 +128,11 @@ public class SocialController {
         return Response.ok(users).build();
     }
 
+    /**
+     * Gets the posts liked by a specific user.
+     * @param userId the user for whom to get the posts they liked
+     * @return a Response containing a list of postIds that the specified userId liked
+     */
     @GET
     @Path("/getLikedPosts/{userId}")
     public Response getLikedPosts(@PathParam("userId") String userId) {
