@@ -43,29 +43,6 @@ stages:
   - test
 
 
-build_dind_maven:
-  stage: build
-  image: docker:latest
-  services:
-    - name: docker:dind
-      command: ["--insecure-registry=registry.local.vidoks.fr"]
-
-  variables:
-    # Points the Docker client to the Docker daemon provided by docker:dind service
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-    # Your registry URL (change accordingly)
-    REGISTRY_URL: registry.local.vidoks.fr/epita-info8/info8
-    # Full image name including registry, namespace, and tag
-    IMAGE_NAME: registry.local.vidoks.fr/epita-info8/info8
-  script:
-    - cd epitweet-backend/docker/CI
-    # Log in to your remote registry using CI environment variables
-    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
-    # Build the image using your Dockerfile in the repository root
-    - docker build -t $IMAGE_NAME .
-    # Push the built image to the registry
-    - docker push $IMAGE_NAME
 
 test:
   image: maven:3.8.3-openjdk-17
