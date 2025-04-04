@@ -2,7 +2,7 @@ variables:
   DOCKER_HOST: "tcp://docker:2375"
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
-
+  TESTCONTAINERS_HOST_OVERRIDE: localhost
 test:
   stage: test
   image: maven:3.9.9-eclipse-temurin-17-alpine
