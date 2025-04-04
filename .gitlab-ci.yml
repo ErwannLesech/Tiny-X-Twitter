@@ -1,16 +1,16 @@
-services:
- - name: docker:24.0.5-dind
-   command: ["--tls=false"]
-
-variables:
-  DOCKER_HOST: tcp://docker:2375
 test:
+  services:
+   - name: docker:24.0.5-dind
+     command: ["--tls=false"]
+
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+
  image: maven:3.9.9-eclipse-temurin-17-alpine
  stage: test
  script:
-  - apk add --no-cache docker-cli
-  - curl -L https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-machine
-  - chmod +x /usr/local/bin/docker-machine
   - cd epitweet-backend
   - mvn install
   - mvn test
