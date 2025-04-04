@@ -12,6 +12,6 @@ test:
  stage: test
  script:
   - cd epitweet-backend
-  - mvn clean install
+  - mvn install
   - mvn test
 
