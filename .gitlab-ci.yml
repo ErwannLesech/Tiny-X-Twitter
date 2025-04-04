@@ -3,8 +3,8 @@ services:
    command: ["--tls=false"]
 
 variables:
-  - TESTCONTAINERS_HOST_OVERRIDE: "172.17.0.1"
-  - DOCKER_HOST: "172.17.0.1"
+  TESTCONTAINERS_HOST_OVERRIDE: "172.17.0.1"
+  DOCKER_HOST: "172.17.0.1"
 
 
 test:
