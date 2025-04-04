@@ -1,5 +1,5 @@
 variables:
-  TESTCONTAINERS_HOST_OVERRIDE: 192.126.1.37
+  TESTCONTAINERS_HOST_OVERRIDE: 172.17.0.1
 
 test:
  image: maven:3.8.3-openjdk-17
