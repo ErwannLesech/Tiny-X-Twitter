@@ -45,8 +45,8 @@ export class ProfileUpdateComponent {
   onSubmit() {
     const userRequest = {
       tag: this.logedUser?.userTag,
-      pseudo: this.userName.length > 0 ? this.userName : null,
-      password: this.password.length > 0 ? this.password : null
+      pseudo: this.userName,
+      password: this.password,
     };
     if (!this.userName || !this.password) {
       this.closePopup();
