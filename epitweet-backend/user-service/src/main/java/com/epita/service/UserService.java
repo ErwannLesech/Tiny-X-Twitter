@@ -8,6 +8,7 @@ import com.epita.repository.entity.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
+import org.jboss.logging.Logger;
 import org.mindrot.jbcrypt.BCrypt;
 
 @ApplicationScoped
@@ -15,6 +16,9 @@ public class UserService {
 
     @Inject
     UserRepository userRepository;
+
+    @Inject
+    Logger logger;
 
     /**
      * Retrieves a user by their tag.
@@ -24,6 +28,7 @@ public class UserService {
      */
     public UserResponse getUser(String userTag) {
         User user = userRepository.findByTag(userTag);
+        logger.infof("getting User: %s", user);
         if (user == null) {
             return null;
         }
@@ -78,11 +83,22 @@ public class UserService {
     public Boolean updateUser(final UserRequest userRequest) {
         User userToUpdate = userRepository.findByTag(userRequest.getTag());
         if (userToUpdate != null) {
-            userToUpdate.pseudo = userRequest.getPseudo();
+            if (userRequest.getPseudo() != null) {
+                userToUpdate.setPseudo(userRequest.getPseudo());
+            }
+            if (userRequest.getProfileDescription() != null) {
+                userToUpdate.setProfileDescription(userRequest.getProfileDescription());
+            }
+            if (userRequest.getProfilePictureUrl() != null) {
+                userToUpdate.setProfilePictureUrl(userRequest.getProfilePictureUrl());
+            }
+            if (userRequest.getProfileBannerUrl() != null) {
+                userToUpdate.setProfileBannerUrl(userRequest.getProfileBannerUrl());
+            }
 
             // Password hash handling
             if (userRequest.getPassword() != null) {
-                userToUpdate.password = hashPassword(userRequest.getPassword());
+                userToUpdate.setPassword(hashPassword(userRequest.getPassword()));
             }
 
             userRepository.updateUser(userToUpdate);
@@ -121,7 +137,7 @@ public class UserService {
             return 404;
         }
 
-        if (checkPassword(userRequest.getPassword(), user.password)) {
+        if (checkPassword(userRequest.getPassword(), user.getPassword())) {
             return 200;
         }
 

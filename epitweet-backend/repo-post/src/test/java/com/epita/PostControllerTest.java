@@ -53,9 +53,9 @@ public class PostControllerTest {
         assert posts.size() == 1;
 
         Post post = posts.get(0);
-        assert Objects.equals(post.postType.toString(), "post");
-        assert post.content.equals("This is my first post!");
-        assert post.parentId == null;
+        assert Objects.equals(post.getPostType().toString(), "post");
+        assert post.getContent().equals("This is my first post!");
+        assert post.getParentId() == null;
     }
 
     @Test
@@ -107,7 +107,7 @@ public class PostControllerTest {
                 .then()
                 .statusCode(201);
 
-        postId = postRepository.findByUser(headerUserFirst).get(0)._id;
+        postId = postRepository.findByUser(headerUserFirst).get(0).getId();
 
         PostResponse post = given().contentType(ContentType.JSON)
                 .when()
