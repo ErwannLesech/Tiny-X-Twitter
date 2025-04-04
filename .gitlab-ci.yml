@@ -1,13 +1,14 @@
 variables:
   DOCKER_HOST: "tcp://docker:2375"
   DOCKER_TLS_CERTDIR: ""
+  DOCKER_TLS_VERIFY: 0
   DOCKER_DRIVER: overlay2
 
 test:
   stage: test
   image: maven:3.9.9-eclipse-temurin-17-alpine
   services:
-    - name: docker:dind
+    - name: docker:20.10.9-dind
       alias: docker
       command: ["--tls=false"]
   script:
