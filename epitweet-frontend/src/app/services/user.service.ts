@@ -45,8 +45,16 @@ export class UserService {
     );
   }
 
-  updateUser(userData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/uspdate`, userData)
+  updateUser(userRequest: any): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/update`, userRequest, this.httpOptions)
+    .pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  deleteUser(userTag: any): Observable<any> {
+    this.httpOptions.headers = this.httpOptions.headers.set('userTag', userTag);
+    return this.http.delete(`${this.apiUrl}/delete`, this.httpOptions)
     .pipe(
       catchError(this.handleError)
     );

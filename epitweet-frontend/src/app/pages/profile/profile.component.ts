@@ -9,6 +9,7 @@ import { UserService } from '../../services/user.service';
 import { User, UserStateService } from '../../services/user-state.service';
 import { Post, PostService } from '../../services/post.service';
 import { catchError, map, Observable, throwError } from 'rxjs';
+import { ProfileUpdateComponent } from "./profile-update/profile-update.component";
 
 @Component({
   selector: 'app-profile',
@@ -16,10 +17,11 @@ import { catchError, map, Observable, throwError } from 'rxjs';
   imports: [
     CommonModule,
     MatIconModule,
-    MatFormFieldModule, 
+    MatFormFieldModule,
     MatInputModule,
-    RouterModule
-  ],
+    RouterModule,
+    ProfileUpdateComponent,
+],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })
@@ -33,6 +35,8 @@ export class ProfileComponent implements OnInit {
   isLoading = true;
   userError: string | null = null;
   postError: string | null = null;
+  dropdownOpen: string | null = null; // Tracks which post's dropdown is open
+  isPopupOpen: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,6 +49,7 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit() {
     this.loggedUser = this.userStateService.getLoggedUser();
+
     this.route.params.subscribe(params => {
       const userTag = params['userTag'];
       this.handleRouteChange(userTag);
@@ -82,8 +87,9 @@ export class ProfileComponent implements OnInit {
         userId: response._id,
         userName: response.pseudo,
         userTag: response.tag,
-        avatarUrl: response.avatarUrl,
-        bio: '',
+        avatarUrl: response.profilePictureUrl,
+        bannerUrl: response.profileBannerUrl,
+        bio: response.profileDescription,
         followersCount: 0,
         followingCount: 0
       })),
@@ -120,6 +126,32 @@ export class ProfileComponent implements OnInit {
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
+  }
+
+  toggleDropdown(postId: string, event: Event): void {
+    event.stopPropagation(); // Prevent routing when clicking the dropdown
+    this.dropdownOpen = this.dropdownOpen === postId ? null : postId;
+  }
+
+  onDeletePost(postId: string, event: Event): void {
+    event.stopPropagation(); // Prevent routing when clicking the delete button
+    this.postService.deletePost(postId).subscribe({
+      next: () => {
+        console.log(`Post ${postId} deleted successfully`);
+        this.posts = this.posts.filter(post => post._id !== postId); // Remove the deleted post from the list
+      },
+      error: (err) => {
+        console.error(`Error deleting post ${postId}:`, err);
+      }
+    });
+  }
+
+  openPopup() {
+    this.isPopupOpen = true;
+  }
+
+  closePopup() {
+    this.isPopupOpen = false;
   }
 
   public formatPostDate(dateString: string): string {
@@ -160,5 +192,11 @@ export class ProfileComponent implements OnInit {
     if (query.trim()) {
       this.router.navigate(['/search'], { queryParams: { q: query } });
     }
+  }
+
+  onLikeClick(event: Event): void {
+    event.stopPropagation();
+    console.log('Like button clicked');
+    // TODO : Implement like functionality
   }
 }

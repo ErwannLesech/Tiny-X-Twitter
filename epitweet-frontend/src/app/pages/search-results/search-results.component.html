@@ -56,23 +56,21 @@
         </div>
         
         <div class="timeline">
-          <div *ngFor="let post of searchResults" class="post">
+          <div *ngFor="let post of searchResults" class="post" [routerLink]="['/post', post._id]">
             <div class="post-header">
-              <img src='assets/images/default-profile.png' class="post-profile-pic">
+              <img [src]="post.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
               <div class="post-user">
-                <a [routerLink]="['/profile', post.user.userTag]" class="nav-link">
-                  <span class="userName">{{ post.user.userName || 'Unknown' }}</span>
-                  <span class="userTag">&#64;{{ post.user.userTag || 'unknown' }}</span>
+                <a [routerLink]="['/profile', post.user?.userTag]" class="nav-link">
+                  <span class="userName">{{ post.user?.userName || 'Unknown' }}</span>
+                  <span class="userTag">&#64;{{ post.user?.userTag || 'unknown' }}</span>
                 </a>
                 <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
               </div>
             </div>
-            <div class="post-content">
-              {{ post.content }}
-            </div>
+            <div class="post-content">{{post.content}}</div>
             <div class="post-actions">
-              <button><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
-              <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.replies || 0 }}</button>
+              <button (click)="onLikeClick($event)"><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
+              <button (click)="onCommentClick($event)"><mat-icon>chat_bubble_outline</mat-icon> {{ post.replies || 0 }}</button>
             </div>
           </div>
         </div>

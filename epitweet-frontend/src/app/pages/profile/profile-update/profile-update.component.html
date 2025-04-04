@@ -1,0 +1,18 @@
+<div class="popup-overlay" (click)="closePopup()"></div>
+<div class="popup-content">
+  <h2>Modifier le profil</h2>
+  <form (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline">
+      <mat-label>Nouveau nom d'utilisateur</mat-label>
+      <input matInput [(ngModel)]="userName" name="userName"/>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Nouveau mot de passe</mat-label>
+      <input matInput type="password" [(ngModel)]="password" name="password"/>
+    </mat-form-field>
+    <div class="popup-actions">
+      <button mat-raised-button color="primary" type="submit">Mettre à jour</button>
+      <button mat-raised-button color="warn" (click)="onDelete()">Supprimer le compte</button>
+    </div>
+  </form>
+</div>

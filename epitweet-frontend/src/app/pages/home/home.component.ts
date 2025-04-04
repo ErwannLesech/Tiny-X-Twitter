@@ -27,6 +27,7 @@ export class HomeComponent implements OnInit {
   newPostContent: string = '';
   isPosting: boolean = false;
   postError: string | null = null;
+  currentTheme: string = 'light'; // Default theme
 
   @ViewChild('postTextarea') postTextarea!: ElementRef;
 
@@ -37,6 +38,11 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      this.currentTheme = savedTheme;
+      document.documentElement.setAttribute('data-theme', this.currentTheme);
+    }
     this.loggedUser = this.userStateService.getLoggedUser();
   }
 
@@ -44,6 +50,12 @@ export class HomeComponent implements OnInit {
     if (query.trim()) {
       this.router.navigate(['/search'], { queryParams: { q: query } });
     }
+  }
+
+  onLikeClick(event: Event): void {
+    event.stopPropagation();
+    console.log('Like button clicked');
+    // TODO: Add like logic here
   }
 
   createPost() {
@@ -80,5 +92,16 @@ export class HomeComponent implements OnInit {
       event.preventDefault();
       this.createPost();
     }
+  }
+
+  toggleTheme() {
+    // Toggle between 'light' and 'dark'
+    this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+
+    // Apply the theme to the <html> element
+    document.documentElement.setAttribute('data-theme', this.currentTheme);
+
+    // Save the selected theme in localStorage
+    localStorage.setItem('theme', this.currentTheme);
   }
 }

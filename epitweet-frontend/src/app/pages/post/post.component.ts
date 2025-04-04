@@ -55,28 +55,16 @@ export class PostComponent implements OnInit {
     this.isLoading = true;
     this.postService.getPostById(postId).subscribe({
       next: (post) => {
-        this.userService.getUserById(post.userId).subscribe({
-          next: (userResponse) => {
-            const postUser = {
-              userId: post.userId,
-              userName: userResponse.pseudo,
-              userTag: userResponse.tag,
-              avatarUrl: userResponse.avatarUrl || 'assets/images/default-profile.png',
-              bio: userResponse.bio || '',
-              followersCount: userResponse.followersCount || 0,
-              followingCount: userResponse.followingCount || 0
-            }
-            post.user = postUser;
-            this.post = post;
-            this.isLoading = false;
-          },
-          error: (err) => {
-            console.error('Error fetching user:', err);
-            this.isLoading = false;
-          }
-        });
+        if (post) {
+          this.post = post;
+          console.log('Post:', this.post);
+        } else {
+          this.error = 'Failed to load post';
+        }
+        this.isLoading = false;
       },
       error: (err) => {
+        console.error('Error loading post:', err);
         this.error = 'Failed to load post';
         this.isLoading = false;
       }

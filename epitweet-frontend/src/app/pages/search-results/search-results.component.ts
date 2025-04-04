@@ -56,26 +56,6 @@ export class SearchResultsComponent implements OnInit {
     this.searchService.searchPostsByContent(query).subscribe({
       next: (results) => {
         this.searchResults = results;
-        this.searchResults.forEach(post => {
-          this.userService.getUserById(post.userId).subscribe({
-            next: (userResponse) => {
-              const postUser = {
-                userId: post.userId,
-                userName: userResponse.pseudo,
-                userTag: userResponse.tag,
-                avatarUrl: userResponse.avatarUrl || 'assets/images/default-profile.png',
-                bio: userResponse.bio || '',
-                followersCount: userResponse.followersCount || 0,
-                followingCount: userResponse.followingCount || 0
-              }
-              post.user = postUser;
-            },
-            error: (err) => {
-              console.error('Error fetching user:', err);
-            }
-          });
-        });
-
         this.isLoading = false;
       },
       error: (err) => {
@@ -129,5 +109,15 @@ export class SearchResultsComponent implements OnInit {
     if (query.trim()) {
       this.router.navigate(['/search'], { queryParams: { q: query } });
     }
+  }
+
+  onLikeClick(event: Event): void {
+    event.stopPropagation();
+    console.log('Like button clicked');
+    // TODO: Add like logic here
+  }
+  
+  onCommentClick(event: Event): void {
+    // TODO: Add comment logic here
   }
 }

@@ -40,19 +40,19 @@
       </div>
 
       <!-- Main Post -->
-      <div class="post-view">
+      <div class="post-view" *ngIf="post">
         <div class="original-post">
           <div class="post-header">
-            <img [src]="post.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+            <img [src]="post.user?.avatarUrl" class="post-profile-pic">
             <div class="post-user">
-              <span class="userName">{{ post.user?.userName }}</span>
-              <span class="userTag">&#64;{{ post.user?.userTag }}</span>
+              <a [routerLink]="['/profile', post.user?.userTag]" class="nav-link">
+                <span class="userName">{{ post.user?.userName }}</span>
+                <span class="userTag">&#64;{{ post.user?.userTag }}</span>
+              </a>
               <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
             </div>
           </div>
-          <div class="post-content">
-            {{ post.content }}
-          </div>
+          <div class="post-content">{{post.content}}</div>
           <div class="post-actions">
             <button><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
             <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments?.length || 0 }}</button>
@@ -68,35 +68,44 @@
         <!-- Replies List -->
         <div class="replies">
           <div *ngFor="let reply of post.comments" class="reply">
-            <div class="post-header">
-              <img [src]="reply.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
-              <div class="post-user">
-                <span class="userName">{{ reply.user?.userName }}</span>
-                <span class="userTag">&#64;{{ reply.user?.userTag }}</span>
-                <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
+            <div *ngIf="reply && reply.content.length > 0">
+              <div class="post-header">
+                <img [src]="reply.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+                <div class="post-user">
+                  <span class="userName">{{ reply.user?.userName }}</span>
+                  <span class="userTag">&#64;{{ reply.user?.userTag }}</span>
+                  <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
+                </div>
               </div>
-            </div>
-            <div class="post-content">
-              {{ reply.content }}
-            </div>
-            <div class="post-actions">
-              <button><mat-icon>favorite_border</mat-icon> {{ reply.likes || 0 }}</button>
+              <div class="post-content">
+                {{ reply.content }}
+              </div>
+              <div class="post-actions">
+                <button><mat-icon>favorite_border</mat-icon> {{ reply.likes || 0 }}</button>
+                <button><mat-icon>chat_bubble_outline</mat-icon> {{ reply.comments?.length || 0 }}</button>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+      <div *ngIf="isLoading" class="loading post-view">
+        Loading post...
+      </div>
+      <div *ngIf="error || !post" class="error-message post-view">
+        No post found with given ID.
       </div>
     </div>
 
     <!-- Right Sidebar (same as home) -->
     <div class="right-sidebar">
         <div class="search-bar">
-        <mat-form-field appearance="outline">
-            <input 
-            matInput 
-            placeholder="Rechercher"
-            #searchInput
-            (keyup.enter)="search(searchInput.value)">
-        </mat-form-field>
+          <mat-form-field appearance="outline">
+              <input 
+              matInput 
+              placeholder="Rechercher"
+              #searchInput
+              (keyup.enter)="search(searchInput.value)">
+          </mat-form-field>
         </div>
         
         <div class="trends">

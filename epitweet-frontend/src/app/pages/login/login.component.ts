@@ -62,8 +62,9 @@ export class LoginComponent {
                 userId: response._id,
                 userName: response.pseudo,
                 userTag: response.tag,
-                avatarUrl: "",
-                bio: "",
+                avatarUrl: response.profilePictureUrl || "https://static-00.iconduck.com/assets.00/profile-default-icon-2048x2045-u3j7s5nj.png",
+                bannerUrl: response.profileBannerUrl || "https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg",
+                bio: response.profileDescription  || "Ceci est la bio de @" + response.tag,
                 followersCount: 0,
                 followingCount: 0
               }

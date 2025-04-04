@@ -22,7 +22,7 @@
       </nav>
       
       <div class="user-profile">
-        <img src="assets/images/default-profile.png" alt="Profile" class="profile-pic">
+        <img [src]="loggedUser?.avatarUrl" alt="Profile" class="profile-pic">
         <div class="user-info">
           <span class="userName">{{ loggedUser?.userName }}</span>
           <span class="userTag">&#64;{{ loggedUser?.userTag }}</span>
@@ -51,12 +51,15 @@
             </button>
             <h1>Profile</h1>
           </div>
-          <div class="profile-banner"></div>
-          <div class="profile-info">
-            <img src="assets/images/default-profile.png" alt="Profile" class="profile-picture">
-            <button class="edit-profile-button">Modifier le profile</button>
+          <div class="profile-banner">
+            <img [src]="targetUser?.bannerUrl" alt="Profile Banner">
           </div>
-          
+          <div class="profile-info">
+            <img [src]="targetUser?.avatarUrl" alt="Profile" class="profile-picture">
+            <button class="edit-profile-button" [class.hide]="targetUser !== loggedUser" (click)="openPopup()">Modifier le profil</button>
+            <app-profile-update *ngIf="isPopupOpen" [userTag]="loggedUser?.userTag || ''" (close)="closePopup()"></app-profile-update>
+          </div>
+
           <div class="profile-details">
             <h2>{{ targetUser?.userName }}</h2>
             <span class="userTag">&#64;{{ targetUser?.userTag }}</span>
@@ -91,7 +94,7 @@
             {{ postError }}
           </div>
           <div *ngIf="activeTab === 'posts' && !isLoading && !postError">
-            <div *ngFor="let post of posts" class="post">
+            <div *ngFor="let post of posts" class="post" [routerLink]="['/post', post._id]">
               <div class="post-header">
                 <img [src]="targetUser?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
                 <div class="post-user">
@@ -99,13 +102,20 @@
                   <span class="userTag">&#64;{{ targetUser?.userTag }}</span>
                   <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
                 </div>
+                <!-- Three-dot menu -->
+                <div *ngIf="targetUser === loggedUser" class="post-options">
+                  <button mat-icon-button (click)="toggleDropdown(post._id, $event)">
+                    <mat-icon>more_horiz</mat-icon>
+                  </button>
+                  <div *ngIf="dropdownOpen === post._id" class="dropdown-menu">
+                    <button (click)="onDeletePost(post._id, $event)">Delete</button>
+                  </div>
+                </div>
               </div>
-              <div class="post-content" [routerLink]="['/post', post._id]">
-                {{ post.content }}
-              </div>
+              <div class="post-content">{{post.content}}</div>
               <div class="post-actions">
-                <button><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
-                <button [routerLink]="['/post', post._id]"><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments || 0 }}</button>
+                <button (click)="onLikeClick($event)"><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
+                <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments || 0 }}</button>
               </div>
             </div>
             <div *ngIf="posts.length === 0" class="no-posts">

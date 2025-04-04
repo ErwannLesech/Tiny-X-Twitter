@@ -54,7 +54,10 @@ export class SignUpComponent {
     this.userRequest = {
       tag: this.userName.toLowerCase(),
       pseudo: this.userName,
-      password: this.password
+      password: this.password,
+      profilePictureUrl: "https://static-00.iconduck.com/assets.00/profile-default-icon-2048x2045-u3j7s5nj.png",
+      profileBannerUrl: "https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg",
+      profileDescription: "Ceci est la bio de @" + this.userName.toLowerCase(),
     };
 
 
@@ -66,8 +69,9 @@ export class SignUpComponent {
             userId: response._id,
             userName: response.pseudo,
             userTag: response.tag,
-            avatarUrl: "",
-            bio: "",
+            avatarUrl: response.profilePictureUrl,
+            bannerUrl: response.profileBannerUrl,
+            bio: response.profileDescription,
             followersCount: 0,
             followingCount: 0
           }
