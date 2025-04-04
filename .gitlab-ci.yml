@@ -1,9 +1,3 @@
-# DinD service is required for Testcontainers
-services:
-  - name: docker:dind
-    # explicitly disable tls to avoid docker startup interruption
-    command: ["--tls=false"]
-
 variables:
   # Instruct Testcontainers to use the daemon of DinD, use port 2375 for non-tls connections.
   DOCKER_HOST: "tcp://docker:2375"
