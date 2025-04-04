@@ -1,68 +1,22 @@
+# DinD service is required for Testcontainers
 services:
-  - docker:dind
-
+  - name: docker:dind
+    # explicitly disable tls to avoid docker startup interruption
+    command: ["--tls=false"]
 
 variables:
-  IMAGE_NAME: $CI_REGISTRY_IMAGE
-  IMAGE_TAG: latest
-  MONGO_INITDB_ROOT_USERNAME: root
-  MONGO_INITDB_ROOT_PASSWORD: root
+  # Instruct Testcontainers to use the daemon of DinD, use port 2375 for non-tls connections.
   DOCKER_HOST: "tcp://docker:2375"
+  # Instruct Docker not to start over TLS.
   DOCKER_TLS_CERTDIR: ""
+  # Improve performance with overlayfs.
   DOCKER_DRIVER: overlay2
-  REDIS_HOST: redis
-  REDIS_PORT: 6379
-  MONGO_HOST: mongo
-  MONGO_PORT: 27017
-  MAVEN_OPTS: >-
-    -Dhttps.protocols=TLSv1.2
-    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-    -Dorg.slf4j.simpleLogger.showDateTime=true
-    -Djava.awt.headless=true
-  MAVEN_CLI_OPTS: >-
-    --batch-mode
-    --errors
-    --fail-at-end
-    --show-version
-    --no-transfer-progress
-cache:
-  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-  paths:
-    - .m2/repository
-
-stages:
-  - build
-  - init
-  - test
-
-
 
 test:
-  image: ubuntu:latest
-  stage: test
-  before_script:
-  # Update package lists and install prerequisites.
-    - apt-get update
-    - apt-get install ca-certificates curl -y
-    - install -m 0755 -d /etc/apt/keyrings
-    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-    - chmod a+r /etc/apt/keyrings/docker.asc
-    - |
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"${UBUNTU_CODENAME:-$VERSION_CODENAME}\") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-    - apt-get update
-    - apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-    - service docker start
-  script:
-    - apt update
-    - apt install openjdk-17-jdk maven -y
-    - java --version
-    - cd epitweet-backend/
-    - mvn $MAVEN_CLI_OPTS test
-  artifacts:
-    reports:
-      junit: epitweet-backend/target/user-service/surefire-reports/*.xml
-      junit: epitweet-backend/repo-post/target/surefire-reports/*
-    paths:
-      - epitweet-backend/target/*.jar
-    expire_in: 1 week
+ image: maven:3.8.3-openjdk-17
+ stage: test
+ script:
+  - cd epitweet-backend
+  - mvn clean install
+  - mvn test
 
