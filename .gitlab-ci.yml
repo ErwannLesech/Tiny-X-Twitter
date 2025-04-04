@@ -39,6 +39,19 @@ stages:
 test:
   image: ubuntu:latest
   stage: test
+  before_script:
+  # Update package lists and install prerequisites.
+    - apt-get update -qq
+    - apt-get install -qq -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+    # Add Docker’s official GPG key.
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    # Add the Docker repository.
+    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    - apt-get update -qq
+    # Install Docker Engine, CLI, and containerd.
+    - apt-get install -qq -y docker-ce docker-ce-cli containerd.io
+    # Start the Docker daemon (if not already running via the dind service).
+    - service docker start
   script:
     - apt update
     - apt install openjdk-17-jdk maven -y
