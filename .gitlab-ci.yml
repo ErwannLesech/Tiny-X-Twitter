@@ -7,7 +7,7 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 test:
- image: maven:3.9.9-amazoncorretto-17
+ image: maven:3.9.9-eclipse-temurin-17-alpine
  stage: test
  script:
   - apk add --no-cache docker-cli
