@@ -11,7 +11,7 @@ test:
       alias: docker
       command: ["--tls=false"]
   script:
-    - ls -l /var/run/docker.sock
+    - docker info
     - cd epitweet-backend
     - mvn install
     - mvn test
