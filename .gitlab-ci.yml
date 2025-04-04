@@ -8,7 +8,7 @@ variables:
   DOCKER_DRIVER: overlay2
 
 test:
- image: maven:3.9.9-eclipse-temurin-17-alpine
+ image: maven:3.9.9-amazoncorretto-17
  stage: test
  script:
   - cd epitweet-backend
