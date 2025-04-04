@@ -81,7 +81,7 @@ public class PostController {
      * @return The list of reply posts or a 404 error if not found.
      */
     @GET
-    @Path("/getPostReplies/{postReferenceId}")
+    @Path("/getPostReply/{postReferenceId}")
     public Response getPostReply(@PathParam("postReferenceId") ObjectId postReferenceId) {
         logger.infof("getPostReplies Request: %s", postReferenceId);
         if (postReferenceId == null || postReferenceId.toString().isEmpty()) {
@@ -107,7 +107,7 @@ public class PostController {
      * @return The list of repost posts or a 404 error if not found.
      */
     @GET
-    @Path("/getPostReposts/{postReferenceId}")
+    @Path("/getPostRepost/{postReferenceId}")
     public Response getPostReposts(@PathParam("postReferenceId") ObjectId postReferenceId) {
         logger.infof("getPostReposts Request: %s", postReferenceId);
         if (postReferenceId == null || postReferenceId.toString().isEmpty()) {
@@ -133,7 +133,7 @@ public class PostController {
      * @return The list of repost posts or a 404 error if not found.
      */
     @GET
-    @Path("/getPostRepostsAndReplies/{postReferenceId}")
+    @Path("/getPostRepostAndReply/{postReferenceId}")
     public Response getPostRepostsAndReplies(@PathParam("postReferenceId") ObjectId postReferenceId) {
         logger.infof("getPostRepostsAndReplies Request: %s", postReferenceId);
         if (postReferenceId == null || postReferenceId.toString().isEmpty()) {
