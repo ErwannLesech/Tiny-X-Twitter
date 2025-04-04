@@ -1,12 +1,16 @@
+services:
+ - name: docker:dind
+   command: ["--tls=false"]
+
 variables:
-  TESTCONTAINERS_HOST_OVERRIDE: "172.17.0.1"
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
 
 test:
  image: maven:3.9.9-eclipse-temurin-17-alpine
  stage: test
  script:
-  - apk update
-  - apk add docker
   - cd epitweet-backend
   - mvn clean install
   - mvn test
