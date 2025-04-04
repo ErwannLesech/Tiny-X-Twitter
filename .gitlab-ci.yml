@@ -50,7 +50,7 @@ test:
     - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     - apt-get update -qq
     # Install Docker Engine, CLI, and containerd.
-    - apt-get install -qq -y docker-ce docker-ce-cli containerd.io
+    - apt-get install -qq -y docker-ce:24.0.7 docker-ce-cli containerd.io
     # Start the Docker daemon (if not already running via the dind service).
     - service docker start
   script:
