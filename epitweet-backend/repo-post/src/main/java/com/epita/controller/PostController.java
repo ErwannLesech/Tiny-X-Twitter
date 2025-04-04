@@ -76,28 +76,80 @@ public class PostController {
     }
 
     /**
-     * Retrieves a reply to a post.
-     * @param replyPostId Reply post ID
-     * @return The reply post or a 404 error if not found.
+     * Retrieves replies to a post.
+     * @param postReferenceId Post Id which as been replied
+     * @return The list of reply posts or a 404 error if not found.
      */
     @GET
-    @Path("/getPostReply/{replyPostId}")
-    public Response getPostReply(@PathParam("replyPostId") ObjectId replyPostId) {
-        logger.infof("getPostReply Request: %s", replyPostId);
-        if (replyPostId == null || replyPostId.toString().isEmpty()) {
-            logger.warn("getPostReply response 400 - replyPostId is null");
+    @Path("/getPostReply/{postReferenceId}")
+    public Response getPostReply(@PathParam("postReferenceId") ObjectId postReferenceId) {
+        logger.infof("getPostReplies Request: %s", postReferenceId);
+        if (postReferenceId == null || postReferenceId.toString().isEmpty()) {
+            logger.warn("getPostReplies response 400 - replyPostId is null");
             return Response.status(Response.Status.BAD_REQUEST).build(); // 400
         }
 
-        logger.infof("Fetching reply post with ID: %s", replyPostId);
-        PostResponse post = postService.getReplyPost(replyPostId);
+        logger.infof("Fetching reply post with ID: %s", postReferenceId);
+        List<PostResponse> post = postService.getRepliesPost(postReferenceId);
 
         if (post == null) {
-            logger.warnf("getPostReply response 404 - Reply post not found for ID: %s", replyPostId);
+            logger.warnf("getPostReplies response 404 - Reply post not found for ID: %s", postReferenceId);
             return Response.status(Response.Status.NOT_FOUND).build(); // 404
         }
 
-        logger.debugf("getPostReply response 200: %s", post);
+        logger.debugf("getPostReplies response 200: %s", post);
+        return Response.ok(post).build(); // 200
+    }
+
+    /**
+     * Retrieves replies to a post.
+     * @param postReferenceId Post Id which as been reposted
+     * @return The list of repost posts or a 404 error if not found.
+     */
+    @GET
+    @Path("/getPostRepost/{postReferenceId}")
+    public Response getPostReposts(@PathParam("postReferenceId") ObjectId postReferenceId) {
+        logger.infof("getPostReposts Request: %s", postReferenceId);
+        if (postReferenceId == null || postReferenceId.toString().isEmpty()) {
+            logger.warn("getPostReposts response 400 - replyPostId is null");
+            return Response.status(Response.Status.BAD_REQUEST).build(); // 400
+        }
+
+        logger.infof("Fetching reply post with ID: %s", postReferenceId);
+        List<PostResponse> post = postService.getRepostsPost(postReferenceId);
+
+        if (post == null) {
+            logger.warnf("getPostReposts response 404 - Reply post not found for ID: %s", postReferenceId);
+            return Response.status(Response.Status.NOT_FOUND).build(); // 404
+        }
+
+        logger.debugf("getPostReposts response 200: %s", post);
+        return Response.ok(post).build(); // 200
+    }
+
+    /**
+     * Retrieves replies and reposts to a post.
+     * @param postReferenceId Post Id which as been reposted
+     * @return The list of repost posts or a 404 error if not found.
+     */
+    @GET
+    @Path("/getPostRepostAndReply/{postReferenceId}")
+    public Response getPostRepostsAndReplies(@PathParam("postReferenceId") ObjectId postReferenceId) {
+        logger.infof("getPostRepostsAndReplies Request: %s", postReferenceId);
+        if (postReferenceId == null || postReferenceId.toString().isEmpty()) {
+            logger.warn("getPostRepostsAndReplies response 400 - replyPostId is null");
+            return Response.status(Response.Status.BAD_REQUEST).build(); // 400
+        }
+
+        logger.infof("Fetching reply post with ID: %s", postReferenceId);
+        List<PostResponse> post = postService.getRepostsAndRepliesPost(postReferenceId);
+
+        if (post == null) {
+            logger.warnf("getPostRepostsAndReplies response 404 - Reply post not found for ID: %s", postReferenceId);
+            return Response.status(Response.Status.NOT_FOUND).build(); // 404
+        }
+
+        logger.debugf("getPostRepostsAndReplies response 200: %s", post);
         return Response.ok(post).build(); // 200
     }
 
