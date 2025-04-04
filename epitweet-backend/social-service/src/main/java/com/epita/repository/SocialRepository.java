@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 public class SocialRepository {
@@ -20,13 +21,15 @@ public class SocialRepository {
     @Inject
     Driver neo4jDriver;
 
+    /**
+     * Creates or updates the follow relation between two users.
+     * @param request the request indicating who follows or unfollows whom
+     */
     public void followUnfollow(FollowUnfollowRequest request) {
         try (var session = neo4jDriver.session()) {
             if (request.isFollowUnfollow()) {
                 session.executeWrite(tx -> {
                     tx.run(
-                            // "MERGE (u1:User {userId: $userFollowId}) " +
-                            // "MERGE (u2:User {userId: $userFollowedId}) " +
                             "MATCH (u1:User {userId: $userFollowId}), (u2:User {userId: $userFollowedId}) " +
                                     "MERGE (u1)-[:FOLLOWS]->(u2)",
                             Map.of(
@@ -56,6 +59,11 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Gets the users followed by a specific user.
+     * @param userId the user for whom to get the followed users
+     * @return a list of userIds who are followed by the specified userId
+     */
     public List<String> getFollows(String userId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User {userId: $userId})-[r:FOLLOWS]->(followed:User) " +
@@ -73,6 +81,11 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Gets the followers of a specific user.
+     * @param userId the user for whom to get the followers
+     * @return a list of userIds who follow the specified userId
+     */
     public List<String> getFollowers(String userId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User)-[:FOLLOWS]->(target:User {userId: $userId}) " +
@@ -90,6 +103,10 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Creates or updates the block relation between two users.
+     * @param request the request indicating who blocks or unblocks whom
+     */
     public void blockUnblock(BlockUnblockRequest request) {
         try (var session = neo4jDriver.session()) {
             if (request.isBlockUnblock()) {
@@ -124,6 +141,11 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Gets the users blocked by a specific user.
+     * @param userId the user for whom to get the blocked users
+     * @return a list of userIds who are blocked by the specified userId
+     */
     public List<String> getBlockedUsers(String userId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User {userId: $userId})-[r:BLOCKS]->(blocked:User) " +
@@ -141,6 +163,11 @@ public class SocialRepository {
         }
     }
 
+    /**
+     * Gets the users who blocked a specific user.
+     * @param userId the user for whom to get the users who blocked them
+     * @return a list of userIds who have blocked the specified userId
+     */
     public List<String> getUsersWhoBlocked(String userId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User)-[r:BLOCKS]->(target:User {userId: $userId}) " +
@@ -250,5 +277,58 @@ public class SocialRepository {
             LOG.errorf("Failed to check if post %s exists: %s", postId, e.getMessage());
             throw new RuntimeException("Failed to check post existence", e);
         }
+    }
+
+    /**
+     * Create a user (testing purpose).
+     *
+     * @param usersId the list of ID of the all user need to be created
+     */
+    public void createUser(List<String> usersId)
+    {
+        try (var session = neo4jDriver.session())
+        {
+            Optional<String> createCypher = usersId.stream()
+                .map(user -> String.format("MERGE (%s:User {userId: \"%s\"}) ", user, user))
+                .reduce((a, b) -> a + b);
+
+            if (createCypher.isPresent())
+            {
+                session.executeWrite(tx ->
+                {
+                    tx.run(
+                        createCypher.get()
+                    );
+                    return null;
+                });
+                usersId.forEach(user ->
+                    LOG.infof("User: %s created", user)
+                );
+            }
+        } catch (Exception e)
+        {
+            throw new RuntimeException("Failed to process createUser", e);
+        }
+    }
+
+    /**
+     * Clean/Drop Table (testing purpose).
+     *
+     */
+    public void clean()
+    {
+        try (var session = neo4jDriver.session())
+        {
+            session.executeWrite(tx ->
+            {
+                tx.run("MATCH (n) DETACH DELETE n"
+                );
+                return null;
+            });
+        } catch (Exception e)
+        {
+            throw new RuntimeException("Failed to process createUser", e);
+        }
+        LOG.infof("All table cleaned");
     }
 }
