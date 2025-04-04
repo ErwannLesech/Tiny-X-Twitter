@@ -1,5 +1,5 @@
 variables:
-  TESTCONTAINERS_HOST_OVERRIDE: 172.17.0.1
+  TESTCONTAINERS_HOST_OVERRIDE: "172.17.0.1"
 
 test:
  image: maven:3.9.9-eclipse-temurin-17-alpine
