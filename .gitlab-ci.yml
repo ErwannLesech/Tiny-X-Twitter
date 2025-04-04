@@ -10,6 +10,7 @@ test:
     - name: docker:24.0.5-dind
       command: ["--tls=false"]
   script:
+    - ls -l /var/run/docker.sock
     - cd epitweet-backend
     - mvn install
     - mvn test
