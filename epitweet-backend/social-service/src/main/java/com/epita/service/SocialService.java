@@ -1,9 +1,20 @@
 package com.epita.service;
 
+import com.epita.contracts.post.PostResponse;
 import com.epita.controller.contracts.AppreciationRequest;
 import com.epita.controller.contracts.BlockUnblockRequest;
 import com.epita.controller.contracts.FollowUnfollowRequest;
+import com.epita.converter.SocialConverter;
+import com.epita.payloads.homeTimeline.SocialHomeTimelineBlock;
+import com.epita.payloads.homeTimeline.SocialHomeTimelineFollow;
+import com.epita.payloads.homeTimeline.SocialHomeTimelineLike;
+import com.epita.payloads.post.CreatePostRequest;
+import com.epita.payloads.post.CreatePostResponse;
+import com.epita.payloads.userTimeline.LikeTimeline;
+import com.epita.repository.PostRestClient;
 import com.epita.repository.SocialRepository;
+import com.epita.repository.UserRestClient;
+import com.epita.repository.publisher.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -14,12 +25,41 @@ public class SocialService {
     @Inject
     SocialRepository socialRepository;
 
+    @Inject
+    UserRestClient userRestClient;
+
+    @Inject
+    PostRestClient postRestClient;
+
+    @Inject
+    SocialHomeTimelineFollowPublisher socialHomeTimelineFollowPublisher;
+
+    @Inject
+    SocialHomeTimelineBlockPublisher socialHomeTimelineBlockPublisher;
+
+    @Inject
+    SocialHomeTimelineLikePublisher socialHomeTimelineLikePublisher;
+
+    @Inject
+    LikeTimelinePublisher likeTimelinePublisher;
+
+    @Inject
+    IsPostBlockedPublisher isPostBlockedPublisher;
+
     /**
      * Creates or updates the follow relation between two users.
      * @param request the request indicating who follows or unfollows whom
      */
-    public void followUnfollow(FollowUnfollowRequest request) {
+    public boolean followUnfollow(FollowUnfollowRequest request) {
         socialRepository.followUnfollow(request);
+
+        if (userRestClient.getUser(request.userFollowId) == null || userRestClient.getUser(request.userFollowedId) == null) {
+            return false;
+        }
+
+        SocialHomeTimelineFollow socialHomeTimelineFollow = SocialConverter.toHomeFollow(request);
+        socialHomeTimelineFollowPublisher.publish(socialHomeTimelineFollow);
+        return true;
     }
 
     /**
@@ -52,8 +92,16 @@ public class SocialService {
      * Creates or updates the block relation between two users.
      * @param request the request indicating who blocks or unblocks whom
      */
-    public void blockUnblock(BlockUnblockRequest request) {
+    public boolean blockUnblock(BlockUnblockRequest request) {
         socialRepository.blockUnblock(request);
+
+        if (userRestClient.getUser(request.userBlockId) == null || userRestClient.getUser(request.userBlockedId) == null) {
+            return false;
+        }
+
+        SocialHomeTimelineBlock socialHomeTimelineBlock = SocialConverter.toHomeBlock(request);
+        socialHomeTimelineBlockPublisher.publish(socialHomeTimelineBlock);
+        return true;
     }
 
     /**
@@ -82,8 +130,19 @@ public class SocialService {
         return socialRepository.getUsersWhoBlocked(userId);
     }
 
-    public void likeUnlike(AppreciationRequest request) {
+    public boolean likeUnlike(AppreciationRequest request) {
         socialRepository.likeUnlike(request);
+
+        if (userRestClient.getUser(request.userId) == null || postRestClient.getPost(request.postId) == null) {
+            return false;
+        }
+
+        SocialHomeTimelineLike socialHomeTimelineLike = SocialConverter.toHomeLike(request);
+        LikeTimeline likeTimeline = SocialConverter.toUserLike(request);
+
+        socialHomeTimelineLikePublisher.publish(socialHomeTimelineLike);
+        likeTimelinePublisher.publish(likeTimeline);
+        return true;
     }
 
     public List<String> getLikeUsers(String postId) {
@@ -100,5 +159,33 @@ public class SocialService {
         }
 
         return socialRepository.getLikesPosts(userId);
+    }
+
+    //méthode pour redis post, appelée depuis le subscriber
+    public void checkPostBlocked(CreatePostRequest message) {
+        String userId = message.getUserId().toString();
+
+        PostResponse post = postRestClient.getPost(message.getParentId().toString());
+        String parentUserId = post.userId.toString();
+
+        List<String> blockedUsers = socialRepository.getBlockedUsers(userId);
+        List<String> blockedByUsers = socialRepository.getUsersWhoBlocked(userId);
+        boolean userBlockedParentUser = blockedUsers.contains(parentUserId);
+        boolean parentUserBlockedUser = blockedByUsers.contains(parentUserId);
+
+
+        //publisher
+        CreatePostResponse postResponse = new CreatePostResponse(
+                message.getUserId(),
+                message.getPostType(),
+                message.getContent(),
+                message.getMediaUrl(),
+                message.getParentId(),
+                parentUserBlockedUser,
+                userBlockedParentUser
+        );
+
+        isPostBlockedPublisher.publish(postResponse);
+
     }
 }

@@ -1,4 +1,4 @@
-package com.epita.payloads.homeTimeline;
+package com.epita.payloads.userTimeline;
 
 /**
  * - ObjectId : userId
@@ -7,13 +7,10 @@ package com.epita.payloads.homeTimeline;
  * - String : method ('like', 'unlike')
  */
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.bson.types.ObjectId;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 /**
  * Represents a payload for user timeline srvc from social srvc to indicate when a like request is made.
@@ -23,7 +20,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class LikeTimeLine {
+public class LikeTimeline {
     /**
      *  The id of the user
      */
@@ -37,7 +34,7 @@ public class LikeTimeLine {
     /**
      *  The date when the post was liked or unliked
      */
-    private Date postLikeDate;
+    private LocalDateTime postLikeDate;
 
     /**
      *  The method (like, unlike)

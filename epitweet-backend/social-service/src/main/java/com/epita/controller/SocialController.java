@@ -26,7 +26,9 @@ public class SocialController {
     @POST
     @Path("/follow")
     public Response followUnfollow(FollowUnfollowRequest followUnfollowRequest) {
-        socialService.followUnfollow(followUnfollowRequest);
+        if (!socialService.followUnfollow(followUnfollowRequest)) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
         return Response.ok().build(); // 200 OK
     }
 
@@ -68,7 +70,9 @@ public class SocialController {
     @POST
     @Path("/block")
     public Response blockUnblock(BlockUnblockRequest blockUnblockRequest) {
-        socialService.blockUnblock(blockUnblockRequest);
+        if (!socialService.blockUnblock(blockUnblockRequest)) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
         return Response.ok().build();
     }
 
@@ -105,7 +109,9 @@ public class SocialController {
     @POST
     @Path("/like")
     public Response likeUnlike(AppreciationRequest request) {
-        socialService.likeUnlike(request);
+        if (socialService.likeUnlike(request)) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
         return Response.ok().build();
     }
 
