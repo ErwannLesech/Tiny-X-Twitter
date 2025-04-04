@@ -1,13 +1,5 @@
 
-services:
-- name: docker:dind
-  command: ["--insecure-registry=registry.local.vidoks.fr"]
 
-
-- name: redis
-- name: registry.local.vidoks.fr/epita-info8/info8
-  alias: mongo
-- name: neo4j
 
 variables:
   IMAGE_NAME: $CI_REGISTRY_IMAGE
@@ -45,9 +37,10 @@ stages:
 
 
 test:
-  image: maven:3.8.3-openjdk-17
+  image: ubuntu:latest
   stage: test
   script:
+    - java --version
     - cd epitweet-backend/
     - mvn $MAVEN_CLI_OPTS test
   artifacts:
