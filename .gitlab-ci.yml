@@ -11,7 +11,7 @@ test:
       alias: docker
       command: ["--tls=false"]
   tags:
-    shell
+    [ shell ]
   script:
     - apk update && apk add --no-cache docker
     - docker info
