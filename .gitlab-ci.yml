@@ -40,6 +40,8 @@ test:
   image: ubuntu:latest
   stage: test
   script:
+    - apt update
+    - apt install openjdk-17-jdk maven
     - java --version
     - cd epitweet-backend/
     - mvn $MAVEN_CLI_OPTS test
