@@ -5,6 +5,7 @@ import com.epita.controller.contracts.UserResponse;
 import com.epita.repository.entity.User;
 import org.bson.types.ObjectId;
 
+import java.time.Instant;
 import java.util.ArrayList;
 
 /**
@@ -23,7 +24,11 @@ public class UserConverter {
                 new ObjectId(),
                 userRequest.getTag(),
                 userRequest.getPseudo(),
-                userRequest.getPassword()
+                userRequest.getPassword(),
+                userRequest.getProfilePictureUrl(),
+                userRequest.getProfileBannerUrl(),
+                userRequest.getProfileDescription(),
+                Instant.now()
         );
     }
 
@@ -35,10 +40,14 @@ public class UserConverter {
      */
     public static UserResponse toResponse(User user) {
         return new UserResponse(
-                user._id,
-                user.tag,
-                user.pseudo,
-                user.password
+                user.getId(),
+                user.getTag(),
+                user.getPseudo(),
+                user.getPassword(),
+                user.getProfilePictureUrl(),
+                user.getProfileBannerUrl(),
+                user.getProfileDescription(),
+                user.getCreatedAt()
         );
     }
 }

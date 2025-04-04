@@ -218,12 +218,17 @@ public class UserController {
         String tag = userRequest.getTag();
         String pseudo = userRequest.getPseudo();
         String password = userRequest.getPassword();
+        String description = userRequest.getProfileDescription();
 
         if (tag == null || tag.isEmpty() || pseudo == null || pseudo.isEmpty()) {
             return Boolean.FALSE;
         }
 
         if (isPasswordNeeded && (password == null || password.isEmpty())) {
+            return Boolean.FALSE;
+        }
+
+        if (description != null && description.length() > 255) {
             return Boolean.FALSE;
         }
 

@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.bson.types.ObjectId;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -36,4 +37,24 @@ public class UserResponse {
      * The password of the user.
      */
     String password;
+
+    /**
+     * The url of profilePicture image
+     */
+    String profilePictureUrl;
+
+    /**
+     * The url of profile banner image
+     */
+    String profileBannerUrl;
+
+    /**
+     * The content of profile description (limited 255 char)
+     */
+    String profileDescription;
+
+    /**
+     * Date of creation of the account
+     */
+    Instant createdAt;
 }

@@ -77,25 +77,72 @@ public class PostService {
     }
 
     /**
-     * Retrieves a reply post by its ID.
+     * Retrieves list of reply posts by its ID.
      *
      * @param replyPostId the ID of the reply post
      * @return a PostResponse object or null if the post is not found or is not a reply
      */
-    public PostResponse getReplyPost(ObjectId replyPostId) {
-        Post post = postRepository.findById(replyPostId);
+    public List<PostResponse> getRepliesPost(ObjectId replyPostId) {
+        Post parentPost = postRepository.findById(replyPostId);
 
-        if (post == null || post.postType != PostType.REPLY) {
+        if (parentPost == null) {
             return null;
         }
 
-        // check if parent post still exists
-        Post repliedPost = postRepository.findById(post.parentId);
-        if (repliedPost == null) {
-            post.parentId = null;
+        // check all replies of this post
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            if (post.getPostType() == PostType.REPLY) {
+                repliesResponses.add(PostConverter.toResponse(post));
+            }
         }
 
-        return PostConverter.toResponse(post);
+        return repliesResponses;
+    }
+
+    /**
+     * Retrieves a list of repost posts.
+     *
+     * @param postReferenceId the ID of the reply post
+     * @return a PostResponse object or null if the post is not found or is not a reply
+     */
+    public List<PostResponse> getRepostsPost(ObjectId postReferenceId) {
+        Post parentPost = postRepository.findById(postReferenceId);
+        if (parentPost == null) {
+            return null;
+        }
+
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            if (post.getPostType() == PostType.REPOST) {
+                repliesResponses.add(PostConverter.toResponse(post));
+            }
+        }
+
+        return repliesResponses;
+    }
+
+    /**
+     * Retrieves a list of repost posts and replies.
+     *
+     * @param postReferenceId the ID of the reply post
+     * @return a PostResponse object or null if the post is not found or is not a reply
+     */
+    public List<PostResponse> getRepostsAndRepliesPost(ObjectId postReferenceId) {
+        Post parentPost = postRepository.findById(postReferenceId);
+        if (parentPost == null) {
+            return null;
+        }
+
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            repliesResponses.add(PostConverter.toResponse(post));
+        }
+
+        return repliesResponses;
     }
 
     /**
@@ -170,7 +217,7 @@ public class PostService {
             return null;
         }
 
-        post.updatedAt = Instant.now();
+        post.setUpdatedAt(Instant.now());
 
         PostResponse postResponse = PostConverter.toResponse(post);
 

@@ -29,4 +29,19 @@ public class UserRequest {
      * The password of the user.
      */
     String password;
+
+    /**
+     * The url of profilePicture image
+     */
+    String profilePictureUrl;
+
+    /**
+     * The url of profile banner image
+     */
+    String profileBannerUrl;
+
+    /**
+     * The content of profile description (limited 255 char)
+     */
+    String profileDescription;
 }

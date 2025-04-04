@@ -48,14 +48,14 @@ public class PostConverter {
      */
     public static PostResponse toResponse(Post post) {
         return new PostResponse(
-                post._id,
-                post.userId,
-                post.postType.toString(),
-                post.content,
-                post.mediaUrl,
-                post.parentId,
-                post.createdAt,
-                post.updatedAt
+                post.getId(),
+                post.getUserId(),
+                post.getPostType().toString(),
+                post.getContent(),
+                post.getMediaUrl(),
+                post.getParentId(),
+                post.getCreatedAt(),
+                post.getUpdatedAt()
         );
     }
 
@@ -100,11 +100,11 @@ public class PostConverter {
      */
     public static IndexPost toIndexPost(Post post, String method){
         return new IndexPost(
-                post._id.toString(),
-                post.postType.toString(),
-                post.content,
-                post.mediaUrl,
-                post.parentId,
+                post.getId().toString(),
+                post.getPostType().toString(),
+                post.getContent(),
+                post.getMediaUrl(),
+                post.getParentId(),
                 method
         );
     }
