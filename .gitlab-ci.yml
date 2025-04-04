@@ -10,6 +10,8 @@ test:
     - name: docker:20.10.9-dind
       alias: docker
       command: ["--tls=false"]
+  tags:
+    shell
   script:
     - apk update && apk add --no-cache docker
     - docker info
