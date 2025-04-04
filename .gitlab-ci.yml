@@ -1,3 +1,5 @@
+services:
+ - docker
 variables:
   TESTCONTAINERS_HOST_OVERRIDE: 172.17.0.1
 
