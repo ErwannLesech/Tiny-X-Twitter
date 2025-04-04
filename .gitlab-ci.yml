@@ -1,5 +1,5 @@
 variables:
-#  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_HOST: "tcp://docker:2375"
   DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
   TESTCONTAINERS_HOST_OVERRIDE: localhost
@@ -11,6 +11,7 @@ test:
       alias: docker
       command: ["--tls=false"]
   script:
+    - apk update && apk add --no-cache docker
     - docker info
     - cd epitweet-backend
     - mvn install
