@@ -18,6 +18,11 @@ public class SocialController {
     @Inject
     SocialService socialService;
 
+    /**
+     * Creates or updates the follow relation between two users.
+     * @param followUnfollowRequest the request indicating who follows or unfollows whom
+     * @return 200 if successful, 400 otherwise
+     */
     @POST
     @Path("/follow")
     public Response followUnfollow(FollowUnfollowRequest followUnfollowRequest) {
@@ -25,6 +30,11 @@ public class SocialController {
         return Response.ok().build(); // 200 OK
     }
 
+    /**
+     * Gets the users followed by a specific user.
+     * @param userId the user for whom to get the followed users
+     * @return a Response containing a list of userIds who are followed by the specified userId
+     */
     @GET
     @Path("/getFollows/{userId}")
     public Response getFollows(@PathParam("userId") String userId) {
@@ -35,6 +45,11 @@ public class SocialController {
         return Response.ok(follows).build();
     }
 
+    /**
+     * Gets the followers of a specific user.
+     * @param userId the user for whom to get the followers
+     * @return a Response containing a list of userIds who follow the specified userId
+     */
     @GET
     @Path("/getFollowers/{userId}")
     public Response getFollowers(@PathParam("userId") String userId) {
@@ -45,13 +60,23 @@ public class SocialController {
         return Response.ok(followers).build();
     }
 
+    /**
+     * Creates or updates the block relation between two users.
+     * @param blockUnblockRequest the request indicating who blocks or unblocks whom
+     * @return 200 if successful, 400 otherwise
+     */
     @POST
     @Path("/block")
-    public Response blockUnblock(BlockUnblockRequest request) {
-        socialService.blockUnblock(request);
+    public Response blockUnblock(BlockUnblockRequest blockUnblockRequest) {
+        socialService.blockUnblock(blockUnblockRequest);
         return Response.ok().build();
     }
 
+    /**
+     * Gets the users blocked by a specific user.
+     * @param userId the user for whom to get the blocked users
+     * @return a Response containing a list of userIds who are blocked by the specified userId
+     */
     @GET
     @Path("/getBlocked/{userId}")
     public Response getBlocked(@PathParam("userId") String userId) {
@@ -62,6 +87,11 @@ public class SocialController {
         return Response.ok(blockedUsers).build();
     }
 
+    /**
+     * Gets the users who blocked a specific user.
+     * @param userId the user for whom to get the users who blocked them
+     * @return a Response containing a list of userIds who have blocked the specified userId
+     */
     @GET
     @Path("/getBlock/{userId}")
     public Response getBlock(@PathParam("userId") String userId) {

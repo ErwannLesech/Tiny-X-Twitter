@@ -13,10 +13,20 @@ import java.util.List;
 public class SocialService {
     @Inject
     SocialRepository socialRepository;
+
+    /**
+     * Creates or updates the follow relation between two users.
+     * @param request the request indicating who follows or unfollows whom
+     */
     public void followUnfollow(FollowUnfollowRequest request) {
         socialRepository.followUnfollow(request);
     }
 
+    /**
+     * Gets the users followed by a specific user.
+     * @param userId the user for whom to get the followed users
+     * @return a list of userIds who are followed by the specified userId
+     */
     public List<String> getFollows(String userId) {
         if (!socialRepository.userExists(userId)) {
             return null;
@@ -25,6 +35,11 @@ public class SocialService {
         return socialRepository.getFollows(userId);
     }
 
+    /**
+     * Gets the followers of a specific user.
+     * @param userId the user for whom to get the followers
+     * @return a list of userIds who follow the specified userId
+     */
     public List<String> getFollowers(String userId) {
         if (!socialRepository.userExists(userId)) {
             return null;
@@ -33,10 +48,19 @@ public class SocialService {
         return socialRepository.getFollowers(userId);
     }
 
+    /**
+     * Creates or updates the block relation between two users.
+     * @param request the request indicating who blocks or unblocks whom
+     */
     public void blockUnblock(BlockUnblockRequest request) {
         socialRepository.blockUnblock(request);
     }
 
+    /**
+     * Gets the users blocked by a specific user.
+     * @param userId the user for whom to get the blocked users
+     * @return a list of userIds who are blocked by the specified userId
+     */
     public List<String> getBlockedUsers(String userId) {
         if (!socialRepository.userExists(userId)) {
             return null;
@@ -45,6 +69,11 @@ public class SocialService {
         return socialRepository.getBlockedUsers(userId);
     }
 
+    /**
+     * Gets the users who blocked a specific user.
+     * @param userId the user for whom to get the users who blocked them
+     * @return a list of userIds who have blocked the specified userId
+     */
     public List<String> getUsersWhoBlocked(String userId) {
         if (!socialRepository.userExists(userId)) {
             return null;
