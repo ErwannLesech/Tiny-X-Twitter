@@ -2,10 +2,11 @@ variables:
   TESTCONTAINERS_HOST_OVERRIDE: 172.17.0.1
 
 test:
- image: maven:3.8.3-openjdk-17
+ image: maven:eclipse-temurin-17-alpine
  stage: test
  script:
-  - apt-get update && apt-get install -y docker.io
+  - apk update
+  - apk add docker
   - cd epitweet-backend
   - mvn clean install
   - mvn test
