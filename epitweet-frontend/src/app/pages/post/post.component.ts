@@ -53,15 +53,28 @@ export class PostComponent implements OnInit {
 
   loadPost(postId: string) {
     this.isLoading = true;
+  
     this.postService.getPostById(postId).subscribe({
       next: (post) => {
         if (post) {
           this.post = post;
-          console.log('Post:', this.post);
+
+          this.postService.getReplies(postId).subscribe({
+            next: (replies) => {
+              this.post.comments = replies;
+              this.isLoading = false;
+            },
+            error: (err) => {
+              console.error('Failed to load replies:', err);
+              this.post.comments = [];
+              this.isLoading = false;
+            }
+          });
+  
         } else {
           this.error = 'Failed to load post';
+          this.isLoading = false;
         }
-        this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading post:', err);

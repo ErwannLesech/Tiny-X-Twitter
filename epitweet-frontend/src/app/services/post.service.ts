@@ -89,6 +89,10 @@ export class PostService {
       );
   }
 
+  getReplies(postId: string) {
+    return this.http.get<any[]>(`${this.apiUrl}/getPostReply/${postId}`);
+  }
+
   //TODO : add updatePost and deletePost methods
 
   private handleGetPostsError(error: HttpErrorResponse) {
