@@ -11,13 +11,14 @@ COPY . .
 
 RUN npm run build -- --output-path=dist
 
-# Serveur Nginx pour servir l'application
-FROM nginx:alpine
+# Serveur http-server pour servir l'application
+FROM node:18-alpine
 
-COPY --from=build /app/dist/ /var/www/html/
+RUN npm install -g http-server
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
+COPY --from=build /app/dist/browser /app/
 
-EXPOSE 80
+EXPOSE 4200
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["http-server", "/app", "-p", "4200"]
