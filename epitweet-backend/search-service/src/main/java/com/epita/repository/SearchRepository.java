@@ -35,6 +35,7 @@ public class SearchRepository {
      * @return list of matching posts.
      */
     public List<PostDocument> search(List<String> tokenizedRequest) {
+        LOGGER.info("Searching for: " + tokenizedRequest);
         try {
             // Separate words and hashtags
             List<String> hashtags = tokenizedRequest.stream()
