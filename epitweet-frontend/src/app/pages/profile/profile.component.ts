@@ -10,6 +10,8 @@ import { User, UserStateService } from '../../services/user-state.service';
 import { Post, PostService } from '../../services/post.service';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { ProfileUpdateComponent } from "./profile-update/profile-update.component";
+import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
+import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 
 @Component({
   selector: 'app-profile',
@@ -21,6 +23,8 @@ import { ProfileUpdateComponent } from "./profile-update/profile-update.componen
     MatInputModule,
     RouterModule,
     ProfileUpdateComponent,
+    LeftSidebarComponent,
+    RightSidebarComponent
 ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']

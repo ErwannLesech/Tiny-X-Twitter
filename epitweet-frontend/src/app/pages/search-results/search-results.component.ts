@@ -10,6 +10,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
+import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 
 @Component({
   selector: 'app-search-results',
@@ -19,8 +21,10 @@ import { UserService } from '../../services/user.service';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    RouterModule
-  ],
+    RouterModule,
+    LeftSidebarComponent,
+    RightSidebarComponent
+],
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss']
 })

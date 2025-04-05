@@ -7,6 +7,8 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { User, UserStateService } from '../../services/user-state.service';
 import { PostService, PostRequest } from '../../services/post.service';
 import { FormsModule } from '@angular/forms';
+import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
+import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 
 @Component({
   selector: 'app-home',
@@ -17,8 +19,10 @@ import { FormsModule } from '@angular/forms';
     MatFormFieldModule,
     MatInputModule,
     RouterModule,
-    FormsModule
-  ],
+    FormsModule,
+    LeftSidebarComponent,
+    RightSidebarComponent
+],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -44,12 +48,6 @@ export class HomeComponent implements OnInit {
       document.documentElement.setAttribute('data-theme', this.currentTheme);
     }
     this.loggedUser = this.userStateService.getLoggedUser();
-  }
-
-  search(query: string) {
-    if (query.trim()) {
-      this.router.navigate(['/search'], { queryParams: { q: query } });
-    }
   }
 
   onLikeClick(event: Event): void {
@@ -92,11 +90,6 @@ export class HomeComponent implements OnInit {
       event.preventDefault();
       this.createPost();
     }
-  }
-
-  logout() {
-    this.userStateService.logout();
-    this.router.navigate(['/login']);
   }
 
   toggleTheme() {

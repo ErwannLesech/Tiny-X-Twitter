@@ -1,27 +1,33 @@
 :root {
-  --color-primary: #0f1419; /* Example primary color */
-  --color-secondary: #949494; /* Example secondary color */
-  --color-border: #e1e8ed;
-  --color-background: #f7f9f9;
-  --color-text: #000000;
+  --color-primary: #000000; /* X/Twitter blue */
+  --color-primary-hover: #0a1822;
+  --color-secondary: #eff3f4;
+  --color-border: #eff3f4;
+  --color-background: #ffffff;
+  --color-text: #0f1419;
   --color-text-light: #ffffff;
-  --color-info: #666;
-  --color-icons: #657786;
-  --color-muted: #7e7e7e;
-  --color-hover: #ececec;
+  --color-info: #536471;
+  --color-icons: #0f1419;
+  --color-muted: #71767b;
+  --color-hover: #f7f9f9;
   --color-danger: #ff4d4f;
+  --color-trends-bg: #f7f9f9;
+  --color-post-hover: #f7f7f7;
 }
 
 [data-theme='dark'] {
-  --color-primary: #1a1a1a; /* Example primary color */
-  --color-secondary: #666666; /* Example secondary color */
-  --color-border: #444444;
-  --color-background: #2c2c2c;
-  --color-text: #ffffff;
-  --color-text-light: #cccccc;
-  --color-info: #aaaaaa;
-  --color-icons: #bbbbbb;
-  --color-muted: #888888;
-  --color-hover: #333333;
+  --color-primary: #1d9bf0;
+  --color-primary-hover: #1a8cd8;
+  --color-secondary: #2f3336;
+  --color-border: #2f3336;
+  --color-background: #000000;
+  --color-text: #e7e9ea;
+  --color-text-light: #e7e9ea;
+  --color-info: #71767b;
+  --color-icons: #e7e9ea;
+  --color-muted: #71767b;
+  --color-hover: #16181c;
   --color-danger: #ff4d4f;
+  --color-trends-bg: #16181c;
+  --color-post-hover: #080808;
 }
