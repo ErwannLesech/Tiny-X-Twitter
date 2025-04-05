@@ -33,7 +33,7 @@ public class BlockUnBlockTest
             "user789",
             "user999");
         socialRepository.clean();
-        socialRepository.createUser(usersId);
+        socialRepository.createResource(usersId, SocialRepository.TypeCreate.USER);
     }
 
     /**
@@ -71,7 +71,7 @@ public class BlockUnBlockTest
             .when()
             .post("/api/social/block")
             .then()
-            .statusCode(400);
+            .statusCode(404);
 
         List<String> blocksId = socialRepository.getBlockedUsers("user123");
         List<String> expectedBlocksId = List.of();
@@ -95,7 +95,7 @@ public class BlockUnBlockTest
             .when()
             .post("/api/social/block")
             .then()
-            .statusCode(400);
+            .statusCode(404);
 
         List<String> blocksId = socialRepository.getUsersWhoBlocked("user456");
         List<String> expectedBlocksId = List.of();
@@ -205,7 +205,7 @@ public class BlockUnBlockTest
             .when()
             .get("/api/social/getBlocked/unknown")
             .then()
-            .statusCode(400);
+            .statusCode(404);
     }
 
     /**
@@ -241,7 +241,7 @@ public class BlockUnBlockTest
             .when()
             .get("/api/social/getBlock/unknown")
             .then()
-            .statusCode(400);
+            .statusCode(404);
     }
 
     /**
