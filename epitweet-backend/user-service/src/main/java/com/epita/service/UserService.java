@@ -87,16 +87,16 @@ public class UserService {
     public Boolean updateUser(final UserRequest userRequest) {
         User userToUpdate = userRepository.findByTag(userRequest.getTag());
         if (userToUpdate != null) {
-            if (userRequest.getPseudo() != null) {
+            if (userRequest.getPseudo() != null && !userRequest.getPseudo().isEmpty()){
                 userToUpdate.setPseudo(userRequest.getPseudo());
             }
-            if (userRequest.getProfileDescription() != null) {
+            if (userRequest.getProfileDescription() != null && !userRequest.getProfileDescription().isEmpty()) {
                 userToUpdate.setProfileDescription(userRequest.getProfileDescription());
             }
-            if (userRequest.getProfilePictureUrl() != null) {
+            if (userRequest.getProfilePictureUrl() != null && !userRequest.getProfilePictureUrl().isEmpty()) {
                 userToUpdate.setProfilePictureUrl(userRequest.getProfilePictureUrl());
             }
-            if (userRequest.getProfileBannerUrl() != null) {
+            if (userRequest.getProfileBannerUrl() != null && !userRequest.getProfileBannerUrl().isEmpty()) {
                 userToUpdate.setProfileBannerUrl(userRequest.getProfileBannerUrl());
             }
 
