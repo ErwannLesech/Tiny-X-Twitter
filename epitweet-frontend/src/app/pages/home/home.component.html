@@ -1,40 +1,11 @@
 <div class="home-container">
   <!-- Left Sidebar -->
-  <div class="left-sidebar">
-    <div class="logo">
-      <img src="assets/images/tiny-twitter-logo.png" alt="Logo" class="logo-icon">
-      <span class="logo-text">TinyTwitter</span>
-    </div>
-    
-    <nav class="main-nav">
-      <a routerLink="/home" class="nav-link active">
-        <mat-icon>home</mat-icon>
-        <span>Accueil</span>
-      </a>
-      <a [routerLink]="['/profile', loggedUser?.userTag]" class="nav-link">
-        <mat-icon>person</mat-icon>
-        <span>Profile</span>
-      </a>
-      <button class="post-creation-button">
-        <mat-icon>edit</mat-icon>
-        <span>Poster</span>
-      </button>
-    </nav>
-    
-    <div class="user-profile">
-      <img  [src]="loggedUser?.avatarUrl" alt="Profile" class="profile-pic">
-      <div class="user-info">
-        <span class="userName">{{ loggedUser?.userName }}</span>
-        <span class="userTag">&#64;{{ loggedUser?.userTag }}</span>
-      </div>
-      <button mat-icon-button (click)="logout()">
-        <mat-icon>logout</mat-icon>
-      </button>
-    </div>
-    <!-- <button (click)="toggleTheme()">
-      <mat-icon>{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
-    </button> -->
-  </div>
+  <app-left-sidebar 
+    [avatarUrl]="loggedUser?.avatarUrl || ''"
+    [userName]="loggedUser?.userName || ''"
+    [userTag]="loggedUser?.userTag || ''"
+    style="display: flex; flex-direction: column; justify-content: space-between;">
+  </app-left-sidebar>
   
   <!-- Main Content -->
   <div class="main-content">
@@ -91,19 +62,5 @@
   </div>
   
   <!-- Right Sidebar -->
-  <div class="right-sidebar">
-    <div class="search-bar">
-      <mat-form-field appearance="outline">
-        <input 
-          matInput 
-          placeholder="Rechercher"
-          #searchInput
-          (keyup.enter)="search(searchInput.value)">
-      </mat-form-field>
-    </div>
-    
-    <div class="trends">
-      <!-- Search results would appear here -->
-    </div>
-  </div>
+  <app-right-sidebar></app-right-sidebar>
 </div>

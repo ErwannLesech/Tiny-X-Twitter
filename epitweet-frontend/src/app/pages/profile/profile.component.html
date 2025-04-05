@@ -1,37 +1,11 @@
 <div class="profile-container">
-    <!-- Left Sidebar (same as home) -->
-    <div class="left-sidebar">
-      <div class="logo">
-        <img src="assets/images/tiny-twitter-logo.png" alt="Logo" class="logo-icon">
-        <span class="logo-text">TinyTwitter</span>
-      </div>
-      
-      <nav class="main-nav">
-        <a routerLink="/home" class="nav-link">
-          <mat-icon>home</mat-icon>
-          <span>Accueil</span>
-        </a>
-        <a [routerLink]="['/profile', loggedUser?.userTag || '']" class="nav-link" [class.active]="targetUser === loggedUser">
-          <mat-icon>person</mat-icon>
-          <span>Profile</span>
-        </a>
-        <button class="post-creation-button">
-          <mat-icon>edit</mat-icon>
-          <span>Poster</span>
-        </button>
-      </nav>
-      
-      <div class="user-profile">
-        <img [src]="loggedUser?.avatarUrl" alt="Profile" class="profile-pic">
-        <div class="user-info">
-          <span class="userName">{{ loggedUser?.userName }}</span>
-          <span class="userTag">&#64;{{ loggedUser?.userTag }}</span>
-        </div>
-        <button mat-icon-button (click)="logout()">
-          <mat-icon>logout</mat-icon>
-        </button>
-      </div>
-    </div>
+    <!-- Left Sidebar -->
+    <app-left-sidebar 
+      [avatarUrl]="loggedUser?.avatarUrl || ''"
+      [userName]="loggedUser?.userName || ''"
+      [userTag]="loggedUser?.userTag || ''"
+      style="display: flex; flex-direction: column; justify-content: space-between;">
+    </app-left-sidebar>
     
     <!-- Loading state -->
     <div *ngIf="isLoading" class="loading">
@@ -151,19 +125,6 @@
       </div>
     </div>
 
-    <!-- Right Sidebar (same as home) -->
-    <div class="right-sidebar">
-      <div class="search-bar">
-        <mat-form-field appearance="outline">
-          <input 
-            matInput 
-            placeholder="Rechercher"
-            #searchInput
-            (keyup.enter)="search(searchInput.value)">
-        </mat-form-field>
-      </div>
-      
-      <div class="trends">
-      </div>
-    </div>
+      <!-- Right Sidebar -->
+    <app-right-sidebar></app-right-sidebar>
 </div>

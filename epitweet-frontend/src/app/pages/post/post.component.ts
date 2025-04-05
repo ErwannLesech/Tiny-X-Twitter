@@ -9,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../services/user.service';
+import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
+import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 
 @Component({
   selector: 'app-post',
@@ -21,7 +23,9 @@ import { UserService } from '../../services/user.service';
     RouterModule,
     MatFormFieldModule,
     MatInputModule,
-  ]
+    LeftSidebarComponent,
+    RightSidebarComponent
+]
 })
 export class PostComponent implements OnInit {
   post: any = null;
@@ -35,8 +39,7 @@ export class PostComponent implements OnInit {
     private postService: PostService,
     private userStateService: UserStateService,
     private router: Router,
-    private location: Location,
-    private userService: UserService
+    private location: Location
   ) {}
 
   ngOnInit() {
