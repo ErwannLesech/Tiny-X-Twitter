@@ -2,6 +2,7 @@ package com.epita.service;
 
 import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.contracts.social.BlockedRelationResponse;
+import com.epita.contracts.user.UserResponse;
 import com.epita.controller.contracts.PostRequest;
 import com.epita.converter.PostTimelineConverter;
 import com.epita.contracts.post.PostResponse;
@@ -14,12 +15,13 @@ import com.epita.repository.entity.PostType;
 import com.epita.repository.publisher.PostHomeTimelinePublisher;
 import com.epita.repository.publisher.PostTimelinePublisher;
 import com.epita.repository.publisher.IndexPostPublisher;
-import io.vertx.ext.auth.impl.UserConverter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -45,9 +47,11 @@ public class PostService {
     IndexPostPublisher indexPostPublisher;
 
     @Inject
+    @RestClient
     UserRestClient userRestClient;
 
     @Inject
+    @RestClient
     SocialRestClient socialRestClient;
 
     /**
@@ -161,7 +165,7 @@ public class PostService {
      */
     public PostResponse createPostRequest(ObjectId userId, PostRequest postRequest) {
         // Check if user exists
-        try (Response response = userRestClient.getUserById(userId)) {
+        try (RestResponse<UserResponse> response = userRestClient.getUserById(userId)) {
             if (response.getStatus() != 200) {
                 return null;
             }
@@ -177,7 +181,7 @@ public class PostService {
 
             BlockedRelationResponse blockedRelationResponse;
             try {
-                blockedRelationResponse = socialRestClient.getBlockedRelation(blockedRelationRequest);
+                blockedRelationResponse = socialRestClient.getBlockedRelation(blockedRelationRequest).getEntity();
             } catch (ClientWebApplicationException e) {
                 return null;
             }
