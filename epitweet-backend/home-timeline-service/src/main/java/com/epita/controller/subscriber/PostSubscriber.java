@@ -5,6 +5,7 @@ import com.epita.service.HomeTimelineService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import io.quarkus.runtime.Startup;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -14,6 +15,10 @@ import java.util.function.Consumer;
 
 import static io.quarkus.mongodb.runtime.dns.MongoDnsClientProvider.vertx;
 
+/**
+ * A subscriber that listens to 'postHomeTimeline'
+ * channel related to post-creation response with repo post service module.
+ */
 @Startup
 @ApplicationScoped
 public class PostSubscriber implements Consumer<PostHomeTimeline> {
@@ -28,8 +33,12 @@ public class PostSubscriber implements Consumer<PostHomeTimeline> {
 
     public PostSubscriber(final RedisDataSource ds) {
         subscriber = ds.pubsub(PostHomeTimeline.class)
-                .subscribe("purchase-cmd", this);
+                .subscribe("postHomeTimeline", this);
     }
+
+    @PostConstruct
+    void init() {logger.info("PostSubscriber initiated !");}
+
 
     @Override
     public void accept(final PostHomeTimeline message) {
@@ -38,6 +47,7 @@ public class PostSubscriber implements Consumer<PostHomeTimeline> {
         // code knowingly, otherwise it may crash at runtime to prevent
         // unwanted blocking code.
         vertx.executeBlocking(future -> {
+            logger.infof("Received PostHomeTimeline from postHomeTimeline: %s", message.toString());
             homeTimelineService.updateOnPost(message);
             future.complete();
         });

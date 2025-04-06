@@ -29,7 +29,9 @@ public class HomeTimelineService {
         return ( timeline != null ) ? Response.ok(timeline).build() : Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    public void updateOnLike(LikePost message) {}
+    public void updateOnLike(LikePost message) {
+
+    }
 
     public void updateOnPost(PostHomeTimeline message) {}
 

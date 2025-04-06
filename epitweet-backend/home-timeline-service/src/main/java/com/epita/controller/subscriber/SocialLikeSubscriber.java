@@ -1,11 +1,11 @@
 package com.epita.controller.subscriber;
 
-import com.epita.payloads.homeTimeline.PostHomeTimeline;
 import com.epita.payloads.social.LikePost;
 import com.epita.service.HomeTimelineService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import io.quarkus.runtime.Startup;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,9 +15,13 @@ import java.util.function.Consumer;
 
 import static io.quarkus.mongodb.runtime.dns.MongoDnsClientProvider.vertx;
 
+/**
+ * A subscriber that listens to 'SocialHomeTimeline Like'
+ * channel related to unlike/like user response with repo social service module.
+ */
 @Startup
 @ApplicationScoped
-public class SocialLIkeSubscriber  implements Consumer<LikePost> {
+public class SocialLikeSubscriber  implements Consumer<LikePost> {
 
     @Inject
     Logger logger;
@@ -27,10 +31,13 @@ public class SocialLIkeSubscriber  implements Consumer<LikePost> {
 
     private final PubSubCommands.RedisSubscriber subscriber;
 
-    public SocialLIkeSubscriber(final RedisDataSource ds) {
+    public SocialLikeSubscriber(final RedisDataSource ds) {
         subscriber = ds.pubsub(LikePost.class)
-                .subscribe("purchase-cmd", this);
+                .subscribe("SocialHomeTimeline Like", this);
     }
+
+    @PostConstruct
+    void init() {logger.info("SocialLikeSubscriber initiated !");}
 
     @Override
     public void accept(final LikePost message) {
@@ -39,6 +46,7 @@ public class SocialLIkeSubscriber  implements Consumer<LikePost> {
         // code knowingly, otherwise it may crash at runtime to prevent
         // unwanted blocking code.
         vertx.executeBlocking(future -> {
+            logger.infof("Received LikePost from SocialHomeTimeline Like: %s", message.toString());
             homeTimelineService.updateOnLike(message);
             future.complete();
         });
