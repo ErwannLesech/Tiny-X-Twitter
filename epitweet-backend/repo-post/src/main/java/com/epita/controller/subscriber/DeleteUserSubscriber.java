@@ -1,6 +1,6 @@
 package com.epita.controller.subscriber;
 
-import com.epita.payloads.post.CreatePostResponse;
+import com.epita.payloads.user.DeleteUserPost;
 import com.epita.service.PostService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  */
 @Startup
 @ApplicationScoped
-public class CreatePostSubscriber implements Consumer<CreatePostResponse> {
+public class DeleteUserSubscriber implements Consumer<DeleteUserPost> {
     private final PubSubCommands.RedisSubscriber subscriber;
     private final Vertx vertx;
 
@@ -31,21 +31,21 @@ public class CreatePostSubscriber implements Consumer<CreatePostResponse> {
     Logger logger;
 
     @Inject
-    public CreatePostSubscriber(final RedisDataSource ds, Vertx vertx) {
+    public DeleteUserSubscriber(final RedisDataSource ds, Vertx vertx) {
         this.vertx = vertx;
-        subscriber = ds.pubsub(CreatePostResponse.class).subscribe("isPostBlockedResponse", this);
+        subscriber = ds.pubsub(DeleteUserPost.class).subscribe("deleteUserPost", this);
     }
 
     @PostConstruct
     void init() {
-        logger.info("CreatePostSubscriber initiated !");
+        logger.info("DeleteUserSubscriber initiated !");
     }
 
     @Override
-    public void accept(final CreatePostResponse message) {
-        logger.infof("Received CreationPostResponse from IsPostBlockedResponse: %s", message.toString());
+    public void accept(final DeleteUserPost message) {
+        logger.infof("Received CreationPostResponse from deleteUserPost: %s", message.toString());
         vertx.executeBlocking(future -> {
-            postService.createPostResponse(message);
+            postService.deletePost(message.getUserId());
             future.complete();
         });
     }

@@ -2,6 +2,7 @@ package com.epita.converter;
 
 import com.epita.controller.contracts.UserRequest;
 import com.epita.controller.contracts.UserResponse;
+import com.epita.payloads.user.DeleteUserPost;
 import com.epita.repository.entity.User;
 import org.bson.types.ObjectId;
 
@@ -48,6 +49,12 @@ public class UserConverter {
                 user.getProfileBannerUrl(),
                 user.getProfileDescription(),
                 user.getCreatedAt()
+        );
+    }
+
+    public static DeleteUserPost toDeleteResponse(User user) {
+        return new DeleteUserPost(
+                user.getId()
         );
     }
 }

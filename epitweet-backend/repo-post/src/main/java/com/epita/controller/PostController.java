@@ -173,7 +173,11 @@ public class PostController {
         logger.infof("Creating post for userId: %s with request: %s", userId, postRequest);
         PostResponse postResponse = postService.createPostRequest(userId, postRequest);
 
-        if (Objects.equals(postRequest.getPostType(), "post") && postResponse != null) {
+        if (postResponse == null) {
+            logger.warnf("createPost response 404 - userId does not exist: %s", userId);
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        else if (Objects.equals(postRequest.getPostType(), "post") && postResponse != null) {
             logger.infof("createPost response 201 - Post created successfully: %s", postResponse);
             return Response.status(Response.Status.CREATED).entity(postResponse).build(); // 201
         } else {
