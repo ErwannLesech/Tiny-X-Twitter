@@ -3,10 +3,14 @@ package com.epita;
 import com.epita.contracts.post.PostResponse;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
+import com.epita.repository.restClient.SocialRestClient;
+import com.epita.repository.restClient.UserRestClient;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +28,14 @@ public class PostControllerTest {
 
     @Inject
     Logger logger;
+
+    @InjectMock
+    @RestClient
+    UserRestClient userRestClient;
+
+    @InjectMock
+    @RestClient
+    SocialRestClient socialRestClient;
 
     ObjectId headerUserFirst = new ObjectId();
     String postContent = "{ \"content\": \"This is my first post!\", \"postType\": \"post\" }";

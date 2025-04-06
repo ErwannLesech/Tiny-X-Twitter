@@ -1,6 +1,5 @@
 package com.epita.repository.publisher;
 
-import com.epita.payloads.post.CreatePostRequest;
 import com.epita.payloads.userTimeline.PostTimeline;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
