@@ -35,6 +35,7 @@
         <module>user-service</module>
         <module>repo-post</module>
         <module>search-service</module>
+        <module>social-service</module>
     </modules>
 
     <dependencyManagement>
@@ -99,6 +100,15 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-elasticsearch-java-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkiverse.neo4j</groupId>
+            <artifactId>quarkus-neo4j</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5-mockito</artifactId>
         </dependency>
     </dependencies>
 

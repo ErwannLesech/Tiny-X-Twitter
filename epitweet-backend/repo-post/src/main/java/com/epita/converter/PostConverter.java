@@ -1,9 +1,8 @@
 package com.epita.converter;
 
+import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.controller.contracts.PostRequest;
 import com.epita.contracts.post.PostResponse;
-import com.epita.payloads.post.CreatePostRequest;
-import com.epita.payloads.post.CreatePostResponse;
 import com.epita.payloads.search.IndexPost;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
@@ -59,35 +58,10 @@ public class PostConverter {
         );
     }
 
-    /**
-     * Converts a {@code CreatePostResponse} to a {@code PostRequest}.
-     *
-     * @param createPostResponse The {@code CreatePostResponse} to convert.
-     * @return The converted {@code PostRequest}.
-     */
-    public static PostRequest toRequest(CreatePostResponse createPostResponse) {
-        return new PostRequest(
-                createPostResponse.getPostType(),
-                createPostResponse.getContent(),
-                createPostResponse.getMediaUrl(),
-                createPostResponse.getParentId() != null ? createPostResponse.getParentId().toString() : null
-        );
-    }
-
-    /**
-     * Converts a {@code PostRequest} to a {@code CreatePostRequest}.
-     *
-     * @param userId      The ID of the user creating the post.
-     * @param postRequest The {@code PostRequest} to convert.
-     * @return The converted {@code CreatePostRequest}.
-     */
-    public static CreatePostRequest toCreatePostRequest(ObjectId userId, PostRequest postRequest) {
-        return new CreatePostRequest(
+    public static BlockedRelationRequest toBlockedRelationRequest(ObjectId userId, ObjectId parentId) {
+        return new BlockedRelationRequest(
                 userId,
-                postRequest.getPostType(),
-                postRequest.getContent(),
-                postRequest.getMediaUrl(),
-                postRequest.getParentObjectId()
+                parentId
         );
     }
 
