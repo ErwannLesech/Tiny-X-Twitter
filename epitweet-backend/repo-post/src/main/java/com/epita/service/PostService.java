@@ -166,7 +166,7 @@ public class PostService {
     public PostResponse createPostRequest(ObjectId userId, PostRequest postRequest) {
         // Check if user exists
         try (RestResponse<UserResponse> response = userRestClient.getUserById(userId)) {
-            if (response.getStatus() != 200) {
+            if (response == null || response.getStatus() != 200) {
                 return null;
             }
         } catch (ClientWebApplicationException e) {
