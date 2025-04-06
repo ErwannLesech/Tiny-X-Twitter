@@ -17,44 +17,52 @@ import java.util.Optional;
 
 @ApplicationScoped
 public class SocialRepository {
-    private static final Logger LOG = Logger.getLogger(SocialRepository.class);
     @Inject
     Driver neo4jDriver;
 
+    @Inject
+    Logger logger;
     /**
      * Creates or updates the follow relation between two users.
      * @param request the request indicating who follows or unfollows whom
      */
-    public void followUnfollow(FollowUnfollowRequest request) {
-        try (var session = neo4jDriver.session()) {
-            if (request.isFollowUnfollow()) {
-                session.executeWrite(tx -> {
+    public void followUnfollow(FollowUnfollowRequest request)
+    {
+        try (var session = neo4jDriver.session())
+        {
+            if (request.isFollowUnfollow())
+            {
+                session.executeWrite(tx ->
+                {
                     tx.run(
-                            "MATCH (u1:User {userId: $userFollowId}), (u2:User {userId: $userFollowedId}) " +
-                                    "MERGE (u1)-[:FOLLOWS]->(u2)",
-                            Map.of(
-                                    "userFollowId", request.getUserFollowId(),
-                                    "userFollowedId", request.getUserFollowedId()
-                            )
+                        "MATCH (u1:User {userId: $userFollowId}), (u2:User {userId: $userFollowedId}) " +
+                            "MERGE (u1)-[:FOLLOWS]->(u2)",
+                        Map.of(
+                            "userFollowId", request.getUserFollowId(),
+                            "userFollowedId", request.getUserFollowedId()
+                        )
                     );
                     return null;
                 });
-                LOG.infof("User %s followed user %s", request.getUserFollowId(), request.getUserFollowedId());
-            } else {
-                session.executeWrite(tx -> {
+                logger.infof("User %s followed user %s", request.getUserFollowId(), request.getUserFollowedId());
+            } else
+            {
+                session.executeWrite(tx ->
+                {
                     tx.run(
-                            "MATCH (u1:User {userId: $userFollowId})-[r:FOLLOWS]->(u2:User {userId: $userFollowedId}) " +
-                                    "DELETE r",
-                            Map.of(
-                                    "userFollowId", request.getUserFollowId(),
-                                    "userFollowedId", request.getUserFollowedId()
-                            )
+                        "MATCH (u1:User {userId: $userFollowId})-[r:FOLLOWS]->(u2:User {userId: $userFollowedId}) " +
+                            "DELETE r",
+                        Map.of(
+                            "userFollowId", request.getUserFollowId(),
+                            "userFollowedId", request.getUserFollowedId()
+                        )
                     );
                     return null;
                 });
-                LOG.infof("User %s unfollowed user %s", request.getUserFollowId(), request.getUserFollowedId());
+                logger.infof("User %s unfollowed user %s", request.getUserFollowId(), request.getUserFollowedId());
             }
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             throw new RuntimeException("Failed to process follow/unfollow", e);
         }
     }
@@ -69,7 +77,7 @@ public class SocialRepository {
             String cypher = "MATCH (u:User {userId: $userId})-[r:FOLLOWS]->(followed:User) " +
                             "RETURN followed.userId";
             var result = session.executeRead(tx ->
-                    tx.run(cypher, Map.of("userId", userId)).list()
+                tx.run(cypher, Map.of("userId", userId)).list()
             );
             List<String> follows = new ArrayList<>();
             for (Record record : result) {
@@ -91,7 +99,7 @@ public class SocialRepository {
             String cypher = "MATCH (u:User)-[:FOLLOWS]->(target:User {userId: $userId}) " +
                             "RETURN u.userId";
             var result = session.executeRead(tx ->
-                    tx.run(cypher, Map.of("userId", userId)).list()
+                tx.run(cypher, Map.of("userId", userId)).list()
             );
             List<String> followers = new ArrayList<>();
             for (Record record : result) {
@@ -112,29 +120,29 @@ public class SocialRepository {
             if (request.isBlockUnblock()) {
                 session.executeWrite(tx -> {
                     tx.run(
-                            "MATCH (u1:User {userId: $userBlockId}), (u2:User {userId: $userBlockedId}) " +
-                                    "MERGE (u1)-[:BLOCKS]->(u2)",
-                            Map.of(
-                                    "userBlockId", request.getUserBlockId(),
-                                    "userBlockedId", request.getUserBlockedId()
-                            )
+                        "MATCH (u1:User {userId: $userBlockId}), (u2:User {userId: $userBlockedId}) " +
+                                "MERGE (u1)-[:BLOCKS]->(u2)",
+                        Map.of(
+                            "userBlockId", request.getUserBlockId(),
+                            "userBlockedId", request.getUserBlockedId()
+                        )
                     );
                     return null;
                 });
-                LOG.infof("User %s blocked user %s", request.getUserBlockId(), request.getUserBlockedId());
+                logger.infof("User %s blocked user %s", request.getUserBlockId(), request.getUserBlockedId());
             } else {
                 session.executeWrite(tx -> {
                     tx.run(
-                            "MATCH (u1:User {userId: $userBlockId})-[r:BLOCKS]->(u2:User {userId: $userBlockedId}) " +
-                                    "DELETE r",
-                            Map.of(
-                                    "userBlockId", request.getUserBlockId(),
-                                    "userBlockedId", request.getUserBlockedId()
-                            )
+                        "MATCH (u1:User {userId: $userBlockId})-[r:BLOCKS]->(u2:User {userId: $userBlockedId}) " +
+                                "DELETE r",
+                        Map.of(
+                            "userBlockId", request.getUserBlockId(),
+                            "userBlockedId", request.getUserBlockedId()
+                        )
                     );
                     return null;
                 });
-                LOG.infof("User %s unblocked user %s", request.getUserBlockId(), request.getUserBlockedId());
+                logger.infof("User %s unblocked user %s", request.getUserBlockId(), request.getUserBlockedId());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to process block/unblock", e);
@@ -151,7 +159,7 @@ public class SocialRepository {
             String cypher = "MATCH (u:User {userId: $userId})-[r:BLOCKS]->(blocked:User) " +
                             "RETURN blocked.userId";
             var result = session.executeRead(tx ->
-                    tx.run(cypher, Map.of("userId", userId)).list()
+                tx.run(cypher, Map.of("userId", userId)).list()
             );
             List<String> blockedUsers = new ArrayList<>();
             for (Record record : result) {
@@ -173,7 +181,7 @@ public class SocialRepository {
             String cypher = "MATCH (u:User)-[r:BLOCKS]->(target:User {userId: $userId}) " +
                             "RETURN u.userId";
             var result = session.executeRead(tx ->
-                    tx.run(cypher, Map.of("userId", userId)).list()
+                tx.run(cypher, Map.of("userId", userId)).list()
             );
             List<String> usersWhoBlocked = new ArrayList<>();
             for (Record record : result) {
@@ -194,30 +202,30 @@ public class SocialRepository {
             if (request.isLikeUnlike()) {
                 session.executeWrite(tx -> {
                     tx.run(
-                            "MATCH (u:User {userId: $userId}), (p:Post {postId: $postId}) " +
-                                    "MERGE (u)-[r:LIKES {dateTime: $dateTime}]->(p)",
-                            Map.of(
-                                    "userId", request.getUserId(),
-                                    "postId", request.getPostId(),
-                                    "dateTime", LocalDateTime.now().toString()
-                            )
+                        "MATCH (u:User {userId: $userId}), (p:Post {postId: $postId}) " +
+                                "MERGE (u)-[r:LIKES {dateTime: $dateTime}]->(p)",
+                        Map.of(
+                            "userId", request.getUserId(),
+                            "postId", request.getPostId(),
+                            "dateTime", LocalDateTime.now().toString()
+                        )
                     );
                     return null;
                 });
-                LOG.infof("User %s liked post %s", request.getUserId(), request.getPostId());
+                logger.infof("User %s liked post %s", request.getUserId(), request.getPostId());
             } else {
                 session.executeWrite(tx -> {
                     tx.run(
-                            "MATCH (u:User {userId: $userId})-[r:LIKES]->(p:Post {postId: $postId}) " +
-                                    "DELETE r",
-                            Map.of(
-                                    "userId", request.getUserId(),
-                                    "postId", request.getPostId()
-                            )
+                        "MATCH (u:User {userId: $userId})-[r:LIKES]->(p:Post {postId: $postId}) " +
+                                "DELETE r",
+                        Map.of(
+                            "userId", request.getUserId(),
+                            "postId", request.getPostId()
+                        )
                     );
                     return null;
                 });
-                LOG.infof("User %s unliked post %s", request.getUserId(), request.getPostId());
+                logger.infof("User %s unliked post %s", request.getUserId(), request.getPostId());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to process like/unlike", e);
@@ -234,7 +242,7 @@ public class SocialRepository {
             String cypher = "MATCH (u:User)-[r:LIKES]->(p:Post {postId: $postId}) " +
                             "RETURN u.userId";
             var result = session.executeRead(tx ->
-                    tx.run(cypher, Map.of("postId", postId)).list()
+                tx.run(cypher, Map.of("postId", postId)).list()
             );
             List<String> users = new ArrayList<>();
             for (Record record : result) {
@@ -256,7 +264,7 @@ public class SocialRepository {
             String cypher = "MATCH (u:User {userId: $userId})-[r:LIKES]->(p:Post) " +
                             "RETURN p.postId";
             var result = session.executeRead(tx ->
-                    tx.run(cypher, Map.of("userId", userId)).list()
+                tx.run(cypher, Map.of("userId", userId)).list()
             );
             List<String> likedPosts = new ArrayList<>();
             for (Record record : result) {
@@ -277,7 +285,7 @@ public class SocialRepository {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User {userId: $userId}) RETURN count(u) as count";
             var result = session.executeRead(tx ->
-                    tx.run(cypher, Map.of("userId", userId)).single()
+                tx.run(cypher, Map.of("userId", userId)).single()
             );
             return result.get("count").asLong() > 0;
         } catch (Exception e) {
@@ -294,11 +302,11 @@ public class SocialRepository {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (p:Post {postId: $postId}) RETURN count(p) as count";
             var result = session.executeRead(tx ->
-                    tx.run(cypher, Map.of("postId", postId)).single()
+                tx.run(cypher, Map.of("postId", postId)).single()
             );
             return result.get("count").asLong() > 0;
         } catch (Exception e) {
-            LOG.errorf("Failed to check if post %s exists: %s", postId, e.getMessage());
+            logger.errorf("Failed to check if post %s exists: %s", postId, e.getMessage());
             throw new RuntimeException("Failed to check post existence", e);
         }
     }
@@ -331,11 +339,12 @@ public class SocialRepository {
      */
     public void createResource(List<String> resourcesId, TypeCreate typeCreate)
     {
+        logger.infof("Try to create %s", typeCreate.toString());
         try (var session = neo4jDriver.session())
         {
             Optional<String> createCypher = resourcesId.stream()
                 .map(resource -> String.format(
-                    "MERGE (%s:%s {%sId: \"%s\"}) ",
+                    "MERGE (user%s:%s {%sId: \"%s\"}) ",
                     resource,
                     typeCreate.toString(),
                     typeCreate.toString().toLowerCase(),
@@ -343,8 +352,10 @@ public class SocialRepository {
                 )
                 .reduce((a, b) -> a + b);
 
+
             if (createCypher.isPresent())
             {
+                logger.infof("cypher: %s", createCypher.get());
                 session.executeWrite(tx ->
                 {
                     tx.run(
@@ -353,8 +364,12 @@ public class SocialRepository {
                     return null;
                 });
                 resourcesId.forEach(user ->
-                    LOG.infof("%s: %s created", typeCreate.toString(), user)
+                    logger.infof("%s: %s created", typeCreate.toString(), user)
                 );
+            }
+            else
+            {
+                logger.info("cypher no optional");
             }
         } catch (Exception e)
         {
@@ -379,6 +394,6 @@ public class SocialRepository {
         {
             throw new RuntimeException("Failed to process createUser", e);
         }
-        LOG.infof("All table cleaned");
+        logger.infof("All table cleaned");
     }
 }

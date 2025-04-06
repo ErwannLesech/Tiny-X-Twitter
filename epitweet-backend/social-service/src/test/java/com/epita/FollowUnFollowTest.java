@@ -2,24 +2,41 @@ package com.epita;
 
 import com.epita.controller.contracts.FollowUnfollowRequest;
 import com.epita.repository.SocialRepository;
+import com.epita.repository.UserRestClient;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
+import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import io.quarkus.test.junit.mockito.InjectMock;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class FollowUnFollowTest
 {
     private static final Logger LOG = Logger.getLogger(SocialRepository.class);
+
     @Inject
     SocialRepository socialRepository;
+
+    @InjectMock
+    @RestClient
+    UserRestClient userRestClient;
+
+    String user123Id = "a00000000000000000000123";
+    String user456Id = "a00000000000000000000456";
+    String user789Id = "a00000000000000000000789";
+    String unknownId = "a000000000000000000f0f0f";
 
     /**
      * clean neo4j repository and append users
@@ -28,12 +45,19 @@ public class FollowUnFollowTest
     public void cleanAndSetup()
     {
         List<String> usersId = List.of(
-            "user123",
-            "user456",
-            "user789",
-            "user999");
+            user123Id,
+            user456Id,
+            user789Id
+        );
         socialRepository.clean();
-        socialRepository.createResource(usersId, SocialRepository.TypeCreate.USER);
+        when(userRestClient.getUser(any(ObjectId.class))).thenAnswer(invocation -> {
+            ObjectId userId = invocation.getArgument(0);
+            if (usersId.contains(userId.toHexString())) {
+                return RestResponse.ok();
+            } else {
+                return RestResponse.status(404);
+            }
+        });
     }
 
     /**
@@ -63,8 +87,8 @@ public class FollowUnFollowTest
     {
         FollowUnfollowRequest followUnfollowRequest = new FollowUnfollowRequest(
             true,
-            "unknown",
-            "user123");
+            unknownId,
+            user123Id);
 
         given().contentType(ContentType.JSON)
             .body(followUnfollowRequest)
@@ -73,7 +97,7 @@ public class FollowUnFollowTest
             .then()
             .statusCode(404);
 
-        List<String> followsId = socialRepository.getFollows("user123");
+        List<String> followsId = socialRepository.getFollows(user123Id);
         List<String> expectedFollowsId = List.of();
         testResult(followsId, expectedFollowsId);
     }
@@ -87,8 +111,8 @@ public class FollowUnFollowTest
     {
         FollowUnfollowRequest followUnfollowRequest = new FollowUnfollowRequest(
             true,
-            "user456",
-            "unknown");
+            user456Id,
+            unknownId);
 
         given().contentType(ContentType.JSON)
             .body(followUnfollowRequest)
@@ -97,14 +121,14 @@ public class FollowUnFollowTest
             .then()
             .statusCode(404);
 
-        List<String> followsId = socialRepository.getFollowers("user456");
+        List<String> followsId = socialRepository.getFollowers(user456Id);
         List<String> expectedFollowsId = List.of();
         testResult(followsId, expectedFollowsId);
     }
 
     /**
      * TEST follow ErrorInvalidBody:<br>
-     *  no body
+     *  No Body
      */
     @Test
     public void testFollowErrorInvalidBody()
@@ -126,8 +150,8 @@ public class FollowUnFollowTest
     {
         FollowUnfollowRequest followUnfollowRequest = new FollowUnfollowRequest(
             true,
-            "user456",
-            "user123");
+            user456Id,
+            user123Id);
 
         given().contentType(ContentType.JSON)
             .body(followUnfollowRequest)
@@ -136,8 +160,8 @@ public class FollowUnFollowTest
             .then()
             .statusCode(200);
 
-        List<String> followsId = socialRepository.getFollows("user123");
-        List<String> expectedFollowsId = List.of("user456");
+        List<String> followsId = socialRepository.getFollows(user123Id);
+        List<String> expectedFollowsId = List.of(user456Id);
         testResult(followsId, expectedFollowsId);
     }
 
@@ -153,8 +177,8 @@ public class FollowUnFollowTest
 
         FollowUnfollowRequest followUnfollowRequest = new FollowUnfollowRequest(
             true,
-            "user789",
-            "user123");
+            user789Id,
+            user123Id);
 
         given().contentType(ContentType.JSON)
             .body(followUnfollowRequest)
@@ -163,8 +187,8 @@ public class FollowUnFollowTest
             .then()
             .statusCode(200);
 
-        List<String> followsId = socialRepository.getFollows("user123");
-        List<String> expectedFollowsId = List.of("user456", "user789");
+        List<String> followsId = socialRepository.getFollows(user123Id);
+        List<String> expectedFollowsId = List.of(user456Id, user789Id);
         testResult(followsId, expectedFollowsId);
     }
 
@@ -181,8 +205,8 @@ public class FollowUnFollowTest
 
         FollowUnfollowRequest followUnfollowRequest = new FollowUnfollowRequest(
             false,
-            "user456",
-            "user123");
+            user456Id,
+            user123Id);
 
         given().contentType(ContentType.JSON)
             .body(followUnfollowRequest)
@@ -191,7 +215,7 @@ public class FollowUnFollowTest
             .then()
             .statusCode(200);
 
-        List<String> followsId = socialRepository.getFollows("user123");
+        List<String> followsId = socialRepository.getFollows(user123Id);
         List<String> expectedFollowsId = List.of();
         testResult(followsId, expectedFollowsId);
     }
@@ -203,7 +227,7 @@ public class FollowUnFollowTest
     {
         given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getFollows/unknown")
+            .get("/api/social/getFollows/" + unknownId)
             .then()
             .statusCode(404);
     }
@@ -221,14 +245,14 @@ public class FollowUnFollowTest
 
         List<String> followsId = given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getFollows/user123")
+            .get("/api/social/getFollows/" + user123Id)
             .then()
             .statusCode(200)
             .extract()
             .jsonPath()
             .getList("$", String.class);
 
-        List<String> expectedFollowsId = List.of("user456", "user789");
+        List<String> expectedFollowsId = List.of(user456Id, user789Id);
         testResult(followsId, expectedFollowsId);
     }
 
@@ -239,7 +263,7 @@ public class FollowUnFollowTest
     {
         given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getFollowers/unknown")
+            .get("/api/social/getFollowers/" + unknownId)
             .then()
             .statusCode(404);
     }
@@ -257,7 +281,7 @@ public class FollowUnFollowTest
 
         List<String> followersId456 = given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getFollowers/user456")
+            .get("/api/social/getFollowers/" + user456Id)
             .then()
             .statusCode(200)
             .extract()
@@ -266,14 +290,14 @@ public class FollowUnFollowTest
 
         List<String> followersId789 = given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getFollowers/user789")
+            .get("/api/social/getFollowers/" + user789Id)
             .then()
             .statusCode(200)
             .extract()
             .jsonPath()
             .getList("$", String.class);
 
-        List<String> expectedFollowsId = List.of("user123");
+        List<String> expectedFollowsId = List.of(user123Id);
         testResult(followersId456, expectedFollowsId);
         testResult(followersId789, expectedFollowsId);
     }

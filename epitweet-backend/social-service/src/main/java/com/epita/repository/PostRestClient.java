@@ -1,35 +1,23 @@
 package com.epita.repository;
 
 import com.epita.contracts.post.PostResponse;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.util.logging.Logger;
 
 /**
  * REST client for interacting with the repo-post.
  */
-@ApplicationScoped
-public class PostRestClient {
-    private static final String POST_URL = "http://localhost:8082/api/posts";
-    private final Client client;
-    private static final Logger LOGGER = Logger.getLogger(PostRestClient.class.getName());
+@RegisterRestClient(configKey = "rest-client")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public interface PostRestClient {
 
-    public PostRestClient() {
-        this.client = ClientBuilder.newClient();
-    }
-
-    public PostResponse getPost(String postId) {
-        try {
-            return client.target(POST_URL + "/getPost/"+ postId)
-                    .request(MediaType.APPLICATION_JSON)
-                    .get(new GenericType<PostResponse>() {});
-        }catch (Exception e) {
-            LOGGER.info(e.getMessage());
-            return null;
-        }
-    }
+    @GET
+    @Path("/getPost/{postId}")
+    public RestResponse<PostResponse> getPost(@PathParam("postId") ObjectId postId);
 }

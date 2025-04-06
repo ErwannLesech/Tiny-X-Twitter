@@ -1,7 +1,7 @@
 package com.epita.service;
 
 import com.epita.controller.contracts.UserRequest;
-import com.epita.controller.contracts.UserResponse;
+import com.epita.contracts.user.UserResponse;
 import com.epita.converter.UserConverter;
 import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;

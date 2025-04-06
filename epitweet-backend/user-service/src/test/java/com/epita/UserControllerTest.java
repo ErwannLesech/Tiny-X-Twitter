@@ -1,6 +1,6 @@
 package com.epita;
 
-import com.epita.controller.contracts.UserResponse;
+import com.epita.contracts.user.UserResponse;
 import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;
 import io.quarkus.test.junit.QuarkusTest;
@@ -10,8 +10,6 @@ import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.LinkedList;
 
 import static io.restassured.RestAssured.given;
 

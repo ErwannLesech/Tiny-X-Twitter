@@ -17,7 +17,11 @@ import com.epita.repository.UserRestClient;
 import com.epita.repository.publisher.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
+import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.ClientWebApplicationException;
 
 import java.util.List;
 
@@ -27,9 +31,11 @@ public class SocialService {
     SocialRepository socialRepository;
 
     @Inject
+    @RestClient
     UserRestClient userRestClient;
 
     @Inject
+    @RestClient
     PostRestClient postRestClient;
 
     @Inject
@@ -47,13 +53,37 @@ public class SocialService {
     @Inject
     IsPostBlockedPublisher isPostBlockedPublisher;
 
+    @Inject
+    Logger logger;
+
+    /**
+     * check if a string is a valid ObjectId
+     */
+    public boolean checkObjectId(String id) {
+        try{
+            new ObjectId(id);
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+
     /**
      * Creates or updates the follow relation between two users.
      * @param request the request indicating who follows or unfollows whom
      */
     public boolean followUnfollow(FollowUnfollowRequest request) {
         //check if users exist in their repo
-        if (userRestClient.getUser(request.userFollowId) == null || userRestClient.getUser(request.userFollowedId) == null) {
+        try {
+            if (userRestClient.getUser(new ObjectId(request.userFollowId)).getStatus() !=
+                Response.Status.OK.getStatusCode() ||
+                userRestClient.getUser(new ObjectId(request.userFollowedId)).getStatus() !=
+                    Response.Status.OK.getStatusCode()) {
+                return false;
+            }
+        }
+        catch (ClientWebApplicationException e) {
             return false;
         }
         //check if exist locally and created if needed
@@ -103,7 +133,15 @@ public class SocialService {
      */
     public boolean blockUnblock(BlockUnblockRequest request) {
         //check if users exist in their repo
-        if (userRestClient.getUser(request.userBlockId) == null || userRestClient.getUser(request.userBlockedId) == null) {
+        try {
+            if (userRestClient.getUser(new ObjectId(request.userBlockedId)).getStatus() !=
+                Response.Status.OK.getStatusCode() ||
+                userRestClient.getUser(new ObjectId(request.userBlockId)).getStatus() !=
+                    Response.Status.OK.getStatusCode()) {
+                return false;
+            }
+        }
+        catch (ClientWebApplicationException e) {
             return false;
         }
         //check if exist locally and created if needed
@@ -153,7 +191,13 @@ public class SocialService {
      */
     public boolean likeUnlike(AppreciationRequest request) {
         //check if user and post exist in their repo
-        if (userRestClient.getUser(request.userId) == null || postRestClient.getPost(request.postId) == null) {
+        try {
+            if (userRestClient.getUser(new ObjectId(request.userId)).getStatus() != Response.Status.OK.getStatusCode() ||
+                postRestClient.getPost(new ObjectId(request.postId)).getStatus() != Response.Status.OK.getStatusCode()) {
+                return false;
+            }
+        }
+        catch (ClientWebApplicationException e) {
             return false;
         }
         //check if exist locally and created if needed
@@ -203,7 +247,7 @@ public class SocialService {
     public void checkPostBlocked(CreatePostRequest message) {
         String userId = message.getUserId().toString();
 
-        PostResponse post = postRestClient.getPost(message.getParentId().toString());
+        PostResponse post = (PostResponse) postRestClient.getPost(message.getParentId()).getEntity();
         String parentUserId = post.userId.toString();
 
         List<String> blockedUsers = socialRepository.getBlockedUsers(userId);

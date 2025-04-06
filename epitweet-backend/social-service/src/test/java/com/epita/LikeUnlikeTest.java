@@ -1,11 +1,17 @@
 package com.epita;
 
 import com.epita.controller.contracts.AppreciationRequest;
+import com.epita.repository.PostRestClient;
 import com.epita.repository.SocialRepository;
+import com.epita.repository.UserRestClient;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
+import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class LikeUnlikeTest
@@ -21,6 +29,22 @@ public class LikeUnlikeTest
     @Inject
     SocialRepository socialRepository;
 
+    @InjectMock
+    @RestClient
+    UserRestClient userRestClient;
+
+    @InjectMock
+    @RestClient
+    PostRestClient postRestClient;
+
+    String user123Id = "a00000000000000000000123";
+    String user456Id = "a00000000000000000000456";
+    String user789Id = "a00000000000000000000789";
+    String post123Id = "a00000000000000000000123";
+    String post456Id = "a00000000000000000000456";
+    String post789Id = "a00000000000000000000789";
+    String unknownId = "a000000000000000000f0f0f";
+
     /**
      * clean neo4j repository and append users
      */
@@ -28,20 +52,32 @@ public class LikeUnlikeTest
     public void cleanAndSetup()
     {
         List<String> usersId = List.of(
-            "user123",
-            "user456",
-            "user789",
-            "user999"
+            user123Id,
+            user456Id,
+            user789Id
         );
         List<String> postsId = List.of(
-            "post123",
-            "post456",
-            "post789",
-            "post999"
+            post123Id,
+            post456Id,
+            post789Id
         );
         socialRepository.clean();
-        socialRepository.createResource(usersId, SocialRepository.TypeCreate.USER);
-        socialRepository.createResource(postsId, SocialRepository.TypeCreate.POST);
+        when(userRestClient.getUser(any(ObjectId.class))).thenAnswer(invocation -> {
+            ObjectId userId = invocation.getArgument(0);
+            if (usersId.contains(userId.toHexString())) {
+                return RestResponse.ok();
+            } else {
+                return RestResponse.status(404);
+            }
+        });
+        when(postRestClient.getPost(any(ObjectId.class))).thenAnswer(invocation -> {
+            ObjectId postId = invocation.getArgument(0);
+            if (postsId.contains(postId.toHexString())) {
+                return RestResponse.ok();
+            } else {
+                return RestResponse.status(404);
+            }
+        });
     }
 
     /**
@@ -71,8 +107,8 @@ public class LikeUnlikeTest
     {
         AppreciationRequest appreciationRequest = new AppreciationRequest(
             true,
-            "unknown",
-            "user123");
+            unknownId,
+            user123Id);
 
         given().contentType(ContentType.JSON)
             .body(appreciationRequest)
@@ -81,7 +117,7 @@ public class LikeUnlikeTest
             .then()
             .statusCode(404);
 
-        List<String> likePostsId = socialRepository.getLikesPosts("user123");
+        List<String> likePostsId = socialRepository.getLikesPosts(user123Id);
         List<String> expectedLikesId = List.of();
         testResult(likePostsId, expectedLikesId);
     }
@@ -95,8 +131,8 @@ public class LikeUnlikeTest
     {
         AppreciationRequest appreciationRequest = new AppreciationRequest(
             true,
-            "post123",
-            "unknown");
+            post123Id,
+            unknownId);
 
         given().contentType(ContentType.JSON)
             .body(appreciationRequest)
@@ -105,7 +141,7 @@ public class LikeUnlikeTest
             .then()
             .statusCode(404);
 
-        List<String> likeUsersId = socialRepository.getLikeUsers("post123");
+        List<String> likeUsersId = socialRepository.getLikeUsers(post123Id);
         List<String> expectedLikesId = List.of();
         testResult(likeUsersId, expectedLikesId);
     }
@@ -134,8 +170,8 @@ public class LikeUnlikeTest
     {
         AppreciationRequest appreciationRequest  = new AppreciationRequest(
             true,
-            "post123",
-            "user123");
+            post123Id,
+            user123Id);
 
         given().contentType(ContentType.JSON)
             .body(appreciationRequest)
@@ -144,9 +180,9 @@ public class LikeUnlikeTest
             .then()
             .statusCode(200);
 
-        List<String> likesId = socialRepository.getLikesPosts("user123");
+        List<String> likesId = socialRepository.getLikesPosts(user123Id);
         LOG.info(likesId.toString());
-        List<String> expectedLikesId = List.of("post123");
+        List<String> expectedLikesId = List.of(post123Id);
         testResult(likesId, expectedLikesId);
     }
 
@@ -162,8 +198,8 @@ public class LikeUnlikeTest
 
         AppreciationRequest appreciationRequest = new AppreciationRequest(
             true,
-            "post456",
-            "user123");
+            post456Id,
+            user123Id);
 
         given().contentType(ContentType.JSON)
             .body(appreciationRequest)
@@ -172,8 +208,8 @@ public class LikeUnlikeTest
             .then()
             .statusCode(200);
 
-        List<String> likesId = socialRepository.getLikesPosts("user123");
-        List<String> expectedLikesId = List.of("post123", "post456");
+        List<String> likesId = socialRepository.getLikesPosts(user123Id);
+        List<String> expectedLikesId = List.of(post123Id, post456Id);
         testResult(likesId, expectedLikesId);
     }
 
@@ -190,8 +226,8 @@ public class LikeUnlikeTest
 
         AppreciationRequest appreciationRequest = new AppreciationRequest(
             false,
-            "post123",
-            "user123");
+            post123Id,
+            user123Id);
 
         given().contentType(ContentType.JSON)
             .body(appreciationRequest)
@@ -200,7 +236,7 @@ public class LikeUnlikeTest
             .then()
             .statusCode(200);
 
-        List<String> likesId = socialRepository.getLikesPosts("user123");
+        List<String> likesId = socialRepository.getLikesPosts(user123Id);
         List<String> expectedLikesId = List.of();
         testResult(likesId, expectedLikesId);
     }
@@ -212,7 +248,7 @@ public class LikeUnlikeTest
     {
         given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getLikedPosts/unknown")
+            .get("/api/social/getLikedPosts/" + unknownId)
             .then()
             .statusCode(404);
     }
@@ -230,14 +266,14 @@ public class LikeUnlikeTest
 
         List<String> likedPostsId = given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getLikedPosts/user123")
+            .get("/api/social/getLikedPosts/" + user123Id)
             .then()
             .statusCode(200)
             .extract()
             .jsonPath()
             .getList("$", String.class);
 
-        List<String> expectedLikesId = List.of("post123", "post456");
+        List<String> expectedLikesId = List.of(post123Id, post456Id);
         testResult(likedPostsId, expectedLikesId);
     }
 
@@ -248,7 +284,7 @@ public class LikeUnlikeTest
     {
         given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getLikeUsers/unknown")
+            .get("/api/social/getLikeUsers/" + unknownId)
             .then()
             .statusCode(404);
     }
@@ -266,7 +302,7 @@ public class LikeUnlikeTest
 
         List<String> likeUserId123 = given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getLikeUsers/post123")
+            .get("/api/social/getLikeUsers/" + post123Id)
             .then()
             .statusCode(200)
             .extract()
@@ -275,14 +311,14 @@ public class LikeUnlikeTest
 
         List<String> likeUserId456 = given().contentType(ContentType.JSON)
             .when()
-            .get("/api/social/getLikeUsers/post456")
+            .get("/api/social/getLikeUsers/" + post456Id)
             .then()
             .statusCode(200)
             .extract()
             .jsonPath()
             .getList("$", String.class);
 
-        List<String> expectedLikesId = List.of("user123");
+        List<String> expectedLikesId = List.of(user123Id);
         testResult(likeUserId123, expectedLikesId);
         testResult(likeUserId456, expectedLikesId);
     }

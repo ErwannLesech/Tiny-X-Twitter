@@ -45,7 +45,8 @@ public class IsPostBlockedSubscriber implements Consumer<CreatePostRequest> {
     public void accept(final CreatePostRequest message) {
         logger.infof("Received isPostBlockedRequest from CreatePostRequest: %s", message.toString());
         vertx.executeBlocking(future -> {
-            // appel d'une méthode de SocialService qui va faire la logique (vérifier les block et set les booleens) et qui va appeler le publisher ?
+            // appel d'une méthode de SocialService qui va faire la logique (vérifier les block et set les booleens)
+            // et qui va appeler le publisher ?
             socialService.checkPostBlocked(message);
             future.complete();
         });

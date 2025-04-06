@@ -1,12 +1,11 @@
 package com.epita.converter;
 
 import com.epita.controller.contracts.UserRequest;
-import com.epita.controller.contracts.UserResponse;
+import com.epita.contracts.user.UserResponse;
 import com.epita.repository.entity.User;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
-import java.util.ArrayList;
 
 /**
  * Utility class for converting between UserRequest, UserResponse, and User entity objects.
