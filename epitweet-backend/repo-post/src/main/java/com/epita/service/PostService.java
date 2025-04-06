@@ -9,6 +9,7 @@ import com.epita.repository.publisher.CreatePostPublisher;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
+import com.epita.repository.publisher.PostHomeTimelinePublisher;
 import com.epita.repository.publisher.PostTimelinePublisher;
 import com.epita.repository.publisher.IndexPostPublisher;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +36,9 @@ public class PostService {
 
     @Inject
     PostTimelinePublisher postTimelinePublisher;
+
+    @Inject
+    PostHomeTimelinePublisher postHomeTimelinePublisher;
 
     @Inject
     IndexPostPublisher indexPostPublisher;
@@ -73,25 +77,72 @@ public class PostService {
     }
 
     /**
-     * Retrieves a reply post by its ID.
+     * Retrieves list of reply posts by its ID.
      *
      * @param replyPostId the ID of the reply post
      * @return a PostResponse object or null if the post is not found or is not a reply
      */
-    public PostResponse getReplyPost(ObjectId replyPostId) {
-        Post post = postRepository.findById(replyPostId);
+    public List<PostResponse> getRepliesPost(ObjectId replyPostId) {
+        Post parentPost = postRepository.findById(replyPostId);
 
-        if (post == null || post.postType != PostType.REPLY) {
+        if (parentPost == null) {
             return null;
         }
 
-        // check if parent post still exists
-        Post repliedPost = postRepository.findById(post.parentId);
-        if (repliedPost == null) {
-            post.parentId = null;
+        // check all replies of this post
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            if (post.getPostType() == PostType.REPLY) {
+                repliesResponses.add(PostConverter.toResponse(post));
+            }
         }
 
-        return PostConverter.toResponse(post);
+        return repliesResponses;
+    }
+
+    /**
+     * Retrieves a list of repost posts.
+     *
+     * @param postReferenceId the ID of the reply post
+     * @return a PostResponse object or null if the post is not found or is not a reply
+     */
+    public List<PostResponse> getRepostsPost(ObjectId postReferenceId) {
+        Post parentPost = postRepository.findById(postReferenceId);
+        if (parentPost == null) {
+            return null;
+        }
+
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            if (post.getPostType() == PostType.REPOST) {
+                repliesResponses.add(PostConverter.toResponse(post));
+            }
+        }
+
+        return repliesResponses;
+    }
+
+    /**
+     * Retrieves a list of repost posts and replies.
+     *
+     * @param postReferenceId the ID of the reply post
+     * @return a PostResponse object or null if the post is not found or is not a reply
+     */
+    public List<PostResponse> getRepostsAndRepliesPost(ObjectId postReferenceId) {
+        Post parentPost = postRepository.findById(postReferenceId);
+        if (parentPost == null) {
+            return null;
+        }
+
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            repliesResponses.add(PostConverter.toResponse(post));
+        }
+
+        return repliesResponses;
     }
 
     /**
@@ -143,6 +194,10 @@ public class PostService {
         // declare to user-timeline that we created a post
         postTimelinePublisher.publish(PostTimelineConverter.toPostTimeline(post, "creation"));
 
+        // declare to home-timeline that we deleted a post
+        postHomeTimelinePublisher.publish(PostTimelineConverter.toPostHomeTimeline(PostConverter.toResponse(post),
+                "deletion"));
+
         // declare to index service that we created a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "creation"));
 
@@ -162,7 +217,7 @@ public class PostService {
             return null;
         }
 
-        post.updatedAt = Instant.now();
+        post.setUpdatedAt(Instant.now());
 
         PostResponse postResponse = PostConverter.toResponse(post);
 
@@ -171,8 +226,13 @@ public class PostService {
         // declare to user-timeline that we deleted a post
         postTimelinePublisher.publish(PostTimelineConverter.toPostTimeline(post, "deletion"));
 
+        // declare to home-timeline that we deleted a post
+        postHomeTimelinePublisher.publish(PostTimelineConverter.toPostHomeTimeline(PostConverter.toResponse(post),
+                "deletion"));
+
         // declare to index service that we deleted a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "deletion"));
+
 
         return postResponse;
     }

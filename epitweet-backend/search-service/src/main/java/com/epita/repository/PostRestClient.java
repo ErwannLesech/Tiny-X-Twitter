@@ -1,7 +1,6 @@
 package com.epita.repository;
 
-import com.epita.controller.contracts.PostResponse;
-import com.epita.service.SearchService;
+import com.epita.contracts.post.PostResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
