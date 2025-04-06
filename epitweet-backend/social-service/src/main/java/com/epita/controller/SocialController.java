@@ -1,5 +1,7 @@
 package com.epita.controller;
 
+import com.epita.contracts.social.BlockedRelationRequest;
+import com.epita.contracts.social.BlockedRelationResponse;
 import com.epita.controller.contracts.AppreciationRequest;
 import com.epita.controller.contracts.BlockUnblockRequest;
 import com.epita.controller.contracts.FollowUnfollowRequest;
@@ -302,5 +304,35 @@ public class SocialController {
         }
         logger.infof("GetLikedPosts response 200 - Request done successfully");
         return Response.ok(likedPosts).build();
+    }
+
+    /**
+     * Checks if two users have mutually blocked each other.
+     * @param blockedRelationRequest the request indicating which users to check
+     * @return a Response containing a BlockedRelationResponse that indicates the blocked relation
+     */
+    @GET
+    @Path("/getBlockedRelation")
+    public Response getBlockedRelation(BlockedRelationRequest blockedRelationRequest)
+    {
+        if (blockedRelationRequest == null) {
+            logger.warnf("GetBlockedRelation response 400 - Empty body request");
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        logger.infof("GetBlockedRelation Request of user: %s", blockedRelationRequest);
+
+        if (blockedRelationRequest.getUserId() == null || blockedRelationRequest.getParentId() == null) {
+            logger.warnf("GetBlockedRelation response 400 - Invalid request");
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        BlockedRelationResponse blockedRelationResponse = socialService.checkPostBlocked(blockedRelationRequest);
+        if (blockedRelationResponse == null) {
+            logger.warnf("GetBlockedRelation response 404 - Users not found during request");
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        logger.infof("GetBlockedRelation response 200 - Request done successfully");
+        return Response.ok(blockedRelationResponse).build();
     }
 }

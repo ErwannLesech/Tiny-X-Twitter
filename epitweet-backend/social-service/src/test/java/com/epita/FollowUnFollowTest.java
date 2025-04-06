@@ -2,7 +2,7 @@ package com.epita;
 
 import com.epita.controller.contracts.FollowUnfollowRequest;
 import com.epita.repository.SocialRepository;
-import com.epita.repository.UserRestClient;
+import com.epita.repository.restClient.UserRestClient;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;

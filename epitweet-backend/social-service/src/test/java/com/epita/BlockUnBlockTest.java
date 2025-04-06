@@ -2,7 +2,7 @@ package com.epita;
 
 import com.epita.controller.contracts.BlockUnblockRequest;
 import com.epita.repository.SocialRepository;
-import com.epita.repository.UserRestClient;
+import com.epita.repository.restClient.UserRestClient;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;

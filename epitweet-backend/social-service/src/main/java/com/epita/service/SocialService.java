@@ -1,6 +1,8 @@
 package com.epita.service;
 
 import com.epita.contracts.post.PostResponse;
+import com.epita.contracts.social.BlockedRelationRequest;
+import com.epita.contracts.social.BlockedRelationResponse;
 import com.epita.controller.contracts.AppreciationRequest;
 import com.epita.controller.contracts.BlockUnblockRequest;
 import com.epita.controller.contracts.FollowUnfollowRequest;
@@ -8,12 +10,10 @@ import com.epita.converter.SocialConverter;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineBlock;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineFollow;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineLike;
-import com.epita.payloads.post.CreatePostRequest;
-import com.epita.payloads.post.CreatePostResponse;
 import com.epita.payloads.userTimeline.LikeTimeline;
-import com.epita.repository.PostRestClient;
+import com.epita.repository.restClient.PostRestClient;
 import com.epita.repository.SocialRepository;
-import com.epita.repository.UserRestClient;
+import com.epita.repository.restClient.UserRestClient;
 import com.epita.repository.publisher.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -49,9 +49,6 @@ public class SocialService {
 
     @Inject
     LikeTimelinePublisher likeTimelinePublisher;
-
-    @Inject
-    IsPostBlockedPublisher isPostBlockedPublisher;
 
     @Inject
     Logger logger;
@@ -192,8 +189,10 @@ public class SocialService {
     public boolean likeUnlike(AppreciationRequest request) {
         //check if user and post exist in their repo
         try {
-            if (userRestClient.getUser(new ObjectId(request.userId)).getStatus() != Response.Status.OK.getStatusCode() ||
-                postRestClient.getPost(new ObjectId(request.postId)).getStatus() != Response.Status.OK.getStatusCode()) {
+            if (userRestClient.getUser(new ObjectId(request.userId)).getStatus() != Response.Status.OK.getStatusCode()
+                ||
+                postRestClient.getPost(new ObjectId(request.postId)).getStatus() != Response.Status.OK.getStatusCode())
+            {
                 return false;
             }
         }
@@ -243,31 +242,20 @@ public class SocialService {
         return socialRepository.getLikesPosts(userId);
     }
 
-    //méthode pour redis post, appelée depuis le subscriber
-    public void checkPostBlocked(CreatePostRequest message) {
-        String userId = message.getUserId().toString();
-
-        PostResponse post = (PostResponse) postRestClient.getPost(message.getParentId()).getEntity();
-        String parentUserId = post.userId.toString();
+     /**
+     * Checks if two users have mutually blocked each other.
+     * @param blockedRelationRequest the request indicating which users to check
+     * @return a BlockedRelationResponse that indicates the blocked relation
+     */
+    public BlockedRelationResponse checkPostBlocked(BlockedRelationRequest blockedRelationRequest) {
+        String userId = blockedRelationRequest.getUserId().toString();
+        String parentUserId = blockedRelationRequest.getParentId().toString();
 
         List<String> blockedUsers = socialRepository.getBlockedUsers(userId);
         List<String> blockedByUsers = socialRepository.getUsersWhoBlocked(userId);
         boolean userBlockedParentUser = blockedUsers.contains(parentUserId);
         boolean parentUserBlockedUser = blockedByUsers.contains(parentUserId);
 
-
-        //publisher
-        CreatePostResponse postResponse = new CreatePostResponse(
-                message.getUserId(),
-                message.getPostType(),
-                message.getContent(),
-                message.getMediaUrl(),
-                message.getParentId(),
-                parentUserBlockedUser,
-                userBlockedParentUser
-        );
-
-        isPostBlockedPublisher.publish(postResponse);
-
+        return new BlockedRelationResponse(parentUserBlockedUser, userBlockedParentUser);
     }
 }
