@@ -5,6 +5,7 @@ import com.epita.controller.contracts.UserResponse;
 import com.epita.converter.UserConverter;
 import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;
+import com.epita.repository.publisher.DeleteUserPublisher;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
@@ -19,6 +20,9 @@ public class UserService {
 
     @Inject
     Logger logger;
+
+    @Inject
+    DeleteUserPublisher deleteUserPublisher;
 
     /**
      * Retrieves a user by their tag.
@@ -118,6 +122,10 @@ public class UserService {
         User userToDelete = userRepository.findByTag(userTag);
         if (userToDelete != null) {
             userRepository.deleteUser(userToDelete);
+
+            // remove its posts
+            deleteUserPublisher.publish(UserConverter.toDeleteResponse(userToDelete));
+
             return UserConverter.toResponse(userToDelete);
         }
 
