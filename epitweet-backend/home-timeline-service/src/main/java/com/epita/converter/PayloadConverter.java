@@ -1,9 +1,9 @@
 package com.epita.converter;
 
 import com.epita.payloads.homeTimeline.PostHomeTimeline;
-import com.epita.payloads.social.BlockUser;
-import com.epita.payloads.social.FollowUser;
-import com.epita.payloads.social.LikePost;
+import com.epita.payloads.homeTimeline.BlockUser;
+import com.epita.payloads.homeTimeline.FollowUser;
+import com.epita.payloads.homeTimeline.LikePost;
 import com.epita.repository.entity.EntryType;
 import com.epita.repository.entity.HomeTimelineEntry;
 import org.slf4j.Logger;

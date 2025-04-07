@@ -1,6 +1,5 @@
-package com.epita.payloads.social;
+package com.epita.payloads.homeTimeline;
 
-import co.elastic.clients.util.DateTime;
 import org.bson.types.ObjectId;
 
 public record FollowUser(ObjectId userId, ObjectId userFollowedId, String method) {}

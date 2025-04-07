@@ -1,7 +1,6 @@
 package com.epita.controller.subscriber;
 
-import com.epita.payloads.homeTimeline.PostHomeTimeline;
-import com.epita.payloads.social.BlockUser;
+import com.epita.payloads.homeTimeline.BlockUser;
 import com.epita.service.HomeTimelineService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;

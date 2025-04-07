@@ -1,6 +1,6 @@
 package com.epita.repository;
 
-import com.epita.payloads.social.BlockUser;
+import com.epita.payloads.homeTimeline.BlockUser;
 import com.epita.repository.entity.EntryType;
 import com.epita.repository.entity.HomeTimelineEntry;
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
@@ -8,7 +8,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.bson.types.ObjectId;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimelineEntry> {

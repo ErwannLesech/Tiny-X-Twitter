@@ -1,6 +1,6 @@
 package com.epita.controller.subscriber;
 
-import com.epita.payloads.social.LikePost;
+import com.epita.payloads.homeTimeline.LikePost;
 import com.epita.service.HomeTimelineService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;

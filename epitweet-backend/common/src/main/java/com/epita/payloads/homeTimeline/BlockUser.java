@@ -1,4 +1,4 @@
-package com.epita.payloads.social;
+package com.epita.payloads.homeTimeline;
 
 import org.bson.types.ObjectId;
 
