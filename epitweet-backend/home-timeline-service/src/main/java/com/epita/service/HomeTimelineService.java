@@ -14,6 +14,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
+import org.jboss.logging.annotations.Pos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +38,11 @@ public class HomeTimelineService {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        List<HomeTimelineEntry> timeline = homeRepository.getTimeline(userId);
+        List<PostResponse> timeline = homeRepository.getTimeline(userId).stream()
+                .map(HomeTimelineEntry::getPost)
+                .toList();
 
-        return ( timeline != null ) ? Response.ok(timeline).build() : Response.status(Response.Status.NOT_FOUND).build();
+        return ( !timeline.isEmpty() ) ? Response.ok(timeline).build() : Response.status(Response.Status.NOT_FOUND).build();
     }
 
     public void updateOnPost(PostHomeTimeline message) {
@@ -50,7 +53,7 @@ public class HomeTimelineService {
                 entry.setUserId(followerId);
                 homeRepository.addHomeEntry(entry);
             } else {
-                homeRepository.removeHomeEntry(followerId, message.getPost().getUserId(), message.getPost().get_id());
+                homeRepository.removeHomeEntry(followerId, message.getPost().getUserId(), message.getPost().get_id(), null);
             }
         }
     }
@@ -61,14 +64,14 @@ public class HomeTimelineService {
             LOGGER.info("Update user timeline on liked/unliked post");
             List<ObjectId> followers = homeRepository.getFollowers(message.userId());
             for (ObjectId followerId : followers ) {
-                if (Objects.equals(message.method(), "like")) {
-                    post.setCreatedAt(message.postLikeDate());
-                    HomeTimelineEntry entry = PayloadConverter.LikeToEntry(message);
-                    entry.setUserId(followerId);
-                    entry.setPost(post);
+                post.setCreatedAt(message.postLikeDate());
+                HomeTimelineEntry entry = PayloadConverter.LikeToEntry(message);
+                entry.setUserId(followerId);
+                entry.setPost(post);
+                if (Objects.equals(message.method(), "like") && !homeRepository.isBlocked(followerId, post.getUserId())) {
                     homeRepository.addHomeEntry(entry);
                 } else {
-                    homeRepository.removeHomeEntry(followerId, message.userId(), post.get_id());
+                    homeRepository.removeHomeEntry(followerId, message.userId(), post.get_id(), EntryType.LIKE);
                 }
             }
         } else {
@@ -82,7 +85,10 @@ public class HomeTimelineService {
             LOGGER.info("Update user timeline on blocked/unblocked user");
             for (PostResponse post : posts) {
                 if (Objects.equals(message.method(), "block")) {
-                    homeRepository.removeHomeEntry(message.userId(), message.userBlockedId(), post.get_id());
+                    homeRepository.addBlockedUser(message);
+                    homeRepository.removeHomeEntry(message.userId(), message.userBlockedId(), post.get_id(), null);
+                } else {
+                    homeRepository.removeBlockedUser(message);
                 }
             }
         }
@@ -93,14 +99,14 @@ public class HomeTimelineService {
         if (posts != null && !posts.isEmpty()) {
             LOGGER.info("Update user timeline on follow/unfollow user");
             for (PostResponse post : posts) {
-                if (Objects.equals(message.method(), "follow")) {
+                if (Objects.equals(message.method(), "follow") && !homeRepository.isBlocked(message.userId(), post.getUserId())) {
                     HomeTimelineEntry entry = PayloadConverter.FollowToEntry(message);
                     entry.setDate(post.createdAt);
                     entry.setType(EntryType.POST);
                     entry.setPost(post);
                     homeRepository.addHomeEntry(entry);
                 } else {
-                    homeRepository.removeHomeEntry(message.userId(), message.userFollowedId(), post.get_id());
+                    homeRepository.removeHomeEntry(message.userId(), message.userFollowedId(), post.get_id(), null);
                 }
             }
         } else {
