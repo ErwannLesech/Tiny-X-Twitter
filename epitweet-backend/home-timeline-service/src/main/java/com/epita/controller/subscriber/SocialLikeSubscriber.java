@@ -33,7 +33,7 @@ public class SocialLikeSubscriber  implements Consumer<LikePost> {
 
     public SocialLikeSubscriber(final RedisDataSource ds) {
         subscriber = ds.pubsub(LikePost.class)
-                .subscribe("SocialHomeTimeline Like", this);
+                .subscribe("SocialHomeTimelineLike", this);
     }
 
     @PostConstruct
@@ -46,7 +46,7 @@ public class SocialLikeSubscriber  implements Consumer<LikePost> {
         // code knowingly, otherwise it may crash at runtime to prevent
         // unwanted blocking code.
         vertx.executeBlocking(future -> {
-            logger.infof("Received LikePost from SocialHomeTimeline Like: %s", message.toString());
+            logger.infof("Received LikePost from SocialHomeTimelineLike: %s", message.toString());
             homeTimelineService.updateOnLike(message);
             future.complete();
         });

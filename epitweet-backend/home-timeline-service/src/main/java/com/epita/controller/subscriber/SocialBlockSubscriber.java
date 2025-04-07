@@ -34,7 +34,7 @@ public class SocialBlockSubscriber implements Consumer<BlockUser> {
 
     public SocialBlockSubscriber(final RedisDataSource ds) {
         subscriber = ds.pubsub(BlockUser.class)
-                .subscribe("SocialHomeTimeline Block", this);
+                .subscribe("SocialHomeTimelineBlock", this);
     }
 
     @PostConstruct
@@ -47,7 +47,7 @@ public class SocialBlockSubscriber implements Consumer<BlockUser> {
         // code knowingly, otherwise it may crash at runtime to prevent
         // unwanted blocking code.
         vertx.executeBlocking(future -> {
-            logger.infof("Received BlockUser from SocialHomeTimeline Block: %s", message.toString());
+            logger.infof("Received BlockUser from SocialHomeTimelineBlock: %s", message.toString());
             homeTimelineService.updateOnBlock(message);
             future.complete();
         });

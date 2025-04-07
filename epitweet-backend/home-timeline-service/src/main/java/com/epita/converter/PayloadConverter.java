@@ -24,7 +24,8 @@ public class PayloadConverter {
      */
     public static HomeTimelineEntry LikeToEntry(LikePost likePost) {
         HomeTimelineEntry entry = new HomeTimelineEntry();
-        entry.setUserId(likePost.userId());
+        entry.setUserFollowedId(likePost.userId());
+        entry.setDate(likePost.postLikeDate());
         entry.setType(EntryType.LIKE);
         return entry;
     }
@@ -63,6 +64,8 @@ public class PayloadConverter {
      */
     public static HomeTimelineEntry PostToEntry(PostHomeTimeline post) {
         HomeTimelineEntry entry = new HomeTimelineEntry();
+        entry.setUserFollowedId(post.getPost().getUserId());
+        entry.setDate(post.getPost().createdAt);
         entry.setPost(post.getPost());
         entry.setType(EntryType.POST);
         return entry;

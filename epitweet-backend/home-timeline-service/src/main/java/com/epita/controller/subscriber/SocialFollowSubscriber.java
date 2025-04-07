@@ -34,7 +34,7 @@ public class SocialFollowSubscriber implements Consumer<FollowUser> {
 
     public SocialFollowSubscriber(final RedisDataSource ds) {
         subscriber = ds.pubsub(FollowUser.class)
-                .subscribe("SocialHomeTimeline Follow", this);
+                .subscribe("SocialHomeTimelineFollow", this);
     }
 
     @PostConstruct
@@ -47,7 +47,7 @@ public class SocialFollowSubscriber implements Consumer<FollowUser> {
         // code knowingly, otherwise it may crash at runtime to prevent
         // unwanted blocking code.
         vertx.executeBlocking(future -> {
-            logger.infof("Received FollowUser from SocialHomeTimeline Follow: %s", message.toString());
+            logger.infof("Received FollowUser from SocialHomeTimelineFollow: %s", message.toString());
             homeTimelineService.updateOnFollow(message);
             future.complete();
         });

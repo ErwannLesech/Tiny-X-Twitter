@@ -1,5 +1,6 @@
 package com.epita.repository;
 
+import com.epita.contracts.post.PostResponse;
 import com.epita.repository.entity.HomeTimelineEntry;
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,28 +14,25 @@ import java.util.Objects;
 public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimelineEntry> {
 
     public List<HomeTimelineEntry> getTimeline(final ObjectId userId) {
-        return this.find("userId", userId).stream().toList();
+        List<HomeTimelineEntry> entries = this.findAll().stream().toList();
+        return entries.stream()
+                .filter(entry -> Objects.equals(entry.getUserId(), userId))
+                .toList();
     }
 
-    public void addHomeEntry(ObjectId userId, HomeTimelineEntry homeEntry) {
-        List<HomeTimelineEntry> homeEntries = getTimeline(userId);
-        if (homeEntries == null) {
-            homeEntries = new ArrayList<>();
-            homeEntries.add(homeEntry);
-            this.persist(homeEntries);
-        } else {
-            homeEntries.add(homeEntry);
-            this.update(homeEntries);
-        }
+    public List<ObjectId> getFollowers(ObjectId userId) {
+        List<HomeTimelineEntry> entries = this.findAll().list();
+        return entries.stream()
+                .filter(entry -> entry.getUserFollowedId().equals(userId))
+                .map(HomeTimelineEntry::getUserId)
+                .toList();
     }
 
-    public void removeHomeEntry(ObjectId userId, ObjectId userFollowedId) {
-        List<HomeTimelineEntry> homeEntries = getTimeline(userId);
-        if (homeEntries != null) {
-            this.update(homeEntries.stream()
-                    .filter(homeEntry -> !Objects.equals(homeEntry.getUserFollowedId(), userFollowedId))
-                    .toList());
-        }
+    public void addHomeEntry(HomeTimelineEntry entry) {
+        this.persist(entry);
     }
 
+    public void removeHomeEntry(ObjectId userId, ObjectId followedId, ObjectId postId) {
+
+    }
 }
