@@ -1,6 +1,6 @@
 package com.epita.controller.subscriber;
 
-import com.epita.payloads.homeTimeline.BlockUser;
+import com.epita.payloads.homeTimeline.SocialHomeTimelineBlock;
 import com.epita.service.HomeTimelineService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
@@ -21,7 +21,7 @@ import static io.quarkus.mongodb.runtime.dns.MongoDnsClientProvider.vertx;
  */
 @Startup
 @ApplicationScoped
-public class SocialBlockSubscriber implements Consumer<BlockUser> {
+public class SocialBlockSubscriber implements Consumer<SocialHomeTimelineBlock> {
 
     @Inject
     Logger logger;
@@ -32,7 +32,7 @@ public class SocialBlockSubscriber implements Consumer<BlockUser> {
     private final PubSubCommands.RedisSubscriber subscriber;
 
     public SocialBlockSubscriber(final RedisDataSource ds) {
-        subscriber = ds.pubsub(BlockUser.class)
+        subscriber = ds.pubsub(SocialHomeTimelineBlock.class)
                 .subscribe("SocialHomeTimelineBlock", this);
     }
 
@@ -40,7 +40,7 @@ public class SocialBlockSubscriber implements Consumer<BlockUser> {
     void init() {logger.info("SocialBlockSubscriber initiated !");}
 
     @Override
-    public void accept(final BlockUser message) {
+    public void accept(final SocialHomeTimelineBlock message) {
         // To keep things simple, we will avoid asynchronous stuff here,
         // so you need to tell Quarkus that you will execute blocking
         // code knowingly, otherwise it may crash at runtime to prevent

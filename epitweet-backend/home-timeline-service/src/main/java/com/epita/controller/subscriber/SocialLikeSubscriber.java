@@ -1,6 +1,6 @@
 package com.epita.controller.subscriber;
 
-import com.epita.payloads.homeTimeline.LikePost;
+import com.epita.payloads.homeTimeline.SocialHomeTimelineLike;
 import com.epita.service.HomeTimelineService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
@@ -21,7 +21,7 @@ import static io.quarkus.mongodb.runtime.dns.MongoDnsClientProvider.vertx;
  */
 @Startup
 @ApplicationScoped
-public class SocialLikeSubscriber  implements Consumer<LikePost> {
+public class SocialLikeSubscriber  implements Consumer<SocialHomeTimelineLike> {
 
     @Inject
     Logger logger;
@@ -32,7 +32,7 @@ public class SocialLikeSubscriber  implements Consumer<LikePost> {
     private final PubSubCommands.RedisSubscriber subscriber;
 
     public SocialLikeSubscriber(final RedisDataSource ds) {
-        subscriber = ds.pubsub(LikePost.class)
+        subscriber = ds.pubsub(SocialHomeTimelineLike.class)
                 .subscribe("SocialHomeTimelineLike", this);
     }
 
@@ -40,7 +40,7 @@ public class SocialLikeSubscriber  implements Consumer<LikePost> {
     void init() {logger.info("SocialLikeSubscriber initiated !");}
 
     @Override
-    public void accept(final LikePost message) {
+    public void accept(final SocialHomeTimelineLike message) {
         // To keep things simple, we will avoid asynchronous stuff here,
         // so you need to tell Quarkus that you will execute blocking
         // code knowingly, otherwise it may crash at runtime to prevent
