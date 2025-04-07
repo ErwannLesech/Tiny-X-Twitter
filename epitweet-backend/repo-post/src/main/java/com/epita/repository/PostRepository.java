@@ -41,6 +41,17 @@ public class PostRepository implements PanacheMongoRepository<Post> {
     }
 
     /**
+     * Finds all replies post of a specific post
+     *
+     * @param id The parent post Id
+     * @return A list of Posts that are replies of the parent post
+     */
+    public List<Post> findByParentId(ObjectId id) {
+        logger.infof("Finding Posts by parent ID: %s", id);
+        return find("parentId", id).list();
+    }
+
+    /**
      * Creates a new Post in the repository.
      *
      * @param post The Post to create.

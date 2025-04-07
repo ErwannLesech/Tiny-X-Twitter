@@ -1,0 +1,10 @@
+openapi: 3.0.1
+
+info:
+  title: Social-Service
+  description: Social-Service endpoints
+  version: 1.0.0
+
+servers:
+  - url:
+    description: Repo Social Service

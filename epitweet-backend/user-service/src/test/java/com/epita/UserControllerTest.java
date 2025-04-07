@@ -1,6 +1,6 @@
 package com.epita;
 
-import com.epita.controller.contracts.UserResponse;
+import com.epita.contracts.user.UserResponse;
 import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;
 import io.quarkus.test.junit.QuarkusTest;
@@ -10,8 +10,6 @@ import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.LinkedList;
 
 import static io.restassured.RestAssured.given;
 
@@ -24,7 +22,7 @@ public class UserControllerTest {
     @Inject
     Logger logger;
 
-    String firstUser = "{ \"tag\": \"group3\", \"pseudo\": \"grp3RPZ\", \"password\": \"Incorrect\" }";
+    String firstUser = "{ \"tag\": \"group3\", \"pseudo\": \"grp3RPZ\", \"password\": \"Incorrect\", \"profilePictureUrl\": \"https://m.media-amazon.com/images/I/31RHp4aa4yL._UXNaN_FMjpg_QL85_.jpg\", \"profileDescription\": \"Salut moi c'est Pedro\" }";
     String wrongRequest = "{ \"tag\": \"group3\" }";
 
     @BeforeEach
@@ -129,7 +127,7 @@ public class UserControllerTest {
         User user = userRepository.findByTag("group3");
         assert user != null;
         logger.info(user.toString());
-        assert user.pseudo.equals("grp3RPZ");
+        assert user.getPseudo().equals("grp3RPZ");
     }
 
     @Test
@@ -151,7 +149,7 @@ public class UserControllerTest {
         // Check in db if the user is still created
         User user = userRepository.findByTag("group3");
         assert user != null;
-        assert user.pseudo.equals("grp3RPZ");
+        assert user.getPseudo().equals("grp3RPZ");
     }
 
     @Test
@@ -169,11 +167,11 @@ public class UserControllerTest {
     public void testUpdateUser() {
         // setup user to modify
         User newUser = new User();
-        newUser.tag = "group3";
-        newUser.pseudo = "grp3RPZ";
+        newUser.setTag("group3");
+        newUser.setPseudo("grp3RPZ");
         userRepository.createUser(newUser);
 
-        ObjectId firstUserId = userRepository.findByTag("group3")._id;
+        ObjectId firstUserId = userRepository.findByTag("group3").getId();
         String firstUserModification = "{ \"tag\": \"group3\", \"pseudo\": \"grp3RPZLaFamille\", \"blockedUsers\" : [ \"" + firstUserId.toHexString() + "\" ] }";
 
         given().contentType(ContentType.JSON)
@@ -186,20 +184,20 @@ public class UserControllerTest {
         // Check if the user has been well updated
         User user = userRepository.findById(firstUserId);
         assert user != null;
-        assert user.tag.equals("group3"); // tag should not change
-        assert user.pseudo.equals("grp3RPZLaFamille");
+        assert user.getTag().equals("group3"); // tag should not change
+        assert user.getPseudo().equals("grp3RPZLaFamille");
     }
 
 
     @Test
     public void testDeleteUser() {
         User newUser = new User();
-        newUser.tag = "group3";
-        newUser.pseudo = "grp3RPZ";
+        newUser.setTag("group3");
+        newUser.setPseudo("grp3RPZ");
         userRepository.createUser(newUser);
 
         UserResponse userResponse = given().contentType(ContentType.JSON)
-                .header("userTag", newUser.tag)
+                .header("userTag", newUser.getTag())
                 .when()
                 .delete("/api/users/delete")
                 .then()
@@ -230,12 +228,13 @@ public class UserControllerTest {
     public void testGetUser()
     {
         User newUser = new User();
-        newUser.tag = "group3";
-        newUser.pseudo = "grp3RPZ";
+        newUser.setTag("group3");
+        newUser.setPseudo("grp3RPZ");
+        newUser.setPassword("gqzeq");
         userRepository.createUser(newUser);
 
         UserResponse userResponse = given().contentType(ContentType.JSON)
-                .header("userTag", newUser.tag)
+                .header("userTag", newUser.getTag())
                 .when()
                 .get("/api/users/getUser")
                 .then()
@@ -244,6 +243,7 @@ public class UserControllerTest {
                 .as(UserResponse.class);
 
         assert userResponse != null;
+        logger.info(userResponse.toString());
         assert userResponse.get_id() != null;
         assert userResponse.getPseudo().equals("grp3RPZ");
     }
@@ -252,12 +252,12 @@ public class UserControllerTest {
     public void testGetUserById()
     {
         User newUser = new User();
-        newUser.tag = "group3";
-        newUser.pseudo = "grp3RPZ";
+        newUser.setTag("group3");
+        newUser.setPseudo("grp3RPZ");
         userRepository.createUser(newUser);
 
         UserResponse userResponse = given().contentType(ContentType.JSON)
-                .header("userTag", newUser.tag)
+                .header("userTag", newUser.getTag())
                 .when()
                 .get("/api/users/getUser")
                 .then()

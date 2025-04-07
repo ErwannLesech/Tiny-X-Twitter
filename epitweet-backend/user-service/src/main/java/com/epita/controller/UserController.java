@@ -1,7 +1,7 @@
 package com.epita.controller;
 
 import com.epita.controller.contracts.UserRequest;
-import com.epita.controller.contracts.UserResponse;
+import com.epita.contracts.user.UserResponse;
 import com.epita.service.UserService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -10,8 +10,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
-
-import java.util.List;
 
 @ApplicationScoped
 @Path("/api/users")
@@ -218,12 +216,17 @@ public class UserController {
         String tag = userRequest.getTag();
         String pseudo = userRequest.getPseudo();
         String password = userRequest.getPassword();
+        String description = userRequest.getProfileDescription();
 
         if (tag == null || tag.isEmpty() || pseudo == null || pseudo.isEmpty()) {
             return Boolean.FALSE;
         }
 
         if (isPasswordNeeded && (password == null || password.isEmpty())) {
+            return Boolean.FALSE;
+        }
+
+        if (description != null && description.length() > 255) {
             return Boolean.FALSE;
         }
 

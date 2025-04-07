@@ -35,7 +35,6 @@
         <module>user-service</module>
         <module>repo-post</module>
         <module>search-service</module>
-        <module>home-timeline-service</module>
     </modules>
 
     <dependencyManagement>
