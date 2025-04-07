@@ -1,4 +1,4 @@
-package com.epita.controller.contracts;
+package com.epita.contracts.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,6 @@ import lombok.ToString;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
-import java.util.List;
 
 /**
  * Represents a response containing user details.
@@ -21,40 +20,40 @@ public class UserResponse {
     /**
      * The unique identifier of the user.
      */
-    ObjectId _id;
+    public ObjectId _id;
 
     /**
      * A tag associated with the user.
      */
-    String tag;
+    public String tag;
 
     /**
      * The pseudonym or username of the user.
      */
-    String pseudo;
+    public String pseudo;
 
     /**
      * The password of the user.
      */
-    String password;
+    public String password;
 
     /**
      * The url of profilePicture image
      */
-    String profilePictureUrl;
+    public String profilePictureUrl;
 
     /**
      * The url of profile banner image
      */
-    String profileBannerUrl;
+    public String profileBannerUrl;
 
     /**
      * The content of profile description (limited 255 char)
      */
-    String profileDescription;
+    public String profileDescription;
 
     /**
      * Date of creation of the account
      */
-    Instant createdAt;
+    public Instant createdAt;
 }

@@ -34,6 +34,10 @@ Epitweet/
 │   ├── src/               # Port 8083
 │   ├── pom.xml 
 │
+├── social-service/        # Social management microservice
+│   ├── src/               # Port 8084
+│   ├── pom.xml 
+
 ├── integrationTests.http   # HTTP test file for API calls
 ├── pom.xml                 # Parent Maven project configuration
 ├── README.md               # Project documentation
@@ -62,6 +66,11 @@ mvn clean install
 To build the `search-service`:
 ```sh
 cd search-service
+mvn clean install
+```
+To build the `social-service`:
+```sh
+cd social-service
 mvn clean install
 ```
 To build the `common`:
@@ -94,6 +103,9 @@ To start all backend services, open separate terminal windows and run the follow
 
 # Start the srvc-search service
 ./mvnw quarkus:dev -pl search-service/
+
+# Start the social service
+./mvnw quarkus:dev -pl social-service/
 ```
 
 ## Testing the Project
@@ -116,6 +128,11 @@ mvn test
 ```sh
 # Run tests for srvc-search
 cd search-service
+mvn test
+```
+```sh
+# Run tests for social-search
+cd social-service
 mvn test
 ```
 

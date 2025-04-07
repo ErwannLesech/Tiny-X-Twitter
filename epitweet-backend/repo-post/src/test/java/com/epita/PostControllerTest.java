@@ -1,13 +1,19 @@
 package com.epita;
 
 import com.epita.contracts.post.PostResponse;
+import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
+import com.epita.repository.restClient.SocialRestClient;
+import com.epita.repository.restClient.UserRestClient;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +21,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.restassured.RestAssured.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 public class PostControllerTest {
@@ -24,6 +32,14 @@ public class PostControllerTest {
 
     @Inject
     Logger logger;
+
+    @InjectMock
+    @RestClient
+    UserRestClient userRestClient;
+
+    @InjectMock
+    @RestClient
+    SocialRestClient socialRestClient;
 
     ObjectId headerUserFirst = new ObjectId();
     String postContent = "{ \"content\": \"This is my first post!\", \"postType\": \"post\" }";
@@ -35,6 +51,12 @@ public class PostControllerTest {
     @BeforeEach
     public void setup() {
         postRepository.clear();
+        when(socialRestClient.getBlockedRelation(any(BlockedRelationRequest.class))).thenAnswer(invocation -> {
+                return RestResponse.ok();
+        });
+        when(userRestClient.getUserById(any(ObjectId.class))).thenAnswer(invocation -> {
+            return RestResponse.ok();
+        });
     }
 
     @Test

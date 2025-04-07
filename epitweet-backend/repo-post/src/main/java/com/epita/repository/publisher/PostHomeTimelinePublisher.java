@@ -1,7 +1,6 @@
 package com.epita.repository.publisher;
 
 import com.epita.payloads.homeTimeline.PostHomeTimeline;
-import com.epita.payloads.userTimeline.PostTimeline;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import jakarta.enterprise.context.ApplicationScoped;
