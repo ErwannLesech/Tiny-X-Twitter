@@ -11,21 +11,15 @@ import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.LinkedList;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+
 
 import static io.restassured.RestAssured.given;
 
-@Testcontainers
 @QuarkusTest
 public class UserControllerTest {
+    @Inject
     UserRepository userRepository;
 
-    @Container
-    private static final MongoDBContainer mongoContainer =
-            new MongoDBContainer("mongo:4.0.10");
     @Inject
     Logger logger;
 
