@@ -30,7 +30,6 @@ public class HomeTimelineService {
     }
 
     public void updateOnLike(LikePost message) {
-
     }
 
     public void updateOnPost(PostHomeTimeline message) {}
