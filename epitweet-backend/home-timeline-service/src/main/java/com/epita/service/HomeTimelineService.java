@@ -14,7 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
-import org.jboss.logging.annotations.Pos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public class HomeTimelineService {
     }
 
     public void updateOnPost(PostHomeTimeline message) {
-        List<ObjectId> followers = homeRepository.getFollowers(message.getPost().userId);
+        List<ObjectId> followers = homeRepository.getFollowers(message.getPost().userId).stream().map(HomeTimelineEntry::getUserId).toList();
         for (ObjectId followerId : followers ) {
             if (Objects.equals(message.getMethod(), "creation")) {
                 HomeTimelineEntry entry = PayloadConverter.PostToEntry(message);
@@ -62,13 +61,13 @@ public class HomeTimelineService {
         PostResponse post = repoPostRestClient.getPost(message.postId().toString());
         if (post != null) {
             LOGGER.info("Update user timeline on liked/unliked post");
-            List<ObjectId> followers = homeRepository.getFollowers(message.userId());
+            List<ObjectId> followers = homeRepository.getFollowers(message.userId()).stream().map(HomeTimelineEntry::getUserId).toList();
             for (ObjectId followerId : followers ) {
                 post.setCreatedAt(message.postLikeDate());
                 HomeTimelineEntry entry = PayloadConverter.LikeToEntry(message);
                 entry.setUserId(followerId);
                 entry.setPost(post);
-                if (Objects.equals(message.method(), "like") && !homeRepository.isBlocked(followerId, post.getUserId())) {
+                if (Objects.equals(message.method(), "like") && homeRepository.isNotBlocked(followerId, post.getUserId())) {
                     homeRepository.addHomeEntry(entry);
                 } else {
                     homeRepository.removeHomeEntry(followerId, message.userId(), post.get_id(), EntryType.LIKE);
@@ -99,7 +98,7 @@ public class HomeTimelineService {
         if (posts != null && !posts.isEmpty()) {
             LOGGER.info("Update user timeline on follow/unfollow user");
             for (PostResponse post : posts) {
-                if (Objects.equals(message.method(), "follow") && !homeRepository.isBlocked(message.userId(), post.getUserId())) {
+                if (Objects.equals(message.method(), "follow") && homeRepository.isNotBlocked(message.userId(), post.getUserId())) {
                     HomeTimelineEntry entry = PayloadConverter.FollowToEntry(message);
                     entry.setDate(post.createdAt);
                     entry.setType(EntryType.POST);

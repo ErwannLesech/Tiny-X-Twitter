@@ -7,10 +7,8 @@ import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.bson.types.ObjectId;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimelineEntry> {
@@ -18,17 +16,14 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
     public static Map<ObjectId, List<ObjectId>> userBlockedList = new HashMap<>();
 
     public List<HomeTimelineEntry> getTimeline(final ObjectId userId) {
-        List<HomeTimelineEntry> entries = this.findAll().stream().toList();
-        return entries.stream()
-                .filter(entry -> Objects.equals(entry.getUserId(), userId))
+        return find("userId", userId).stream()
+                .sorted(Comparator.comparing(HomeTimelineEntry::getDate))
                 .toList();
     }
 
-    public List<ObjectId> getFollowers(ObjectId userId) {
-        List<HomeTimelineEntry> entries = this.findAll().list();
-        return entries.stream()
+    public List<HomeTimelineEntry> getFollowers(ObjectId userId) {
+        return this.findAll().stream()
                 .filter(entry -> entry.getUserFollowedId().equals(userId))
-                .map(HomeTimelineEntry::getUserId)
                 .toList();
     }
 
@@ -47,14 +42,13 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
         } else {
             userBlockedList.get(blockUser.userId()).add(blockUser.userBlockedId());
         }
-
     }
 
     public void removeBlockedUser(BlockUser blockUser) {
         userBlockedList.get(blockUser.userId()).remove(blockUser.userBlockedId());
     }
 
-    public boolean isBlocked(ObjectId userId, ObjectId userBlockedId) {
-        return userBlockedList.get(userId).contains(userBlockedId);
+    public boolean isNotBlocked(ObjectId userId, ObjectId userBlockedId) {
+        return !userBlockedList.get(userId).contains(userBlockedId);
     }
 }
