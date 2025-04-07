@@ -18,6 +18,8 @@ export class LeftSidebarComponent {
   @Input() avatarUrl: string = '';
   @Input() userName: string = '';
   @Input() userTag: string = '';
+  currentTheme: string = 'light'; // Default theme
+
   
   // @Output() postClick = new EventEmitter<void>();
   // @Output() logout = new EventEmitter<void>();
@@ -26,6 +28,15 @@ export class LeftSidebarComponent {
     private router: Router,
     private userStateService: UserStateService,
   ) {}
+
+  ngOnInit() {
+    // Retrieve the selected theme from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      this.currentTheme = savedTheme;
+      document.documentElement.setAttribute('data-theme', this.currentTheme);
+    }
+  }
 
   isActive(route: string): boolean {
     return this.router.url.includes(route);
@@ -38,5 +49,16 @@ export class LeftSidebarComponent {
   logout() {
     this.userStateService.logout();
     this.router.navigate(['/login']);
+  }
+
+  toggleTheme() {
+    // Toggle between 'light' and 'dark'
+    this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+
+    // Apply the theme to the <html> element
+    document.documentElement.setAttribute('data-theme', this.currentTheme);
+
+    // Save the selected theme in localStorage
+    localStorage.setItem('theme', this.currentTheme);
   }
 }

@@ -27,6 +27,9 @@ export class ProfileUpdateComponent {
   logedUser: User | null = null;
   userName: string = '';
   password: string = '';
+  avatarUrl: string = '';
+  bannerUrl: string = '';
+  bio: string = '';
 
   constructor(
     private userService: UserService,
@@ -36,6 +39,14 @@ export class ProfileUpdateComponent {
 
   ngOnInit() {
     this.logedUser = this.userStateService.getLoggedUser();
+    if (!this.logedUser) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.userName = this.logedUser.userName || '';
+    this.avatarUrl = this.logedUser.avatarUrl || '';
+    this.bannerUrl = this.logedUser.bannerUrl || '';
+    this.bio = this.logedUser.bio || '';
   }
 
   closePopup() {
@@ -43,23 +54,24 @@ export class ProfileUpdateComponent {
   }
 
   onSubmit() {
+    if (!this.logedUser) return;
+
     const userRequest = {
-      tag: this.logedUser?.userTag,
-      pseudo: this.userName.length > 0 ? this.userName : this.logedUser?.userName,
-      password: this.password.length > 0 ? this.password : null,
-      profilePictureUrl: this.logedUser?.avatarUrl,
-      profileBannerUrl: this.logedUser?.bannerUrl,
-      profileDescription: this.logedUser?.bio,
+      tag: this.logedUser.userTag,
+      pseudo: this.userName,
+      password: this.password || null,
+      profilePictureUrl: this.avatarUrl,
+      profileBannerUrl: this.bannerUrl,
+      profileDescription: this.bio
     };
-    if (!this.userName || !this.password) {
-      this.closePopup();
-    }
+
     this.userService.updateUser(userRequest).subscribe({
       next: () => {
-        this.userStateService.resetLoggedUser(this.logedUser!);
-        this.router.navigate(['/profile', this.logedUser?.userTag]).then(() => {
-          window.location.reload();
-        });
+          this.userStateService.resetLoggedUser(this.logedUser!);
+          this.closePopup();
+          this.router.navigate(['/profile', this.logedUser?.userTag]).then(() => {
+            window.location.reload();
+          });
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du profil:', err);
@@ -67,7 +79,10 @@ export class ProfileUpdateComponent {
     });
   }
 
-  onDelete() {
+  onDelete(event: MouseEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+
     if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ?')) {
       this.userService.deleteUser(this.userTag).subscribe({
         next: () => {
