@@ -1,7 +1,7 @@
 package com.epita.controller.subscriber;
 
-import com.epita.payloads.post.CreatePostRequest;
-import com.epita.service.UserService;
+import com.epita.payloads.user.DeleteUserPost;
+import com.epita.service.PostService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import io.quarkus.runtime.Startup;
@@ -15,36 +15,37 @@ import org.jboss.logging.Logger;
 import java.util.function.Consumer;
 
 /**
- * Subscriber for handling CreatePostRequest messages from a Redis Pub/Sub channel.
+ * A subscriber that listens to 'isPostBlockedResponse'
+ * channel related to post-creation response with user-service module.
  */
 @Startup
 @ApplicationScoped
-public class CreatePostSubscriber implements Consumer<CreatePostRequest> {
-    private PubSubCommands.RedisSubscriber subscriber;
+public class DeleteUserSubscriber implements Consumer<DeleteUserPost> {
+    private final PubSubCommands.RedisSubscriber subscriber;
     private final Vertx vertx;
 
     @Inject
-    UserService userService;
+    PostService postService;
 
     @Inject
     Logger logger;
 
     @Inject
-    public CreatePostSubscriber(final RedisDataSource ds, Vertx vertx) {
+    public DeleteUserSubscriber(final RedisDataSource ds, Vertx vertx) {
         this.vertx = vertx;
-        subscriber = ds.pubsub(CreatePostRequest.class).subscribe("isPostBlockedRequest", this);
+        subscriber = ds.pubsub(DeleteUserPost.class).subscribe("deleteUserPost", this);
     }
 
     @PostConstruct
     void init() {
-        logger.info("CreatePostSubscriber initiated !");
+        logger.info("DeleteUserSubscriber initiated !");
     }
 
     @Override
-    public void accept(final CreatePostRequest message) {
-        logger.infof("Received CreatePostRequest on IsPostBlockedRequest: %s", message.toString());
+    public void accept(final DeleteUserPost message) {
+        logger.infof("Received CreationPostResponse from deleteUserPost: %s", message.toString());
         vertx.executeBlocking(future -> {
-            userService.createPostRequest(message);
+            postService.deletePost(message.getUserId());
             future.complete();
         });
     }

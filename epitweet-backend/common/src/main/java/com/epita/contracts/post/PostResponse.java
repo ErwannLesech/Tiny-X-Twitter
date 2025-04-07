@@ -1,4 +1,4 @@
-package com.epita.controller.contracts;
+package com.epita.contracts.post;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import org.bson.types.ObjectId;
 import java.time.Instant;
 
 /**
- * Represents the response for a Post entity, used in controller contracts.
+ * Represents the response for a Post entity, used in controller contracts and in repo-post payloads
  */
 @Getter
 @Setter

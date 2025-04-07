@@ -1,16 +1,15 @@
 package com.epita.service;
 
-import com.epita.payloads.post.CreatePostRequest;
 import com.epita.controller.contracts.UserRequest;
-import com.epita.controller.contracts.UserResponse;
-import com.epita.converter.CreatePostConverter;
+import com.epita.contracts.user.UserResponse;
 import com.epita.converter.UserConverter;
 import com.epita.repository.UserRepository;
 import com.epita.repository.entity.User;
-import com.epita.repository.publisher.CreatePostPublisher;
+import com.epita.repository.publisher.DeleteUserPublisher;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
+import org.jboss.logging.Logger;
 import org.mindrot.jbcrypt.BCrypt;
 
 @ApplicationScoped
@@ -20,7 +19,10 @@ public class UserService {
     UserRepository userRepository;
 
     @Inject
-    CreatePostPublisher createPostPublisher;
+    Logger logger;
+
+    @Inject
+    DeleteUserPublisher deleteUserPublisher;
 
     /**
      * Retrieves a user by their tag.
@@ -30,11 +32,27 @@ public class UserService {
      */
     public UserResponse getUser(String userTag) {
         User user = userRepository.findByTag(userTag);
+        logger.infof("getting User: %s", user);
         if (user == null) {
             return null;
         }
 
-        return new UserResponse(user._id, user.tag, user.pseudo, user.password, user.blockedUsers);
+        return UserConverter.toResponse(user);
+    }
+
+    /**
+     * Retrieves a user by their Identifier.
+     *
+     * @param userId the id of the user
+     * @return a UserResponse object if the user is found, or null
+     */
+    public UserResponse getUserById(ObjectId userId) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            return null;
+        }
+
+        return UserConverter.toResponse(user);
     }
 
     /**
@@ -69,12 +87,22 @@ public class UserService {
     public Boolean updateUser(final UserRequest userRequest) {
         User userToUpdate = userRepository.findByTag(userRequest.getTag());
         if (userToUpdate != null) {
-            userToUpdate.pseudo = userRequest.getPseudo();
-            userToUpdate.blockedUsers = userRequest.getBlockedUsers();
+            if (userRequest.getPseudo() != null && !userRequest.getPseudo().isEmpty()){
+                userToUpdate.setPseudo(userRequest.getPseudo());
+            }
+            if (userRequest.getProfileDescription() != null && !userRequest.getProfileDescription().isEmpty()) {
+                userToUpdate.setProfileDescription(userRequest.getProfileDescription());
+            }
+            if (userRequest.getProfilePictureUrl() != null && !userRequest.getProfilePictureUrl().isEmpty()) {
+                userToUpdate.setProfilePictureUrl(userRequest.getProfilePictureUrl());
+            }
+            if (userRequest.getProfileBannerUrl() != null && !userRequest.getProfileBannerUrl().isEmpty()) {
+                userToUpdate.setProfileBannerUrl(userRequest.getProfileBannerUrl());
+            }
 
             // Password hash handling
             if (userRequest.getPassword() != null) {
-                userToUpdate.password = hashPassword(userRequest.getPassword());
+                userToUpdate.setPassword(hashPassword(userRequest.getPassword()));
             }
 
             userRepository.updateUser(userToUpdate);
@@ -94,6 +122,10 @@ public class UserService {
         User userToDelete = userRepository.findByTag(userTag);
         if (userToDelete != null) {
             userRepository.deleteUser(userToDelete);
+
+            // remove its posts
+            deleteUserPublisher.publish(UserConverter.toDeleteResponse(userToDelete));
+
             return UserConverter.toResponse(userToDelete);
         }
 
@@ -113,7 +145,7 @@ public class UserService {
             return 404;
         }
 
-        if (checkPassword(userRequest.getPassword(), user.password)) {
+        if (checkPassword(userRequest.getPassword(), user.getPassword())) {
             return 200;
         }
 
@@ -139,29 +171,5 @@ public class UserService {
      */
     private Boolean checkPassword(String passwordToCheck, String userPassword) {
         return BCrypt.checkpw(passwordToCheck, userPassword);
-    }
-
-    /**
-     * Checks if the userId and the parentId have blocked each other.
-     *
-     * @param message the CreatePostRequest from repo-post
-     */
-    public void createPostRequest(CreatePostRequest message) {
-        ObjectId userId = message.getUserId();
-        ObjectId parentId = message.getParentId();
-
-        User user = userRepository.findById(userId);
-        User parentUser = userRepository.findById(parentId);
-
-        if (user == null || parentUser == null) {
-            createPostPublisher.publish(CreatePostConverter.toCreatePostResponse(message,
-                    false, false));
-        } else {
-            Boolean childBlockedParentUser = user.blockedUsers.contains(parentId);
-            Boolean parentUserBlockedUser = parentUser.blockedUsers.contains(userId);
-
-            createPostPublisher.publish(CreatePostConverter.toCreatePostResponse(message,
-                    parentUserBlockedUser, childBlockedParentUser));
-        }
     }
 }

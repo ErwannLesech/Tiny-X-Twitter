@@ -1,17 +1,29 @@
 package com.epita.service;
 
+import com.epita.contracts.social.BlockedRelationRequest;
+import com.epita.contracts.social.BlockedRelationResponse;
+import com.epita.contracts.user.UserResponse;
 import com.epita.controller.contracts.PostRequest;
-import com.epita.controller.contracts.PostResponse;
-import com.epita.payloads.post.CreatePostResponse;
+import com.epita.converter.PostTimelineConverter;
+import com.epita.contracts.post.PostResponse;
 import com.epita.converter.PostConverter;
-import com.epita.repository.publisher.CreatePostPublisher;
+import com.epita.repository.restClient.SocialRestClient;
+import com.epita.repository.restClient.UserRestClient;
 import com.epita.repository.PostRepository;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
+import com.epita.repository.publisher.PostHomeTimelinePublisher;
+import com.epita.repository.publisher.PostTimelinePublisher;
+import com.epita.repository.publisher.IndexPostPublisher;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.resteasy.reactive.ClientWebApplicationException;
+import org.jboss.resteasy.reactive.RestResponse;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +38,21 @@ public class PostService {
     PostRepository postRepository;
 
     @Inject
-    CreatePostPublisher createPostPublisher;
+    PostTimelinePublisher postTimelinePublisher;
+
+    @Inject
+    PostHomeTimelinePublisher postHomeTimelinePublisher;
+
+    @Inject
+    IndexPostPublisher indexPostPublisher;
+
+    @Inject
+    @RestClient
+    UserRestClient userRestClient;
+
+    @Inject
+    @RestClient
+    SocialRestClient socialRestClient;
 
     /**
      * Retrieves a list of posts for a given user.
@@ -62,25 +88,72 @@ public class PostService {
     }
 
     /**
-     * Retrieves a reply post by its ID.
+     * Retrieves list of reply posts by its ID.
      *
      * @param replyPostId the ID of the reply post
      * @return a PostResponse object or null if the post is not found or is not a reply
      */
-    public PostResponse getReplyPost(ObjectId replyPostId) {
-        Post post = postRepository.findById(replyPostId);
+    public List<PostResponse> getRepliesPost(ObjectId replyPostId) {
+        Post parentPost = postRepository.findById(replyPostId);
 
-        if (post == null || post.postType != PostType.REPLY) {
+        if (parentPost == null) {
             return null;
         }
 
-        // check if parent post still exists
-        Post repliedPost = postRepository.findById(post.parentId);
-        if (repliedPost == null) {
-            post.parentId = null;
+        // check all replies of this post
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            if (post.getPostType() == PostType.REPLY) {
+                repliesResponses.add(PostConverter.toResponse(post));
+            }
         }
 
-        return PostConverter.toResponse(post);
+        return repliesResponses;
+    }
+
+    /**
+     * Retrieves a list of repost posts.
+     *
+     * @param postReferenceId the ID of the reply post
+     * @return a PostResponse object or null if the post is not found or is not a reply
+     */
+    public List<PostResponse> getRepostsPost(ObjectId postReferenceId) {
+        Post parentPost = postRepository.findById(postReferenceId);
+        if (parentPost == null) {
+            return null;
+        }
+
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            if (post.getPostType() == PostType.REPOST) {
+                repliesResponses.add(PostConverter.toResponse(post));
+            }
+        }
+
+        return repliesResponses;
+    }
+
+    /**
+     * Retrieves a list of repost posts and replies.
+     *
+     * @param postReferenceId the ID of the reply post
+     * @return a PostResponse object or null if the post is not found or is not a reply
+     */
+    public List<PostResponse> getRepostsAndRepliesPost(ObjectId postReferenceId) {
+        Post parentPost = postRepository.findById(postReferenceId);
+        if (parentPost == null) {
+            return null;
+        }
+
+        List<Post> replies = postRepository.findByParentId(parentPost.getId());
+        List<PostResponse> repliesResponses = new ArrayList<>();
+        for (Post post : replies) {
+            repliesResponses.add(PostConverter.toResponse(post));
+        }
+
+        return repliesResponses;
     }
 
     /**
@@ -91,30 +164,41 @@ public class PostService {
      * @return a PostResponse object or null if the post-type is not POST
      */
     public PostResponse createPostRequest(ObjectId userId, PostRequest postRequest) {
-        if (Objects.equals(postRequest.postType, PostType.POST.toString())) {
-            // Independent post, no need block check
-            Post createdPost = createPost(userId, postRequest);
-            return PostConverter.toResponse(createdPost);
-        } else {
-            createPostPublisher.publish(PostConverter.toCreatePostRequest(userId, postRequest));
+        // Check if user exists
+        try (RestResponse<UserResponse> response = userRestClient.getUserById(userId)) {
+            if (response == null || response.getStatus() != 200) {
+                return null;
+            }
+        } catch (ClientWebApplicationException e) {
             return null;
         }
-    }
 
-    /**
-     * Handles the creation of a post-response.
-     *
-     * @param createPostResponse the creation post-response details
-     */
-    public void createPostResponse(CreatePostResponse createPostResponse) {
-        if (createPostResponse.getParentUserBlockedUser() || createPostResponse.getUserBlockedParentUser()) {
-            return;
+        if (!Objects.equals(postRequest.postType, PostType.POST.toString())) {
+            // Check if parentId or user have not blocked themselves
+            ObjectId parentUserId = postRepository.findById(postRequest.getParentObjectId()).getUserId();
+            BlockedRelationRequest blockedRelationRequest =
+                    PostConverter.toBlockedRelationRequest(userId, parentUserId);
+
+            BlockedRelationResponse blockedRelationResponse;
+            try {
+                blockedRelationResponse = socialRestClient.getBlockedRelation(blockedRelationRequest).getEntity();
+            } catch (ClientWebApplicationException e) {
+                return null;
+            }
+
+            if (blockedRelationResponse == null) {
+                return null;
+            }
+
+            // check if non block
+            if  (blockedRelationResponse.getParentUserBlockedUser() ||
+                    blockedRelationResponse.getUserBlockedParentUser()){
+                return null;
+            }
         }
 
-        ObjectId userId = createPostResponse.getUserId();
-        PostRequest postRequest = PostConverter.toRequest(createPostResponse);
-
-        createPost(userId, postRequest);
+        Post createdPost = createPost(userId, postRequest);
+        return PostConverter.toResponse(createdPost);
     }
 
     /**
@@ -128,6 +212,16 @@ public class PostService {
         Post post = PostConverter.toEntity(userId, postRequest);
 
         postRepository.createPost(post);
+
+        // declare to user-timeline that we created a post
+        postTimelinePublisher.publish(PostTimelineConverter.toPostTimeline(post, "creation"));
+
+        // declare to home-timeline that we deleted a post
+        postHomeTimelinePublisher.publish(PostTimelineConverter.toPostHomeTimeline(PostConverter.toResponse(post),
+                "deletion"));
+
+        // declare to index service that we created a Post
+        indexPostPublisher.publish(PostConverter.toIndexPost(post, "creation"));
 
         return post;
     }
@@ -145,10 +239,35 @@ public class PostService {
             return null;
         }
 
+        post.setUpdatedAt(Instant.now());
+
         PostResponse postResponse = PostConverter.toResponse(post);
 
         postRepository.deletePost(post);
 
+        // declare to user-timeline that we deleted a post
+        postTimelinePublisher.publish(PostTimelineConverter.toPostTimeline(post, "deletion"));
+
+        // declare to home-timeline that we deleted a post
+        postHomeTimelinePublisher.publish(PostTimelineConverter.toPostHomeTimeline(PostConverter.toResponse(post),
+                "deletion"));
+
+        // declare to index service that we deleted a Post
+        indexPostPublisher.publish(PostConverter.toIndexPost(post, "deletion"));
+
         return postResponse;
+    }
+
+    /**
+     * Deletes all posts of a userId
+     *
+     * @param userId the ID of the user
+     */
+    public void deleteUserPost(ObjectId userId) {
+        List<Post> posts = postRepository.findByUser(userId);
+
+        for (Post post : posts) {
+            postRepository.deletePost(post);
+        }
     }
 }

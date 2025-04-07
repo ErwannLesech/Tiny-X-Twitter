@@ -1,11 +1,12 @@
 package com.epita.converter;
 
 import com.epita.controller.contracts.UserRequest;
-import com.epita.controller.contracts.UserResponse;
+import com.epita.contracts.user.UserResponse;
+import com.epita.payloads.user.DeleteUserPost;
 import com.epita.repository.entity.User;
 import org.bson.types.ObjectId;
 
-import java.util.ArrayList;
+import java.time.Instant;
 
 /**
  * Utility class for converting between UserRequest, UserResponse, and User entity objects.
@@ -24,7 +25,10 @@ public class UserConverter {
                 userRequest.getTag(),
                 userRequest.getPseudo(),
                 userRequest.getPassword(),
-                userRequest.getBlockedUsers() != null ? userRequest.getBlockedUsers() : new ArrayList<>()
+                userRequest.getProfilePictureUrl(),
+                userRequest.getProfileBannerUrl(),
+                userRequest.getProfileDescription(),
+                Instant.now()
         );
     }
 
@@ -36,11 +40,20 @@ public class UserConverter {
      */
     public static UserResponse toResponse(User user) {
         return new UserResponse(
-                user._id,
-                user.tag,
-                user.pseudo,
-                user.password,
-                user.blockedUsers
+                user.getId(),
+                user.getTag(),
+                user.getPseudo(),
+                user.getPassword(),
+                user.getProfilePictureUrl(),
+                user.getProfileBannerUrl(),
+                user.getProfileDescription(),
+                user.getCreatedAt()
+        );
+    }
+
+    public static DeleteUserPost toDeleteResponse(User user) {
+        return new DeleteUserPost(
+                user.getId()
         );
     }
 }

@@ -31,7 +31,17 @@ public class UserRequest {
     String password;
 
     /**
-     * A list of user IDs that this user has blocked.
+     * The url of profilePicture image
      */
-    List<ObjectId> blockedUsers;
+    String profilePictureUrl;
+
+    /**
+     * The url of profile banner image
+     */
+    String profileBannerUrl;
+
+    /**
+     * The content of profile description (limited 255 char)
+     */
+    String profileDescription;
 }

@@ -1,7 +1,7 @@
 package com.epita.controller;
 
 import com.epita.controller.contracts.UserRequest;
-import com.epita.controller.contracts.UserResponse;
+import com.epita.contracts.user.UserResponse;
 import com.epita.service.UserService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -10,8 +10,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
-
-import java.util.List;
 
 @ApplicationScoped
 @Path("/api/users")
@@ -48,6 +46,34 @@ public class UserController {
         }
 
         logger.debugf("getUser response 200: %s", userResponse);
+        return Response.ok(userResponse).build();
+    }
+
+    /**
+     * Retrieves a user by their userId.
+     *
+     * @param userId the id of the user
+     * @return a Response containing the UserResponse if found, or an error status
+     */
+    @GET
+    @Path("/getUserById")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUser(@HeaderParam("userId") ObjectId userId) {
+        logger.infof("getUserById Request: %s", userId);
+        if (userId == null || userId.toString().isEmpty()) {
+            logger.warn("getUser response 400 - Invalid userId");
+            return Response.status(Response.Status.BAD_REQUEST).build(); // 400
+        }
+
+        logger.infof("Fetching user with id: %s", userId);
+        UserResponse userResponse = userService.getUserById(userId);
+
+        if (userResponse == null) {
+            logger.warnf("getUserById response 404 - User not found for id: %s", userId);
+            return Response.status(Response.Status.NOT_FOUND).build(); // 404
+        }
+
+        logger.debugf("getUserById response 200: %s", userResponse);
         return Response.ok(userResponse).build();
     }
 
@@ -190,13 +216,17 @@ public class UserController {
         String tag = userRequest.getTag();
         String pseudo = userRequest.getPseudo();
         String password = userRequest.getPassword();
-        List<ObjectId> blockedList = userRequest.getBlockedUsers();
+        String description = userRequest.getProfileDescription();
 
         if (tag == null || tag.isEmpty() || pseudo == null || pseudo.isEmpty()) {
             return Boolean.FALSE;
         }
 
         if (isPasswordNeeded && (password == null || password.isEmpty())) {
+            return Boolean.FALSE;
+        }
+
+        if (description != null && description.length() > 255) {
             return Boolean.FALSE;
         }
 

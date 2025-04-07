@@ -1,9 +1,9 @@
 package com.epita.converter;
 
+import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.controller.contracts.PostRequest;
-import com.epita.controller.contracts.PostResponse;
-import com.epita.payloads.post.CreatePostRequest;
-import com.epita.payloads.post.CreatePostResponse;
+import com.epita.contracts.post.PostResponse;
+import com.epita.payloads.search.IndexPost;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
 import org.bson.types.ObjectId;
@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Utility class for converting between different representations of a Post.
@@ -27,7 +28,6 @@ public class PostConverter {
      * @return The converted {@code Post} entity.
      */
     public static Post toEntity(ObjectId userId, PostRequest postRequest) {
-        LOGGER.debug("Converting PostRequest to Post entity for userId: {}", userId);
         return new Post(
                 userId,
                 PostType.fromString(postRequest.getPostType()),
@@ -46,50 +46,40 @@ public class PostConverter {
      * @return The converted {@code PostResponse}.
      */
     public static PostResponse toResponse(Post post) {
-        LOGGER.debug("Converting Post entity to PostResponse for postId: {}", post._id);
         return new PostResponse(
-                post._id,
-                post.userId,
-                post.postType.toString(),
-                post.content,
-                post.mediaUrl,
-                post.parentId,
-                post.createdAt,
-                post.updatedAt
+                post.getId(),
+                post.getUserId(),
+                post.getPostType().toString(),
+                post.getContent(),
+                post.getMediaUrl(),
+                post.getParentId(),
+                post.getCreatedAt(),
+                post.getUpdatedAt()
         );
     }
 
-    /**
-     * Converts a {@code CreatePostResponse} to a {@code PostRequest}.
-     *
-     * @param createPostResponse The {@code CreatePostResponse} to convert.
-     * @return The converted {@code PostRequest}.
-     */
-    public static PostRequest toRequest(CreatePostResponse createPostResponse) {
-        LOGGER.debug("Converting CreatePostResponse to PostRequest");
-        return new PostRequest(
-                createPostResponse.getPostType(),
-                createPostResponse.getContent(),
-                createPostResponse.getMediaUrl(),
-                createPostResponse.getParentId() != null ? createPostResponse.getParentId().toString() : null
-        );
-    }
-
-    /**
-     * Converts a {@code PostRequest} to a {@code CreatePostRequest}.
-     *
-     * @param userId      The ID of the user creating the post.
-     * @param postRequest The {@code PostRequest} to convert.
-     * @return The converted {@code CreatePostRequest}.
-     */
-    public static CreatePostRequest toCreatePostRequest(ObjectId userId, PostRequest postRequest) {
-        LOGGER.debug("Converting PostRequest to CreatePostRequest for userId: {}", userId);
-        return new CreatePostRequest(
+    public static BlockedRelationRequest toBlockedRelationRequest(ObjectId userId, ObjectId parentId) {
+        return new BlockedRelationRequest(
                 userId,
-                postRequest.getPostType(),
-                postRequest.getContent(),
-                postRequest.getMediaUrl(),
-                postRequest.getParentObjectId()
+                parentId
+        );
+    }
+
+    /**
+     * Converts a {@code Post} to a {@code IndexPost}.
+     *
+     * @param post   The post that has been created or deleted
+     * @param method The method (creation or deletion)
+     * @return The converted {@code IndexPost}.
+     */
+    public static IndexPost toIndexPost(Post post, String method){
+        return new IndexPost(
+                post.getId().toString(),
+                post.getPostType().toString(),
+                post.getContent(),
+                post.getMediaUrl(),
+                post.getParentId(),
+                method
         );
     }
 }

@@ -1,9 +1,8 @@
 package com.epita.repository.entity;
 
+import io.quarkus.mongodb.panache.PanacheMongoEntityBase;
 import io.quarkus.mongodb.panache.common.MongoEntity;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
@@ -11,50 +10,52 @@ import java.time.Instant;
 /**
  * Represents a Post entity in the MongoDB collection "Posts".
  */
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @MongoEntity(collection = "Posts")
-public class Post {
+public class Post extends PanacheMongoEntityBase {
     /**
      * Unique mongo identifier of the Post
      */
-    public ObjectId _id;
+    private ObjectId id;
 
     /**
      * The ID of the user who created the post.
      */
-    public ObjectId userId;
+    private ObjectId userId;
 
     /**
      * The type of post (post, repost, reply)
      */
-    public PostType postType;
+    private PostType postType;
 
     /**
      * The content of the Post (max 160 char)
      */
-    public String content;
+    private String content;
 
     /**
      * The URL of the media attached to the post (optional).
      */
-    public String mediaUrl;
+    private String mediaUrl;
 
     /**
      * The ID of the parent post if this is a reply to another post.
      */
-    public ObjectId parentId;
+    private ObjectId parentId;
 
     /**
      * Timestamp of creation instant of the post
      */
-    public Instant createdAt;
+    private Instant createdAt;
 
     /**
      * Timestamp of last update instant of the post
      */
-    public Instant updatedAt;
+    private Instant updatedAt;
 
     /**
      * Constructs a new Post object.

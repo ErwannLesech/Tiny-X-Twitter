@@ -1,43 +1,61 @@
 package com.epita.repository.entity;
 
+import io.quarkus.mongodb.panache.PanacheMongoEntityBase;
 import io.quarkus.mongodb.panache.common.MongoEntity;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.bson.types.ObjectId;
-import java.util.List;
+
+import java.time.Instant;
 
 /**
  * Represents a User entity stored in the MongoDB collection "Users".
  */
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @MongoEntity(collection = "Users")
-public class User {
+public class User extends PanacheMongoEntityBase {
 
     /**
      * The unique identifier of the user.
      */
-    public ObjectId _id;
+    private ObjectId id;
 
     /**
      * A tag associated with the user.
      */
-    public String tag;
+    private String tag;
 
     /**
      * The pseudonym or username of the user.
      */
-    public String pseudo;
+    private String pseudo;
 
     /**
      * The hashed password of the user.
      */
-    public String password;
+    private String password;
 
     /**
-     * A list of user IDs that this user has blocked.
+     * The url of profilePicture image
      */
-    public List<ObjectId> blockedUsers;
+    private String profilePictureUrl;
+
+    /**
+     * The url of profile banner image
+     */
+    private String profileBannerUrl;
+
+    /**
+     * The content of profile description (limited to 255 char)
+     */
+    private String profileDescription;
+
+    /**
+     * Date of creation of the account
+     */
+    private Instant createdAt;
+
 }
