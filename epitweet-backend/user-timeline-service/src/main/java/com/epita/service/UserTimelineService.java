@@ -42,9 +42,9 @@ public class UserTimelineService {
     public UserTimelineResponse getUserTimeline(ObjectId userId) {
         logger.infof("Fetching timeline for user: %s", userId);
         List<UserTimelineEntry> userTimeline = userTimelineRepository.findByUserId(userId);
-        userTimeline.sort(UserTimelineEntry::compareTo);
         List<UserTimelinePost> userTimelinePosts = userTimeline
                 .stream()
+                .sorted(UserTimelineEntry::compareTo)
                 .map(UserTimelineConverter::toResponse)
                 .toList();
         return new UserTimelineResponse(userId, userTimelinePosts);

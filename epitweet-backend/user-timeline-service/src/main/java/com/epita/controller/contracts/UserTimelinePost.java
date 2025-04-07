@@ -11,6 +11,7 @@ import java.time.Instant;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class UserTimelinePost {
     /**
      * ID of the related post.

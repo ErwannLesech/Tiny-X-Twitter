@@ -22,6 +22,17 @@ public class UserTimelineRepository implements PanacheMongoRepository<UserTimeli
     Logger logger;
 
     /**
+     * Retrieves all timeline entries associated with the specified user ID.
+     *
+     * @param userId The {@link ObjectId} of the user whose timeline entries are to be fetched.
+     * @return A list of {@link UserTimelineEntry} documents associated with the given user ID.
+     */
+    public List<UserTimelineEntry> findByUserId(ObjectId userId) {
+        logger.infof("Finding entries with user ID: %s", userId.toString());
+        return find("userId", userId).list();
+    }
+
+    /**
      * Create a new user timeline entry in the MongoDB collection.
      *
      * @param userTimelineEntry The {@link UserTimelineEntry} to be created.
@@ -48,16 +59,5 @@ public class UserTimelineRepository implements PanacheMongoRepository<UserTimeli
                 userTimelineEntry.getUserId(),
                 userTimelineEntry.getPostId(),
                 userTimelineEntry.getUserTimelineEntryAction());
-    }
-
-    /**
-     * Retrieves all timeline entries associated with the specified user ID.
-     *
-     * @param userId The {@link ObjectId} of the user whose timeline entries are to be fetched.
-     * @return A list of {@link UserTimelineEntry} documents associated with the given user ID.
-     */
-    public List<UserTimelineEntry> findByUserId(ObjectId userId) {
-        logger.infof("Finding entries with user ID: %s", userId.toString());
-        return find("userId", userId).list();
     }
 }
