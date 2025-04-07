@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { User, UserStateService } from '../../../services/user-state.service';
 import { Router } from '@angular/router';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-profile-update',
@@ -34,7 +35,8 @@ export class ProfileUpdateComponent {
   constructor(
     private userService: UserService,
     private userStateService: UserStateService,
-    private router: Router
+    private router: Router,
+    private notification: NotificationService
   ) {}
 
   ngOnInit() {
@@ -67,14 +69,15 @@ export class ProfileUpdateComponent {
 
     this.userService.updateUser(userRequest).subscribe({
       next: () => {
-          this.userStateService.resetLoggedUser(this.logedUser!);
-          this.closePopup();
+          this.userStateService.resetLoggedUser(this.logedUser!)
+          this.notification.showSuccess('Profile updated successfully!');
           this.router.navigate(['/profile', this.logedUser?.userTag]).then(() => {
-            window.location.reload();
+            window.location.reload()
           });
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du profil:', err);
+        this.notification.showError('Failed to update profile');
       }
     });
   }
@@ -86,11 +89,13 @@ export class ProfileUpdateComponent {
     if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ?')) {
       this.userService.deleteUser(this.userTag).subscribe({
         next: () => {
+          this.notification.showSuccess('Profile deleted successfully!');
           this.userStateService.logout();
           this.router.navigate(['/']);
         },
         error: (err) => {
           console.error('Erreur lors de la suppression du compte:', err);
+          this.notification.showError('Failed to delete profile');
         }
       });
     }

@@ -1,0 +1,20 @@
+.notification {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 4px;
+    color: white;
+    font-size: 14px;
+    
+    mat-icon {
+      margin-right: 8px;
+    }
+    
+    &.success {
+      background-color: #4CAF50;
+    }
+    
+    &.error {
+      background-color: #F44336;
+    }
+}

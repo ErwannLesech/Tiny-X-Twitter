@@ -120,3 +120,22 @@ body {
 .hide {
   display: none;
 }
+
+// Notifications
+
+// Custom snackbar styles
+.success-snackbar {
+  background-color: #4CAF50 !important;
+  color: white !important;
+}
+
+.error-snackbar {
+  background-color: #F44336 !important;
+  color: white !important;
+}
+
+.mat-snack-bar-container {
+  margin-top: 64px !important; // Adjust based on your header height
+  max-width: 100vw !important;
+  background: transparent !important;
+}
