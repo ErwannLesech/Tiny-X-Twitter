@@ -162,11 +162,11 @@ public class UserController {
         }
 
         logger.info("Updating user");
-        Boolean updateDone = userService.updateUser(userRequest);
+        UserResponse updatedUser = userService.updateUser(userRequest);
 
-        if (updateDone) {
+        if (updatedUser != null) {
             logger.info("updateUser response 200 - User updated successfully");
-            return Response.status(Response.Status.OK).build(); // 200
+            return Response.ok(updatedUser).build();
         }
 
         logger.warn("updateUser response 404 - User not found during update");

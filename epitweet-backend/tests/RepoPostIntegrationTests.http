@@ -1,0 +1,279 @@
+@env = dev
+
+# ================== Repo Post Service ==================
+
+###
+# @name Prepare data
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user2",
+  "pseudo": "User Two",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected user fields", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "User ID is missing");
+        client.assert(body.tag === "user2", "Tag mismatch");
+        client.assert(body.pseudo === "User Two", "Pseudo mismatch");
+        client.assert(typeof body.password === "string", "Password should be hashed string");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
+        client.assert(body.profileDescription === null, "profileDescription should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a timestamp string");
+        client.global.set("user1Id", body._id)
+    });
+%}
+
+###
+# @name 1. Test Create Post
+POST http://localhost:8082/api/posts/createPost
+userId:{{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "This is my first post!",
+  "mediaPath": "https://cdn.example.com/image.jpg"
+}
+
+> {%
+    client.test("Response status is 201 - Post created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected post fields", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected post _id");
+        client.assert(body.userId === client.global.get("user1Id") , "User ID mismatch");
+        client.assert(body.postType === "post", "Post type should be 'post'");
+        client.assert(body.content === "This is my first post!", "Content mismatch");
+        client.assert(body.mediaUrl === null, "Expected mediaUrl to be null (mediaPath not stored directly)");
+        client.assert(body.parentId === null, "Expected parentId to be null");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+        client.global.set("post1Id", body._id);
+    });
+%}
+
+###
+# @name 2. Test Get Posts by User
+GET http://localhost:8082/api/posts/getPosts
+userId:{{user1Id}}
+
+> {%
+    client.test("Response status is 200 - Posts fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an array of posts", function() {
+        client.assert(Array.isArray(response.body), "Response body should be an array");
+        client.assert(response.body.length > 0, "Response should contain at least one post");
+    });
+
+    client.test("First post has correct structure and values", function() {
+        const post = response.body[0];
+
+        client.assert(post._id === client.global.get("post1Id"), "Unexpected post _id");
+        client.assert(post.userId === client.global.get("user1Id"), "userId mismatch");
+        client.assert(post.postType === "post", "postType should be 'post'");
+        client.assert(post.content === "This is my first post!", "Content mismatch");
+        client.assert(post.mediaUrl === null, "mediaUrl should be null");
+        client.assert(post.parentId === null, "parentId should be null");
+        client.assert(typeof post.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof post.updatedAt === "string", "updatedAt should be a string timestamp");
+    });
+%}
+
+
+###
+# @name 3. Test Get Post by ID
+GET http://localhost:8082/api/posts/getPost/{{post1Id}}
+
+> {%
+    client.test("Response status is 200 - Post found", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response contains expected post fields", function() {
+        const body = response.body;
+
+        client.assert(body._id === client.global.get("post1Id"), "Unexpected post _id");
+        client.assert(body.userId === client.global.get("user1Id"), "userId mismatch");
+        client.assert(body.postType === "post", "postType should be 'post'");
+        client.assert(body.content === "This is my first post!", "Content mismatch");
+        client.assert(body.mediaUrl === null, "mediaUrl should be null");
+        client.assert(body.parentId === null, "parentId should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+    });
+%}
+
+###
+# @name 4. Test Create Repost
+POST http://localhost:8082/api/posts/createPost
+userId:{{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "repost",
+  "content": "This is my second Repost!",
+  "parentId": "{{post1Id}}"
+}
+
+> {%
+    client.test("Response status is 201 - Repost created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Repost fields are correctly set", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected _id for repost");
+        client.assert(body.userId === client.global.get("user1Id"), "userId mismatch");
+        client.assert(body.postType === "repost", "postType should be 'repost'");
+        client.assert(body.content === "This is my second Repost!", "Content mismatch");
+        client.assert(body.mediaUrl === null, "mediaUrl should be null for repost");
+        client.assert(body.parentId === client.global.get("post1Id"), "parentId mismatch (should reference original post)");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+        client.global.set("repost1Id", body._id);
+    });
+%}
+
+###
+# @name 5. Test Create Reply
+POST http://localhost:8082/api/posts/createPost
+userId:{{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "reply",
+  "content": "This is my first Reply!",
+  "parentId": "{{post1Id}}"
+}
+
+> {%
+    client.test("Response status is 201 - Repost created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Repost fields are correctly set", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected _id for repost");
+        client.assert(body.userId === client.global.get("user1Id"), "userId mismatch");
+        client.assert(body.postType === "reply", "postType should be 'repost'");
+        client.assert(body.content === "This is my first Reply!", "Content mismatch");
+        client.assert(body.mediaUrl === null, "mediaUrl should be null for repost");
+        client.assert(body.parentId === client.global.get("post1Id"), "parentId mismatch (should reference original post)");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+        client.global.set("reply1Id", body._id);
+    });
+%}
+
+###
+# @name 6. Get all reposts and replies (after creating repost and reply)
+GET http://localhost:8082/api/posts/getPostRepostAndReply/{{post1Id}}
+userId:{{user1Id}}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an array with reposts and replies", function() {
+        const body = response.body;
+        client.assert(Array.isArray(body), "Response body should be an array");
+
+        client.assert(body.length >= 2, "Expected at least 2 elements (repost and reply)");
+
+        const repost = body.find(p => p.postType === "repost");
+        const reply = body.find(p => p.postType === "reply");
+
+        client.assert(repost !== undefined, "Repost not found in response");
+        client.assert(reply !== undefined, "Reply not found in response");
+
+        client.assert(typeof repost._id === "string", "Repost _id should be a string");
+        client.assert(typeof repost.content === "string", "Repost content should be a string");
+        client.assert(repost.parentId === client.global.get("post1Id"), "Repost parentId should match post1Id");
+
+        client.assert(typeof reply._id === "string", "Reply _id should be a string");
+        client.assert(typeof reply.content === "string", "Reply content should be a string");
+        client.assert(reply.parentId === client.global.get("post1Id"), "Reply parentId should match post1Id");
+    });
+%}
+
+###
+# @name 7. Test Get Reply
+GET http://localhost:8082/api/posts/getPostReply/{{post1Id}}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an array of replies", function() {
+        const body = response.body;
+        client.assert(Array.isArray(body), "Response body should be an array");
+        client.assert(body.length > 0, "Expected at least one reply in the response");
+
+        const reply = body[0];
+
+        client.assert(reply.postType === "reply", "The postType of the item should be 'reply'");
+        client.assert(typeof reply._id === "string", "Reply _id should be a string");
+        client.assert(reply.content !== undefined, "Reply content should not be undefined");
+        client.assert(typeof reply.content === "string", "Reply content should be a string");
+        client.assert(reply.parentId === client.global.get("post1Id"), "Reply parentId should match the original post ID");
+
+        client.assert(typeof reply.createdAt === "string", "createdAt must be a timestamp string");
+        client.assert(typeof reply.updatedAt === "string", "updatedAt must be a timestamp string");
+    });
+%}
+
+###
+# @name 8. Test Delete Repost
+DELETE http://localhost:8082/api/posts/deletePost/{{repost1Id}}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response body contains correct repost details", function() {
+        const body = response.body;
+        client.assert(body._id === client.global.get("repost1Id"), "Expected repost _id to match the one being deleted");
+        client.assert(body.userId === client.global.get("user1Id"), "Expected userId to match the repost user");
+        client.assert(body.postType === "repost", "Expected postType to be 'repost'");
+        client.assert(body.content === "This is my second Repost!", "Expected content to match the repost content");
+        client.assert(body.parentId === client.global.get("post1Id"), "Expected parentId to match the original post ID");
+        client.assert(typeof body.createdAt === "string", "Expected createdAt to be a timestamp string");
+        client.assert(typeof body.updatedAt === "string", "Expected updatedAt to be a timestamp string");
+    });
+%}
+
+###
+# @name 9. Test get deleted Repost
+GET http://localhost:8082/api/posts/getPostRepost/{{repost1Id}}
+
+> {%
+    client.test("Response status is 404 for deleted repost", function() {
+        client.assert(response.status === 404, "Expected status 404 but got " + response.status);
+    });
+
+    client.test("Response body is empty", function() {
+        const body = response.body;
+        client.assert(body === undefined || body.length === 0, "Expected empty response body");
+    });
+%}
+
