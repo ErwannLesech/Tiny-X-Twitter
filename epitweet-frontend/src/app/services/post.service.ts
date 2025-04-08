@@ -15,9 +15,9 @@ export interface Post {
   updatedAt: string | '';
   user: User | null;
   likes: number | 0;
-  likeUsersIds: string[] | [];
+  likeUsersIds: string[];
   replies: number | 0;
-  repliesIds: string[] | [];
+  repliesIds: string[];
   reposts: number | 0;
   isLiked: boolean | false;
 }
@@ -54,46 +54,31 @@ export class PostService {
         }
 
         const loggedUser = this.userStateService.getLoggedUser();
-        if (!loggedUser) {
-          return of([]);
-        }
-        // Then get like status for all posts
+        
         const postObservables = posts.map((post) => 
           this.socialService.getLikeUsers(post._id).pipe(
+            catchError(() => of([])), // Return empty array if error occurs
             switchMap((likeUsersIds: string[]) => {
+              const isLiked = loggedUser ? likeUsersIds.includes(loggedUser.userId) : false;
               const updatedPost = {
                 ...post,
                 likes: likeUsersIds.length,
                 likeUsersIds: likeUsersIds,
-                isLiked: likeUsersIds.includes(loggedUser.userId)
+                isLiked: isLiked
               };
               return this.getReplies(post._id).pipe(
+                catchError(() => of([])), // Return empty array if error occurs
                 map((replies: Post[]) => ({
                   ...updatedPost,
                   replies: replies.length,
                   repliesIds: replies.map((reply) => reply._id)
-                })),
-                catchError(() => of({
-                  ...updatedPost,
-                  replies: 0,
-                  repliesIds: []
                 }))
               );
-            }),
-            catchError(() => of({
-              ...post,
-              likes: 0,
-              likeUsersIds: [],
-              isLiked: false,
-              replies: 0,
-              repliesIds: []
-            }))
+            })
           )
         );
 
-        return forkJoin(postObservables).pipe(
-          map((flattenedPosts) => flattenedPosts.flat())
-        );
+        return forkJoin(postObservables);
       }),
       catchError(this.handleGetPostsError)
     );
@@ -102,27 +87,23 @@ export class PostService {
   getPostById(postId: string): Observable<Post | null> {
     return this.http.get<Post>(`${this.apiUrl}/getPost/${postId}`, this.httpOptions).pipe(
       switchMap((post: Post) => {
-        // If we have a logged in user, check if they liked this post
         const loggedUser = this.userStateService.getLoggedUser();
-        if (!loggedUser) {
-          return of({...post, isLiked: false});
-        }
         
         return this.socialService.getLikeUsers(post._id).pipe(
-          map((likeUsersIds: string[]) => {
-            return {
-              ...post,
-              likes: likeUsersIds.length,
-              likeUsersIds: likeUsersIds,
-              isLiked: likeUsersIds.includes(loggedUser.userId)
-            };
-          })
+          catchError(() => of([])), // Return empty array if error occurs
+          map((likeUsersIds: string[]) => ({
+            ...post,
+            likes: likeUsersIds.length,
+            likeUsersIds: likeUsersIds,
+            isLiked: loggedUser ? likeUsersIds.includes(loggedUser.userId) : false
+          }))
         );
       }),
       switchMap((post: Post) =>
         this.userService.getUserById(post.userId).pipe(
-          map((userResponse) => {
-            const postUser = {
+          map((userResponse) => ({
+            ...post,
+            user: {
               userId: post.userId,
               userName: userResponse.pseudo,
               userTag: userResponse.tag,
@@ -131,56 +112,41 @@ export class PostService {
               bio: userResponse.profileDescription || "Ceci est la bio de @" + userResponse.tag,
               followersCount: userResponse.followersCount || 0,
               followingCount: userResponse.followingCount || 0
-            };
-            return {
-              ...post,
-              user: postUser
-            };
-          }),
-          catchError((err) => {
-            console.error('Error fetching user:', err);
-            return of(null);
-          })
+            }
+          })),
+          catchError(() => of(post)) // Continue with post even if user fetch fails
         )
       ),
-      switchMap((post: Post | null) => {
-        if (!post) {
-          return of(null);
-        }
-        return this.getReplies(post._id).pipe(
+      switchMap((post: Post) => 
+        this.getReplies(post._id).pipe(
+          catchError(() => of([])), // Return empty array if error occurs
           map((replies: Post[]) => ({
             ...post,
             replies: replies.length,
             repliesIds: replies.map((reply) => reply._id)
-          })),
-          catchError(() => of({
-            ...post,
-            replies: 0,
-            repliesIds: []
           }))
-        );
-      }),
+        )
+      ),
       catchError(this.handleGetPostsError)
     );
   }
 
-  // Get a user's liked posts
   getUserLikedPosts(userId: string): Observable<Post[] | null> {
     return this.socialService.getUserLikedPostsIds(userId).pipe(
+      catchError(() => of([])), // Return empty array if error occurs
       switchMap((postIds: string[]) => {
         if (!postIds || postIds.length === 0) {
           return of([]);
         }
         
-        // Fetch details for each post
         const postObservables = postIds.map((postId: string) => 
           this.getPostById(postId).pipe(
-            catchError(() => of(null)) // Handle case where post might not be found
+            catchError(() => of(null))
           )
         );
         
         return forkJoin(postObservables).pipe(
-          map((posts: (Post | null)[]) => posts.filter((post: Post | null) => post !== null) as Post[])
+          map((posts: (Post | null)[]) => posts.filter((post): post is Post => post !== null))
         );
       }),
       catchError(this.handleGetPostsError)

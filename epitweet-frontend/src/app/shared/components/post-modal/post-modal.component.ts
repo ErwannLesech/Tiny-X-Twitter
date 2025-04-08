@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
@@ -6,13 +6,16 @@ import { fadeAnimation, scaleAnimation } from './post-modal.animations';
 import { User, UserStateService } from '../../../services/user-state.service';
 import { PostService, PostRequest } from '../../../services/post.service';
 import { NotificationService } from '../../../services/notification.service';
+import { GifSelectorComponent } from '../../../shared/components/gif-selector/gif-selector.component';
+import { EmojiSelectorComponent } from '../../../shared/components/emoji-selector/emoji-selector.component';
 
 @Component({
   selector: 'app-post-modal',
   templateUrl: './post-modal.component.html',
   styleUrls: ['./post-modal.component.scss'],
   animations: [fadeAnimation, scaleAnimation],
-  imports: [CommonModule, MatIconModule, FormsModule]
+  imports: [CommonModule, MatIconModule, FormsModule, GifSelectorComponent, EmojiSelectorComponent],
+  standalone: true
 })
 export class PostModalComponent implements OnInit {
   isModalOpen = false;
@@ -20,6 +23,11 @@ export class PostModalComponent implements OnInit {
   newPostContent = '';
   isPosting = false;
   postError: string | null = null;
+  selectedGifUrl: string | null = null;
+  showGifSelector: boolean = false;
+  showEmojiSelector: boolean = false;
+  
+  @ViewChild('postTextarea') postTextarea!: ElementRef;
   
   constructor(
     private userStateService: UserStateService,
@@ -54,6 +62,9 @@ export class PostModalComponent implements OnInit {
     this.newPostContent = '';
     this.isPosting = false;
     this.postError = null;
+    this.selectedGifUrl = null;
+    this.showGifSelector = false;
+    this.showEmojiSelector = false;
   }
   
   // Handle Enter key press (without shift key)
@@ -64,9 +75,55 @@ export class PostModalComponent implements OnInit {
     }
   }
   
+  // Toggle GIF selector
+  toggleGifSelector() {
+    this.showGifSelector = !this.showGifSelector;
+    if (this.showGifSelector) {
+      this.showEmojiSelector = false;
+    }
+  }
+  
+  // Toggle Emoji selector
+  toggleEmojiSelector() {
+    this.showEmojiSelector = !this.showEmojiSelector;
+    if (this.showEmojiSelector) {
+      this.showGifSelector = false;
+    }
+  }
+  
+  // Handle GIF selection
+  onGifSelected(gifUrl: string) {
+    this.selectedGifUrl = gifUrl;
+    this.showGifSelector = false;
+  }
+  
+  // Handle Emoji selection
+  onEmojiSelected(emoji: string) {
+    // Insérer l'emoji à la position du curseur
+    const textArea = this.postTextarea.nativeElement;
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    
+    // Concaténer le texte avant l'emoji, l'emoji, puis le texte après
+    this.newPostContent = this.newPostContent.substring(0, start) + emoji + this.newPostContent.substring(end);
+    
+    // Replacer le curseur juste après l'emoji inséré
+    setTimeout(() => {
+      textArea.selectionStart = textArea.selectionEnd = start + emoji.length;
+      textArea.focus();
+    }, 0);
+    
+    this.showEmojiSelector = false;
+  }
+  
+  // Remove selected GIF
+  removeSelectedGif() {
+    this.selectedGifUrl = null;
+  }
+  
   // Create a new post
   createPost() {
-    if (!this.newPostContent.trim() || !this.loggedUser?.userId) {
+    if ((!this.newPostContent.trim() && !this.selectedGifUrl) || !this.loggedUser?.userId) {
       return;
     }
     
@@ -76,13 +133,14 @@ export class PostModalComponent implements OnInit {
     const postRequest: PostRequest = {
       postType: 'post',
       content: this.newPostContent,
-      mediaUrl: '',
+      mediaUrl: this.selectedGifUrl || '',
       parentId: null // This would be used for replies
     };
     
     this.postService.createPost(this.loggedUser.userId, postRequest).subscribe({
       next: (response) => {
         this.newPostContent = '';
+        this.selectedGifUrl = null;
         this.isPosting = false;
         console.log('Post created successfully', response);
         this.notificationService.showSuccess('Post created successfully');

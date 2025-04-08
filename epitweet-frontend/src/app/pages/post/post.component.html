@@ -1,87 +1,139 @@
 <div class="post-container">
-    <!-- Left Sidebar -->
-    <app-left-sidebar 
-      [avatarUrl]="loggedUser?.avatarUrl || ''"
-      [userName]="loggedUser?.userName || ''"
-      [userTag]="loggedUser?.userTag || ''"
-      style="display: flex; flex-direction: column; justify-content: space-between;">
-    </app-left-sidebar>
-    
-    <!-- Main Content -->
-    <div class="post-content-global">
-      <div class="post-header-global">
-        <button mat-icon-button class="back-button" (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <h1>Post</h1>
+  <!-- Left Sidebar -->
+  <app-left-sidebar 
+    [avatarUrl]="loggedUser?.avatarUrl || ''"
+    [userName]="loggedUser?.userName || ''"
+    [userTag]="loggedUser?.userTag || ''"
+    style="display: flex; flex-direction: column; justify-content: space-between;">
+  </app-left-sidebar>
+  
+  <!-- Main Content -->
+  <div class="post-content-global">
+    <div class="post-header-global">
+      <button mat-icon-button class="back-button" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Post</h1>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading post-view">
+      Loading post...
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error" class="error-message post-view">
+      {{ error }}
+    </div>
+
+    <!-- Post Content -->
+    <div class="post-view" *ngIf="post && !isLoading">
+      <!-- Original Post -->
+      <div class="original-post">
+        <div class="post-header">
+          <img [src]="post.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+          <div class="post-user">
+            <a [routerLink]="['/profile', post.user?.userTag]" class="nav-link">
+              <span class="userName">{{ post.user?.userName }}</span>
+              <span class="userTag">&#64;{{ post.user?.userTag }}</span>
+            </a>
+            <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
+          </div>
+        </div>
+        <div>
+          <div class="post-content">{{post.content}}</div>
+          <div class="post-media" *ngIf="post.mediaUrl">
+            <img [src]="post.mediaUrl" alt="Post media">
+          </div>
+        </div>
+        <div class="post-actions">
+          <button (click)="onLikeClick(post, $event)">
+            <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+            {{ post.likes || 0 }}
+          </button>
+          <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.replies || 0 }}</button>
+        </div>
       </div>
 
-      <!-- Main Post -->
-      <div class="post-view" *ngIf="post">
-        <div class="original-post">
-          <div class="post-header">
-            <img [src]="post.user?.avatarUrl" class="post-profile-pic">
-            <div class="post-user">
-              <a [routerLink]="['/profile', post.user?.userTag]" class="nav-link">
-                <span class="userName">{{ post.user?.userName }}</span>
-                <span class="userTag">&#64;{{ post.user?.userTag }}</span>
-              </a>
-              <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
-            </div>
-          </div>
-          <div class="post-content">{{post.content}}</div>
-          <div class="post-actions">
-            <button (click)="onLikeClick(post, $event)">
-              <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
-              {{ post.likes || 0 }}
+      <!-- Reply Form -->
+      <div class="reply-form" *ngIf="loggedUser">
+        <textarea placeholder="Post your reply" [(ngModel)]="replyContent" #postTextarea></textarea>
+        
+        <div class="selected-gif-container" *ngIf="selectedGifUrl">
+          <div class="selected-gif">
+            <button class="remove-gif-button" (click)="removeSelectedGif()">
+              <mat-icon>close</mat-icon>
             </button>
-            <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments?.length || 0 }}</button>
+            <img [src]="selectedGifUrl" alt="Selected GIF">
           </div>
         </div>
-
-        <!-- Reply Form -->
-        <div class="reply-form">
-          <textarea placeholder="Post your reply" [(ngModel)]="replyContent"></textarea>
+        
+        <div class="reply-actions">
+          <div class="reply-tools">
+            <mat-icon>image</mat-icon>
+          </div>
+          <div class="reply-tools">
+            <mat-icon (click)="toggleGifSelector()">gif</mat-icon>
+          </div>
+          <div class="reply-tools">
+            <mat-icon (click)="toggleEmojiSelector()">face</mat-icon>
+          </div>
           <button class="reply-button" (click)="postReply()">Reply</button>
         </div>
+      </div>
 
-        <div class="reply-separator" *ngIf="post.comments?.length > 0">
-          Replies
-        </div>
+      <!-- Selectors -->
+      <div class="selector-container" *ngIf="showEmojiSelector">
+        <app-emoji-selector
+          (emojiSelected)="onEmojiSelected($event)"
+          (close)="toggleEmojiSelector()">
+        </app-emoji-selector>
+      </div>
+      
+      <app-gif-selector 
+        *ngIf="showGifSelector" 
+        (gifSelected)="onGifSelected($event)"
+        (close)="toggleGifSelector()">
+      </app-gif-selector>
 
-        <!-- Replies List -->
-        <div class="replies">
-          <div *ngFor="let reply of post.comments" class="reply" (click)="viewReplyAsPost(reply._id)">
-            <div class="post-header">
-              <img [src]="reply.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
-              <div class="post-user">
-                <a [routerLink]="['/profile', reply.user?.userTag]" class="nav-link">
-                  <span class="userName">{{ reply.user?.userName }}</span>
-                  <span class="userTag">&#64;{{ reply.user?.userTag }}</span>
-                </a>
-                <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
-              </div>
+      <div class="reply-separator" *ngIf="post.replies > 0">
+        Replies
+      </div>
+
+      <!-- Replies List -->
+      <div class="replies">
+        <div *ngFor="let reply of comments" class="reply" (click)="viewReplyAsPost(reply._id)">
+          <div class="post-header">
+            <img [src]="reply.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+            <div class="post-user">
+              <a [routerLink]="['/profile', reply.user?.userTag]" class="nav-link">
+                <span class="userName">{{ reply.user?.userName }}</span>
+                <span class="userTag">&#64;{{ reply.user?.userTag }}</span>
+              </a>
+              <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
             </div>
+          </div>
+          <div>
             <div class="post-content">
               {{ reply.content }}
             </div>
-            <div class="post-actions" (click)="$event.stopPropagation()">
-              <button (click)="onLikeClick(reply, $event)">
-                <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
-                {{ post.likes || 0 }}
-              </button>
-              <button><mat-icon>chat_bubble_outline</mat-icon> {{ reply.comments?.length || 0 }}</button>
+            
+            <!-- Display GIF in replies if present -->
+            <div class="post-media" *ngIf="reply.mediaUrl">
+              <img [src]="reply.mediaUrl" alt="Reply media">
             </div>
+          </div>
+          <div class="post-actions" (click)="$event.stopPropagation()">
+            <button (click)="onLikeClick(reply, $event)">
+              <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+              {{ post.likes || 0 }}
+            </button>
+            <button><mat-icon>chat_bubble_outline</mat-icon> {{ reply.replies || 0 }}</button>
           </div>
         </div>
       </div>
-      <div *ngIf="isLoading" class="loading post-view">
-        Loading post...
-      </div>
-      <div *ngIf="error || !post" class="error-message post-view">
-        No post found with given ID.
-      </div>
     </div>
+  </div>
 
   <!-- Right Sidebar -->
   <app-right-sidebar></app-right-sidebar>

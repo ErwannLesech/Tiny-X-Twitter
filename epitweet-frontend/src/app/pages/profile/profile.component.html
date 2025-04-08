@@ -145,8 +145,13 @@
                 </div>
               </div>
             </div>
-            <div class="post-content" [routerLink]="['/post', reply._id]">
-              {{ reply.content }}
+            <div>
+              <div class="post-content" [routerLink]="['/post', reply._id]">
+                {{ reply.content }}
+              </div>
+              <div class="post-media" *ngIf="reply.mediaUrl">
+                <img [src]="reply.mediaUrl" alt="Example GIF">
+              </div>
             </div>
             <div class="post-actions">
               <button (click)="onLikeClick(reply, $event)">

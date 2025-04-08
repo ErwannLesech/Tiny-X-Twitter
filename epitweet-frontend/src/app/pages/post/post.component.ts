@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule, Location } from '@angular/common';
 import { Post, PostRequest, PostService } from '../../services/post.service';
@@ -12,9 +12,11 @@ import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { SocialService } from '../../services/social.service';
 import { NotificationService } from '../../services/notification.service';
-import { of, forkJoin } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { UserService } from '../../services/user.service';
+import { GifSelectorComponent } from '../../shared/components/gif-selector/gif-selector.component';
+import { EmojiSelectorComponent } from '../../shared/components/emoji-selector/emoji-selector.component';
 
 @Component({
   selector: 'app-post',
@@ -24,19 +26,27 @@ import { UserService } from '../../services/user.service';
     CommonModule,
     FormsModule,
     MatIconModule,
-    RouterModule,
     MatFormFieldModule,
     MatInputModule,
     LeftSidebarComponent,
-    RightSidebarComponent
-]
+    RightSidebarComponent,
+    GifSelectorComponent,
+    EmojiSelectorComponent,
+    RouterModule
+  ],
+  standalone: true
 })
 export class PostComponent implements OnInit {
-  post: any = null;
+  post: Post | null = null;
+  comments: Post[] = [];
   replyContent: string = '';
   loggedUser: User | null = null;
   isLoading = true;
   error: string | null = null;
+  selectedGifUrl: string | null = null;
+  showGifSelector: boolean = false;
+  showEmojiSelector: boolean = false;
+  @ViewChild('postTextarea') postTextarea!: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -63,90 +73,131 @@ export class PostComponent implements OnInit {
 
   loadPost(postId: string) {
     this.isLoading = true;
+    this.error = null;
+    this.post = null;
+    this.comments = [];
   
-    this.postService.getPostById(postId).subscribe({
-      next: (post) => {
+    this.postService.getPostById(postId).pipe(
+      switchMap(post => {
         if (!post) {
-          this.error = 'Failed to load post';
+          this.error = 'Post not found';
           this.isLoading = false;
-          return;
+          return of(null);
         }
   
+        // Check if current user liked this post
+        if (this.loggedUser && post.likeUsersIds) {
+          post.isLiked = post.likeUsersIds.includes(this.loggedUser.userId);
+        } else {
+          post.isLiked = false;
+        }
+        
         this.post = post;
-  
-        this.postService.getReplies(postId).subscribe({
-          next: (replies) => {
-            if (!replies || replies.length === 0) {
-              this.post.comments = [];
-              this.isLoading = false;
-              return;
-            }
-  
-            const enrichedReplies$ = replies.map(reply =>
-              this.userService.getUserById(reply.userId).pipe(
-                map(userResponse => {
-                  reply.user = {
-                    userId: reply.userId,
-                    userName: userResponse.pseudo,
-                    userTag: userResponse.tag,
-                    avatarUrl: userResponse.profilePictureUrl || 'assets/images/default-profile.png',
-                    bannerUrl: userResponse.profileBannerUrl || '',
-                    bio: userResponse.profileDescription || '',
-                    followersCount: userResponse.followersCount || 0,
-                    followingCount: userResponse.followingCount || 0
-                  };
-                  return reply;
-                }),
-                catchError(err => {
-                  console.error(`Failed to load user for reply: ${reply._id}`, err);
-                  return of(reply);
-                })
+        
+        // Load replies if there are any
+        if (post.repliesIds && post.repliesIds.length > 0) {
+          return forkJoin(
+            post.repliesIds.map(replyId => 
+              this.postService.getPostById(replyId).pipe(
+                catchError(() => of(null)) // Ignore errors for individual replies
               )
-            );
-  
-            forkJoin(enrichedReplies$).subscribe(enrichedReplies => {
-              this.post.comments = enrichedReplies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-              this.isLoading = false;
-            });
-          },
-          error: (err) => {
-            console.error('Failed to load replies:', err);
-            this.post.comments = [];
-            this.isLoading = false;
-          }
-        });
-      },
-      error: (err) => {
+            )
+          ).pipe(
+            map(replies => {
+              // Filter out null replies and sort by date (newest first)
+              this.comments = replies.filter(reply => reply !== null) as Post[];
+              this.comments.sort((a, b) => 
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              );
+              return post;
+            })
+          );
+        }
+        
+        return of(post);
+      }),
+      catchError(err => {
         console.error('Error loading post:', err);
         this.error = 'Failed to load post';
         this.isLoading = false;
+        return of(null);
+      })
+    ).subscribe(() => {
+      this.isLoading = false;
+    });
+  }
+
+  postReply() {
+    if ((!this.replyContent.trim() && !this.selectedGifUrl) || !this.loggedUser || !this.post) return;
+  
+    const postRequest: PostRequest = {
+      postType: 'reply',
+      content: this.replyContent.trim(),
+      mediaUrl: this.selectedGifUrl || '',
+      parentId: this.post._id
+    };
+  
+    this.postService.createPost(this.loggedUser.userId, postRequest).subscribe({
+      next: (reply) => {
+        if (!this.post) return;
+        
+        // Get the full reply post with user info
+        this.postService.getPostById(reply._id).subscribe(fullReply => {
+          if (fullReply) {
+            // Update the replies count and add to comments array
+            this.post!.replies = (this.post!.replies || 0) + 1;
+            this.post!.repliesIds = [...(this.post!.repliesIds || []), reply._id];
+            this.comments = [fullReply, ...this.comments]; // Add new reply at the beginning
+          }
+        });
+  
+        this.replyContent = '';
+        this.selectedGifUrl = null;
+        this.notificationService.showSuccess('Reply created successfully');
+      },
+      error: (err) => {
+        console.error('Failed to post reply', err);
+        this.notificationService.showError('Error creating reply, the user may have blocked you !');
       }
     });
   }
   
+  toggleGifSelector() {
+    this.showGifSelector = !this.showGifSelector;
+    if (this.showGifSelector) {
+      this.showEmojiSelector = false;
+    }
+  }
 
-  postReply() {
-    if (!this.replyContent.trim() || !this.loggedUser) return;
+  toggleEmojiSelector() {
+    this.showEmojiSelector = !this.showEmojiSelector;
+    if (this.showEmojiSelector) {
+      this.showGifSelector = false;
+    }
+  }
+  
+  onGifSelected(gifUrl: string) {
+    this.selectedGifUrl = gifUrl;
+    this.showGifSelector = false;
+  }
 
-    const postRequest: PostRequest = {
-      postType: 'reply',
-      content: this.replyContent.trim(),
-      mediaUrl: '',
-      parentId: this.post._id
-    };
-
-    this.postService.createPost(this.loggedUser.userId, postRequest).subscribe({
-      next: (reply) => {
-        this.post.comments = this.post.comments || [];
-        this.post.comments.unshift(reply);
-        this.replyContent = '';
-        this.notificationService.showSuccess('Reply created successfully')
-      },
-      error: (err) => {
-        console.error('Failed to post reply', err);
-        this.notificationService.showError('Error creating reply')
-      }
-    });
+  onEmojiSelected(emoji: string) {
+    const textArea = this.postTextarea.nativeElement;
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    
+    this.replyContent = this.replyContent.substring(0, start) + emoji + this.replyContent.substring(end);
+    
+    setTimeout(() => {
+      textArea.selectionStart = textArea.selectionEnd = start + emoji.length;
+      textArea.focus();
+    }, 0);
+    
+    this.showEmojiSelector = false;
+  }
+  
+  removeSelectedGif() {
+    this.selectedGifUrl = null;
   }
 
   viewReplyAsPost(replyId: string) {
@@ -157,42 +208,32 @@ export class PostComponent implements OnInit {
 
   goBack() {
     if (this.post?.parentId) {
+      // If this is a reply, navigate to its parent post
       this.router.navigate(['/post', this.post.parentId]).then(() => {
-        this.loadPost(this.post.parentId);
+        window.location.reload(); // Force reload to ensure fresh data
       });
     } else {
-      this.location.back();
+      // If this is a top-level post, go back in history
+      this.router.navigate(['/home']).then(() => {
+        window.location.reload(); // Force reload to ensure fresh data
+      });
     }
   }
   
-
   public formatPostDate(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();
     
-    // Calculate time difference in seconds
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds}s ago`;
-    }
-    
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
     const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}min ago`;
-    }
-    
+    if (diffInMinutes < 60) return `${diffInMinutes}min ago`;
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    }
-    
+    if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) {
-      return `${diffInDays}j ago`;
-    }
+    if (diffInDays < 7) return `${diffInDays}j ago`;
     
-    // For older dates, show the actual date
     return date.toLocaleDateString('fr-FR', { 
       day: 'numeric', 
       month: 'short',
@@ -204,29 +245,37 @@ export class PostComponent implements OnInit {
     event.stopPropagation();
     if (!this.loggedUser) return;
   
-    // Determine the new like state
     const newLikeState = !post.isLiked;
-    
-    // Prepare the request
     const likeRequest = {
       likeUnlike: newLikeState,
       postId: post._id,
       userId: this.loggedUser.userId
     };
     
-    // Update UI optimistically
+    // Optimistic update
     post.isLiked = newLikeState;
     post.likes = newLikeState ? (post.likes || 0) + 1 : Math.max(0, (post.likes || 1) - 1);
+    
+    if (newLikeState) {
+      post.likeUsersIds = [...(post.likeUsersIds || []), this.loggedUser.userId];
+    } else {
+      post.likeUsersIds = (post.likeUsersIds || []).filter(id => id !== this.loggedUser?.userId);
+    }
   
-    // Send the request
     this.socialService.likePost(likeRequest).subscribe({
       error: (err) => {
         console.error('Error toggling like:', err);
-        // Revert UI changes if the request fails
+        // Revert on error
         post.isLiked = !newLikeState;
         post.likes = newLikeState ? 
-          Math.max(0, (post.likes || 1) - 1) : 
+          Math.max(0, (post.likes || 1) - 1): 
           (post.likes || 0) + 1;
+          
+        if (newLikeState) {
+          post.likeUsersIds = (post.likeUsersIds || []).filter(id => id !== this.loggedUser?.userId);
+        } else {
+          post.likeUsersIds = [...(post.likeUsersIds || []), this.loggedUser?.userId || ''];
+        }
       }
     });
   }

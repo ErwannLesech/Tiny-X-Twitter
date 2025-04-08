@@ -11,6 +11,8 @@ import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { SocialService } from '../../services/social.service';
 import { NotificationService } from '../../services/notification.service';
+import { GifSelectorComponent } from '../../shared/components/gif-selector/gif-selector.component';
+import { EmojiSelectorComponent } from '../../shared/components/emoji-selector/emoji-selector.component';
 
 @Component({
   selector: 'app-home',
@@ -23,8 +25,10 @@ import { NotificationService } from '../../services/notification.service';
     RouterModule,
     FormsModule,
     LeftSidebarComponent,
-    RightSidebarComponent
-],
+    RightSidebarComponent,
+    GifSelectorComponent,
+    EmojiSelectorComponent
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -33,6 +37,9 @@ export class HomeComponent implements OnInit {
   newPostContent: string = '';
   isPosting: boolean = false;
   postError: string | null = null;
+  selectedGifUrl: string | null = null;
+  showGifSelector: boolean = false;
+  showEmojiSelector: boolean = false;
 
   @ViewChild('postTextarea') postTextarea!: ElementRef;
 
@@ -48,7 +55,7 @@ export class HomeComponent implements OnInit {
   }
 
   createPost() {
-    if (!this.newPostContent.trim() || !this.loggedUser?.userId) {
+    if ((!this.newPostContent.trim() && !this.selectedGifUrl) || !this.loggedUser?.userId) {
       return;
     }
 
@@ -58,13 +65,14 @@ export class HomeComponent implements OnInit {
     const postRequest: PostRequest = {
       postType: 'post',
       content: this.newPostContent,
-      mediaUrl: '',
+      mediaUrl: this.selectedGifUrl || '',
       parentId: null // This would be used for replies
     };
 
     this.postService.createPost(this.loggedUser.userId, postRequest).subscribe({
       next: (response) => {
         this.newPostContent = '';
+        this.selectedGifUrl = null;
         this.isPosting = false;
         console.log('Post created successfully', response);
         this.notificationService.showSuccess('Post created successfully')
@@ -115,4 +123,45 @@ export class HomeComponent implements OnInit {
         }
       });
     }
+  
+  toggleGifSelector() {
+    this.showGifSelector = !this.showGifSelector;
+    if (this.showGifSelector) {
+      this.showEmojiSelector = false;
+    }
+  }
+  
+  toggleEmojiSelector() {
+    this.showEmojiSelector = !this.showEmojiSelector;
+    if (this.showEmojiSelector) {
+      this.showGifSelector = false;
+    }
+  }
+  
+  onGifSelected(gifUrl: string) {
+    this.selectedGifUrl = gifUrl;
+    this.showGifSelector = false;
+  }
+  
+  onEmojiSelected(emoji: string) {
+    // Insérer l'emoji à la position du curseur
+    const textArea = this.postTextarea.nativeElement;
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    
+    // Concaténer le texte avant l'emoji, l'emoji, puis le texte après
+    this.newPostContent = this.newPostContent.substring(0, start) + emoji + this.newPostContent.substring(end);
+    
+    // Replacer le curseur juste après l'emoji inséré
+    setTimeout(() => {
+      textArea.selectionStart = textArea.selectionEnd = start + emoji.length;
+      textArea.focus();
+    }, 0);
+    
+    this.showEmojiSelector = false;
+  }
+  
+  removeSelectedGif() {
+    this.selectedGifUrl = null;
+  }
 }

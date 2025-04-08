@@ -19,14 +19,33 @@
         [(ngModel)]="newPostContent"
         (keydown)="handleKeyDown($event)"
         #postTextarea></textarea>
+      
+      <!-- Display selected GIF if any -->
+      <div class="selected-gif-container" *ngIf="selectedGifUrl">
+        <div class="selected-gif">
+          <button class="remove-gif-button" (click)="removeSelectedGif()">
+            <mat-icon>close</mat-icon>
+          </button>
+          <img [src]="selectedGifUrl" alt="Selected GIF">
+        </div>
+      </div>
+      
       <div class="post-creation-actions">
         <mat-icon class="post-creation-tools" id="post-creation-image">image</mat-icon>
-        <mat-icon class="post-creation-tools" id="post-creation-gif">gif</mat-icon>
-        <mat-icon class="post-creation-tools" id="post-creation-emoticon">face</mat-icon>
+        <mat-icon 
+          class="post-creation-tools" 
+          id="post-creation-gif"
+          (click)="toggleGifSelector()"
+          [class.active]="showGifSelector">gif</mat-icon>
+          <mat-icon 
+          class="post-creation-tools" 
+          id="post-creation-emoticon" 
+          (click)="toggleEmojiSelector()"
+          [class.active]="showEmojiSelector">face</mat-icon>
         <button 
           class="post-creation-button" 
           (click)="createPost()"
-          [disabled]="!newPostContent.trim() || isPosting">
+          [disabled]="(!newPostContent.trim() && !selectedGifUrl) || isPosting">
           <span *ngIf="!isPosting">Poster</span>
           <span *ngIf="isPosting">Posting...</span>
         </button>
@@ -35,6 +54,20 @@
         {{ postError }}
       </div>
     </div>
+
+    <div class="selector-container" *ngIf="showEmojiSelector">
+      <app-emoji-selector
+        (emojiSelected)="onEmojiSelected($event)"
+        (close)="toggleEmojiSelector()">
+      </app-emoji-selector>
+    </div>
+    
+    <!-- GIF Selector Modal -->
+    <app-gif-selector 
+      *ngIf="showGifSelector" 
+      (gifSelected)="onGifSelected($event)"
+      (close)="toggleGifSelector()">
+    </app-gif-selector>
     
     <div class="timeline">
       <div class="post" [routerLink]="['/post', 'no_Id']">
@@ -47,8 +80,15 @@
             </a>
           </div>
         </div>
-        <div class="post-content">Haha ? Moi puceau ? Sérieusement ? ça faisait longtemps qu'on me l'avait pas sortie celle là...
-          Demande à mes potes si je suis puceau, tu verras ce que tu vas te prendre xD parce que tu m'as l'air tout d'un bon gros puceau de merde.</div>
+        <div>
+          <div class="post-content">Haha ? Moi puceau ? Sérieusement ? ça faisait longtemps qu'on me l'avait pas sortie celle là...
+            Demande à mes potes si je suis puceau, tu verras ce que tu vas te prendre xD parce que tu m'as l'air tout d'un bon gros puceau de merde.
+          </div>
+          <div>
+            <img src="https://media.giphy.com/media/3o7aCTPPm4OHfRLSH6/giphy.gif" alt="Example GIF">
+          </div>
+
+        </div>
         <div class="post-actions">
           <!-- <button (click)="onLikeClick(post._id, $event)">
             <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
