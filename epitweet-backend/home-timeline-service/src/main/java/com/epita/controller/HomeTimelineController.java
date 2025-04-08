@@ -29,7 +29,7 @@ public class HomeTimelineController {
     @Path("/timeline/home/{userId}")
     public Response getTimeline(@PathParam("userId") final ObjectId userId) {
         if (userId == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
         HomeTimelineResponse res = homeService.getHomeTimeline(userId);
         return Response.ok(res).build();

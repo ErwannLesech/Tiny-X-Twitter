@@ -1,10 +1,7 @@
 package com.epita.controller.contracts;
 
 import com.epita.repository.entity.EntryType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
@@ -13,6 +10,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 public class HomeTimelinePost {
     /**
      * The ID of the user's post.

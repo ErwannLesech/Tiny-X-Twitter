@@ -1,10 +1,7 @@
 package com.epita.controller.contracts;
 
 import com.epita.contracts.post.PostResponse;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.bson.types.ObjectId;
 
 import java.util.List;
@@ -16,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 public class HomeTimelineResponse {
     /**
      * The ID of the user's timeline.
