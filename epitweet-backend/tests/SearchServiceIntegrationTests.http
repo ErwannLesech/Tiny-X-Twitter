@@ -2,9 +2,41 @@
 
 # ================== Search Service ==================
 
-### 🔍 1. Create Post with hashtags #dev #java
+###
+# @name Prepare data
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user3",
+  "pseudo": "User Three",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected user fields", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "User ID is missing");
+        client.assert(body.tag === "user3", "Tag mismatch");
+        client.assert(body.pseudo === "User Three", "Pseudo mismatch");
+        client.assert(typeof body.password === "string", "Password should be hashed string");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
+        client.assert(body.profileDescription === null, "profileDescription should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a timestamp string");
+        client.global.set("user1Id", body._id)
+    });
+%}
+
+###
+# @name 🔍 1. Create Post with hashtags #dev #java
 POST http://localhost:8082/api/posts/createPost
-userId: 65fb387a206b9b57f5cbe7bb
+userId: {{user1Id}}
 Content-Type: application/json
 
 {
@@ -13,9 +45,36 @@ Content-Type: application/json
   "mediaPath": ""
 }
 
-### 🔍 2. Create Post with regular words only
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains correct post details", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "Post ID is missing");
+        client.assert(body.userId === client.global.get("user1Id"), "User ID mismatch");
+        client.assert(body.postType === "post", "Expected postType to be 'post'");
+        client.assert(body.content === "Je parle de #dev et #java aujourd’hui !", "Content mismatch");
+        client.assert(body.mediaUrl === null, "Expected mediaUrl to be null");
+        client.assert(body.parentId === null, "Expected parentId to be null");
+        client.assert(typeof body.createdAt === "string", "Expected createdAt to be a timestamp string");
+        client.assert(typeof body.updatedAt === "string", "Expected updatedAt to be a timestamp string");
+    });
+
+    client.test("Post content contains hashtags", function() {
+        const content = response.body.content;
+        client.assert(content.includes("#dev"), "Expected content to include #dev");
+        client.assert(content.includes("#java"), "Expected content to include #java");
+    });
+
+    client.global.set("hashtagPostId", response.body._id);
+%}
+
+###
+# @name 🔍 2. Create Post with regular words only
 POST http://localhost:8082/api/posts/createPost
-userId: 65fb387a206b9b57f5cbe7bb
+userId: {{user1Id}}
 Content-Type: application/json
 
 {
@@ -24,9 +83,33 @@ Content-Type: application/json
   "mediaPath": ""
 }
 
-### 🔍 3. Create Post with unrelated content
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains correct post details", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "Post ID is missing");
+        client.assert(body.userId === client.global.get("user1Id"), "User ID mismatch");
+        client.assert(body.postType === "post", "Expected postType to be 'post'");
+        client.assert(body.content === "Java Quarkus Elasticsearch sont puissants", "Content mismatch");
+        client.assert(body.mediaUrl === null, "Expected mediaUrl to be null");
+        client.assert(body.parentId === null, "Expected parentId to be null");
+        client.assert(typeof body.createdAt === "string", "Expected createdAt to be a timestamp string");
+        client.assert(typeof body.updatedAt === "string", "Expected updatedAt to be a timestamp string");
+    });
+
+    client.test("Post content does not contain hashtags", function() {
+        const content = response.body.content;
+        client.assert(!content.includes("#"), "Expected content to not contain any hashtags");
+    });
+%}
+
+###
+# @name 🔍 3. Create Post with unrelated content
 POST http://localhost:8082/api/posts/createPost
-userId: 65fb387a206b9b57f5cbe7bb
+userId: {{user1Id}}
 Content-Type: application/json
 
 {
@@ -35,7 +118,31 @@ Content-Type: application/json
   "mediaPath": ""
 }
 
-### 🔍 4. Search vague match (regular words only)
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains correct post details", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "Post ID is missing");
+        client.assert(body.userId === client.global.get("user1Id"), "User ID mismatch");
+        client.assert(body.postType === "post", "Expected postType to be 'post'");
+        client.assert(body.content === "Rien à voir ici", "Content mismatch");
+        client.assert(body.mediaUrl === null, "Expected mediaUrl to be null");
+        client.assert(body.parentId === null, "Expected parentId to be null");
+        client.assert(typeof body.createdAt === "string", "Expected createdAt to be a timestamp string");
+        client.assert(typeof body.updatedAt === "string", "Expected updatedAt to be a timestamp string");
+    });
+
+    client.test("Post content is unrelated", function() {
+        const content = response.body.content;
+        client.assert(content === "Rien à voir ici", "Expected content to be 'Rien à voir ici'");
+    });
+%}
+
+###
+# @name 🔍 4. Search vague match (regular words only)
 POST http://localhost:8083/api/search/searchPosts
 Content-Type: application/json
 
@@ -73,7 +180,7 @@ Content-Type: application/json
 
 ### 🗑️ 9. Delete post containing hashtags
 # ⚠️ Remplacer l'ID par celui du post à supprimer (récupéré via /getPosts)
-DELETE http://localhost:8082/api/posts/deletePost/REPLACE_WITH_POST_ID
+DELETE http://localhost:8082/api/posts/deletePost/{{hashtagPostId}}
 
 ### 🚫 10. Re-search after delete
 POST http://localhost:8083/api/search/searchPosts
