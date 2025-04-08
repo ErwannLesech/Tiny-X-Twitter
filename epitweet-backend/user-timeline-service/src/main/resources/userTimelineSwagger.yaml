@@ -52,7 +52,7 @@ components:
           example: "post_123"
         action:
           type: string
-          example: "like"
+          example: "liked"
         at:
           type: string
           format: date-time
