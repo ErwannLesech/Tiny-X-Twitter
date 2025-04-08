@@ -111,6 +111,10 @@ $button-border-radius: 9999px; // Fully rounded
 .post-creator {
   width: 100%;
   
+  .post-text-container {
+    width: 100%;
+  }
+  
   textarea {
     width: 100%;
     border: 0.5px solid var(--color-border);
@@ -126,6 +130,45 @@ $button-border-radius: 9999px; // Fully rounded
     }
   }
   
+  .selected-gif-container {
+    width: 100%;
+    padding: 0.5rem 0;
+    
+    .selected-gif {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      
+      img {
+        max-width: 100%;
+        max-height: 300px;
+        display: block;
+      }
+      
+      .remove-gif-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.8);
+        }
+      }
+    }
+  }
+  
   .post-creation-actions {
     display: flex;
     justify-content: space-between;
@@ -137,6 +180,15 @@ $button-border-radius: 9999px; // Fully rounded
       margin-top: 0.5rem;
       color: var(--color-primary);
       cursor: pointer;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: var(--color-secondary);
+      }
+      
+      &.active {
+        color: var(--color-secondary);
+      }
     }
     
     .post-creation-button {
