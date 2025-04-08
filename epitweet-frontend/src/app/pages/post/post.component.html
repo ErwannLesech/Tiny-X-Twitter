@@ -45,28 +45,32 @@
           <button class="reply-button" (click)="postReply()">Reply</button>
         </div>
 
+        <div class="reply-separator" *ngIf="post.comments?.length > 0">
+          Replies
+        </div>
+
         <!-- Replies List -->
         <div class="replies">
-          <div *ngFor="let reply of post.comments" class="reply">
-            <div *ngIf="reply && reply.content.length > 0">
-              <div class="post-header">
-                <img [src]="reply.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
-                <div class="post-user">
+          <div *ngFor="let reply of post.comments" class="reply" (click)="viewReplyAsPost(reply._id)">
+            <div class="post-header">
+              <img [src]="reply.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+              <div class="post-user">
+                <a [routerLink]="['/profile', reply.user?.userTag]" class="nav-link">
                   <span class="userName">{{ reply.user?.userName }}</span>
                   <span class="userTag">&#64;{{ reply.user?.userTag }}</span>
-                  <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
-                </div>
+                </a>
+                <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
               </div>
-              <div class="post-content">
-                {{ reply.content }}
-              </div>
-              <div class="post-actions">
-                <button (click)="onLikeClick(reply, $event)">
-                  <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
-                  {{ post.likes || 0 }}
-                </button>
-                <button><mat-icon>chat_bubble_outline</mat-icon> {{ reply.comments?.length || 0 }}</button>
-              </div>
+            </div>
+            <div class="post-content">
+              {{ reply.content }}
+            </div>
+            <div class="post-actions" (click)="$event.stopPropagation()">
+              <button (click)="onLikeClick(reply, $event)">
+                <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+                {{ post.likes || 0 }}
+              </button>
+              <button><mat-icon>chat_bubble_outline</mat-icon> {{ reply.comments?.length || 0 }}</button>
             </div>
           </div>
         </div>

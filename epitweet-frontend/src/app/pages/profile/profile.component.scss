@@ -187,6 +187,15 @@
               color: #657786;
               margin-right: 5px;
             }
+
+            a.nav-link {
+              text-decoration: none;
+              color: inherit;
+
+              &:hover {
+                text-decoration: underline;
+              }
+            }
           }
         }
         

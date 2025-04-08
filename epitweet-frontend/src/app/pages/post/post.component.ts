@@ -12,6 +12,9 @@ import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { SocialService } from '../../services/social.service';
 import { NotificationService } from '../../services/notification.service';
+import { of, forkJoin } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-post',
@@ -42,7 +45,8 @@ export class PostComponent implements OnInit {
     private router: Router,
     private location: Location,
     private socialService: SocialService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -62,25 +66,55 @@ export class PostComponent implements OnInit {
   
     this.postService.getPostById(postId).subscribe({
       next: (post) => {
-        if (post) {
-          this.post = post;
-
-          this.postService.getReplies(postId).subscribe({
-            next: (replies) => {
-              this.post.comments = replies;
-              this.isLoading = false;
-            },
-            error: (err) => {
-              console.error('Failed to load replies:', err);
-              this.post.comments = [];
-              this.isLoading = false;
-            }
-          });
-  
-        } else {
+        if (!post) {
           this.error = 'Failed to load post';
           this.isLoading = false;
+          return;
         }
+  
+        this.post = post;
+  
+        this.postService.getReplies(postId).subscribe({
+          next: (replies) => {
+            if (!replies || replies.length === 0) {
+              this.post.comments = [];
+              this.isLoading = false;
+              return;
+            }
+  
+            const enrichedReplies$ = replies.map(reply =>
+              this.userService.getUserById(reply.userId).pipe(
+                map(userResponse => {
+                  reply.user = {
+                    userId: reply.userId,
+                    userName: userResponse.pseudo,
+                    userTag: userResponse.tag,
+                    avatarUrl: userResponse.profilePictureUrl || 'assets/images/default-profile.png',
+                    bannerUrl: userResponse.profileBannerUrl || '',
+                    bio: userResponse.profileDescription || '',
+                    followersCount: userResponse.followersCount || 0,
+                    followingCount: userResponse.followingCount || 0
+                  };
+                  return reply;
+                }),
+                catchError(err => {
+                  console.error(`Failed to load user for reply: ${reply._id}`, err);
+                  return of(reply);
+                })
+              )
+            );
+  
+            forkJoin(enrichedReplies$).subscribe(enrichedReplies => {
+              this.post.comments = enrichedReplies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+              this.isLoading = false;
+            });
+          },
+          error: (err) => {
+            console.error('Failed to load replies:', err);
+            this.post.comments = [];
+            this.isLoading = false;
+          }
+        });
       },
       error: (err) => {
         console.error('Error loading post:', err);
@@ -89,6 +123,7 @@ export class PostComponent implements OnInit {
       }
     });
   }
+  
 
   postReply() {
     if (!this.replyContent.trim() || !this.loggedUser) return;
@@ -114,9 +149,22 @@ export class PostComponent implements OnInit {
     });
   }
 
-  goBack() {
-    this.location.back();
+  viewReplyAsPost(replyId: string) {
+    this.router.navigate(['/post', replyId]).then(() => {
+      this.loadPost(replyId);
+    });
   }
+
+  goBack() {
+    if (this.post?.parentId) {
+      this.router.navigate(['/post', this.post.parentId]).then(() => {
+        this.loadPost(this.post.parentId);
+      });
+    } else {
+      this.location.back();
+    }
+  }
+  
 
   public formatPostDate(dateString: string): string {
     const date = new Date(dateString);

@@ -52,11 +52,6 @@
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-
-            a {
-              text-decoration: none;
-              color: black;
-            }
             
             .userName {
               font-weight: bold;
@@ -66,6 +61,15 @@
             .userTag, .post-time {
               color: #657786;
               margin-right: 5px;
+            }
+
+            a.nav-link {
+              text-decoration: none;
+              color: inherit;
+
+              &:hover {
+                text-decoration: underline;
+              }
             }
           }
         }

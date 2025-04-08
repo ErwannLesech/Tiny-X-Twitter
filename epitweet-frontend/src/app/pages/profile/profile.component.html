@@ -167,8 +167,10 @@
             <div class="post-header">
               <img [src]="post.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
               <div class="post-user">
-                <span class="userName">{{ post.user?.userName }}</span>
-                <span class="userTag">&#64;{{ post.user?.userTag }}</span>
+                <a [routerLink]="['/profile', post.user?.userTag]" class="nav-link">
+                  <span class="userName">{{ post.user?.userName }}</span>
+                  <span class="userTag">&#64;{{ post.user?.userTag }}</span>
+                </a>
                 <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
               </div>
             </div>
