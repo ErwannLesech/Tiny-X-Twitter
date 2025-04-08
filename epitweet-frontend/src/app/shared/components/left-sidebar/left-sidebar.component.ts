@@ -1,23 +1,29 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
 import { UserStateService } from '../../../services/user-state.service';
+import { PostService } from '../../../services/post.service';
+import { PostComponent } from '../../../pages/post/post.component';
+import { PostModalComponent } from '../post-modal/post-modal.component';
 
 @Component({
   selector: 'app-left-sidebar',
   templateUrl: './left-sidebar.component.html',
   styleUrls: ['./left-sidebar.component.scss'],
+  standalone: true,
   imports: [
     CommonModule,
     MatIconModule,
-    RouterModule
+    RouterModule,
+    PostModalComponent
   ],
 })
 export class LeftSidebarComponent {
   @Input() avatarUrl: string = '';
   @Input() userName: string = '';
   @Input() userTag: string = '';
+  @ViewChild('postModal') postModal!: PostModalComponent;
   currentTheme: string = 'light'; // Default theme
 
   
@@ -26,7 +32,7 @@ export class LeftSidebarComponent {
 
   constructor(
     private router: Router,
-    private userStateService: UserStateService,
+    private userStateService: UserStateService
   ) {}
 
   ngOnInit() {
@@ -43,7 +49,7 @@ export class LeftSidebarComponent {
   }
 
   postClick() {
-    // TODO: Implement post click logic
+    this.postModal.show();
   }
 
   logout() {
