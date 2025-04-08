@@ -12,6 +12,7 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 import { ProfileUpdateComponent } from "./profile-update/profile-update.component";
 import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-profile',
@@ -48,7 +49,8 @@ export class ProfileComponent implements OnInit {
     private userService: UserService,
     private postService: PostService,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -142,10 +144,12 @@ export class ProfileComponent implements OnInit {
     this.postService.deletePost(postId).subscribe({
       next: () => {
         console.log(`Post ${postId} deleted successfully`);
+        this.notificationService.showSuccess('Post deleted successfully')
         this.posts = this.posts.filter(post => post._id !== postId); // Remove the deleted post from the list
       },
       error: (err) => {
         console.error(`Error deleting post ${postId}:`, err);
+        this.notificationService.showError('Post deleted successfully')
       }
     });
   }
