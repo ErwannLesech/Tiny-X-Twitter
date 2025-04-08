@@ -3,7 +3,9 @@ package com.epita.service;
 import com.epita.contracts.post.PostResponse;
 import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.contracts.social.BlockedRelationResponse;
-import com.epita.converter.PayloadConverter;
+import com.epita.controller.contracts.HomeTimelinePost;
+import com.epita.controller.contracts.HomeTimelineResponse;
+import com.epita.converter.HomeTimelineConverter;
 import com.epita.payloads.homeTimeline.PostHomeTimeline;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineBlock;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineFollow;
@@ -41,14 +43,15 @@ public class HomeTimelineService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeTimelineService.class);
 
-    public Response getTimeline(final ObjectId userId) {
+    public Response getHomeTimeline(final ObjectId userId) {
         if (userId == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        List<PostResponse> timeline = homeRepository.getTimeline(userId).stream()
-                .map(HomeTimelineEntry::getPost)
+        List<HomeTimelinePost> timeline = homeRepository.getTimeline(userId).stream()
+                .map(HomeTimelineConverter::toPost)
                 .toList();
-        return (!timeline.isEmpty()) ? Response.ok(timeline).build() : Response.status(Response.Status.NOT_FOUND).build();
+        HomeTimelineResponse response = new HomeTimelineResponse(userId, timeline);
+        return Response.ok(response).build();
     }
 
     public void updateOnPost(PostHomeTimeline message) {
@@ -57,7 +60,7 @@ public class HomeTimelineService {
                 .toList();
         for (ObjectId followerId : followers) {
             if (Objects.equals(message.getMethod(), "creation")) {
-                HomeTimelineEntry entry = PayloadConverter.PostToEntry(message, followerId);
+                HomeTimelineEntry entry = HomeTimelineConverter.PostToEntry(message, followerId);
                 homeRepository.addHomeEntry(entry);
             } else {
                 homeRepository.removeHomeEntry(followerId, message.getPost().getUserId(), message.getPost().get_id(), null);
@@ -74,7 +77,7 @@ public class HomeTimelineService {
                     .toList();
             for (ObjectId followerId : followers) {
                 post.setCreatedAt(message.getPostLikeDate().atZone(ZoneId.systemDefault()).toInstant());
-                HomeTimelineEntry entry = PayloadConverter.LikeToEntry(message, followerId, post);
+                HomeTimelineEntry entry = HomeTimelineConverter.LikeToEntry(message, followerId, post);
 
                 BlockedRelationResponse blockedRelationResponse = socialRestClient.getBlockedRelation(new BlockedRelationRequest(followerId, post.getUserId())).getEntity();
                 if (Objects.equals(message.getMethod(), "like") && !blockedRelationResponse.getUserBlockedParentUser()) {
@@ -95,7 +98,7 @@ public class HomeTimelineService {
             for (PostResponse post : posts) {
                 BlockedRelationResponse blockedRelationResponse = socialRestClient.getBlockedRelation(new BlockedRelationRequest(message.getUserId(), post.getUserId())).getEntity();
                 if (Objects.equals(message.getMethod(), "follow") && !blockedRelationResponse.getUserBlockedParentUser()) {
-                    HomeTimelineEntry entry = PayloadConverter.FollowToEntry(message, post);
+                    HomeTimelineEntry entry = HomeTimelineConverter.FollowToEntry(message, post);
                     homeRepository.addHomeEntry(entry);
                 } else {
                     homeRepository.removeHomeEntry(message.getUserId(), message.getUserFollowedId(), post.get_id(), null);

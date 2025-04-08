@@ -27,6 +27,6 @@ public class HomeTimelineController {
     @GET
     @Path("/timeline/home/{userId}")
     public Response getTimeline(@PathParam("userId") final ObjectId userId) {
-        return homeService.getTimeline(userId);
+        return homeService.getHomeTimeline(userId);
     }
 }

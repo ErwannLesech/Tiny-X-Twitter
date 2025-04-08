@@ -2,6 +2,9 @@ package com.epita.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Enum to specify a HomeTimelineEntry type.
+ */
 public enum EntryType {
     POST("post"),
     LIKE("like"),;

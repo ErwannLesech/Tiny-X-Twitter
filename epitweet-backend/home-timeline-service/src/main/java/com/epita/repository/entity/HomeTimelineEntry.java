@@ -31,19 +31,19 @@ public class HomeTimelineEntry {
     ObjectId userId;
 
     /**
-     * The ID of the user followed by timeline owner.
+     * The ID of a user followed by timeline owner.
      */
     ObjectId userFollowedId;
+
+    /**
+     * One post from the user's timeline.
+     */
+    ObjectId postId;
 
     /**
      * The type of the post liked or posted by the followed user.
      */
     EntryType type;
-
-    /**
-     * One post from the user's timeline.
-     */
-    PostResponse post;
 
     /**
      * Date when the post have been posted or liked by the followed user.

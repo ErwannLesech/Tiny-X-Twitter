@@ -11,8 +11,6 @@ import java.util.*;
 @ApplicationScoped
 public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimelineEntry> {
 
-    public static Map<ObjectId, List<ObjectId>> userBlockedList = new HashMap<>();
-
     public List<HomeTimelineEntry> getTimeline(final ObjectId userId) {
         return find("userId", userId).stream()
                 .sorted(Comparator.comparing(HomeTimelineEntry::getDate))
@@ -24,7 +22,7 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
     }
 
     public void removeHomeEntry(ObjectId userId, ObjectId userFollowedId, ObjectId postId, EntryType type) {
-        delete("userId = ?1 and userFollowedId = ?2 and post._id = ?3 and type in ?4",
+        delete("userId = ?1 and userFollowedId = ?2 and postId = ?3 and type in ?4",
                 userId, userFollowedId, postId, (type == null) ? List.of(EntryType.POST, EntryType.LIKE) : type);
     }
 }
