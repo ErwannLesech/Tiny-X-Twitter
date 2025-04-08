@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Represents a request to create or delete a like.
+ */
 @Getter
 @Setter
 @ToString

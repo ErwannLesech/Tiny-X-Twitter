@@ -214,6 +214,33 @@ public class LikeUnlikeTest
     }
 
     /**
+     * TEST like:<br>
+     *  user123 like post123<br>
+     *  user123 like post123
+     */
+    @Test
+    public void testMultiLikeSamePost()
+    {
+        testLike();
+
+        AppreciationRequest appreciationRequest = new AppreciationRequest(
+                true,
+                post123Id,
+                user123Id);
+
+        given().contentType(ContentType.JSON)
+                .body(appreciationRequest)
+                .when()
+                .post("/api/social/like")
+                .then()
+                .statusCode(200);
+
+        List<String> likesId = socialRepository.getLikesPosts(user123Id);
+        List<String> expectedLikesId = List.of(post123Id);
+        testResult(likesId, expectedLikesId);
+    }
+
+    /**
      * TEST unLike:<br>
      * user123 unlike post123<br>
      * After:
