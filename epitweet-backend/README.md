@@ -5,6 +5,7 @@ Epitweet Backend is a Twitter-like API developed using **Quarkus** and **Maven**
 - `user-service`: Handles user authentication and management.
 - `repo-post`: Manages post creation, retrieval, and interactions.
 - `search-service`: Handles post indexing and searching via Elasticsearch.
+- `user-timeline-service`: Manages retrieval and updates of user timelines (authored and liked posts, sorted by date).
 
 ## API Documentation
 The APIs for Epitweet are documented using **Swagger**.
@@ -37,6 +38,10 @@ Epitweet/
 ├── social-service/        # Social management microservice
 │   ├── src/               # Port 8084
 │   ├── pom.xml 
+
+├── user-timeline-service/ # User timeline management microservice
+│   ├── src/               # Port 8085
+│   ├── pom.xml
 
 ├── integrationTests.http   # HTTP test file for API calls
 ├── pom.xml                 # Parent Maven project configuration
@@ -73,6 +78,11 @@ To build the `social-service`:
 cd social-service
 mvn clean install
 ```
+To build the `user-timeline-service`:
+```sh
+cd user-timeline-service
+mvn clean install
+```
 To build the `common`:
 ```sh
 cd common
@@ -106,6 +116,9 @@ To start all backend services, open separate terminal windows and run the follow
 
 # Start the social service
 ./mvnw quarkus:dev -pl social-service/
+
+# Start the user timeline service
+./mvnw quarkus:dev -pl user-timeline-service/
 ```
 
 ## Testing the Project
@@ -133,6 +146,11 @@ mvn test
 ```sh
 # Run tests for social-search
 cd social-service
+mvn test
+```
+```sh
+# Run tests for user-timeline-service
+cd user-timeline-service
 mvn test
 ```
 

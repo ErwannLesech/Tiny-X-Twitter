@@ -36,6 +36,7 @@
         <module>repo-post</module>
         <module>search-service</module>
         <module>social-service</module>
+        <module>user-timeline-service</module>
     </modules>
 
     <dependencyManagement>
