@@ -26,7 +26,6 @@ public class UserTimelineRepositoryTest {
 
     @BeforeEach
     public void setup() {
-        // Nettoyage des entrées de test
         List<UserTimelineEntry> existing = repository.findByUserId(userId);
         for (UserTimelineEntry entry : existing) {
             repository.delete(entry);
@@ -45,25 +44,36 @@ public class UserTimelineRepositoryTest {
 
     @Test
     public void testDeleteEntry_shouldRemoveMatchingEntry() {
-        // Insertion
         UserTimelineEntry entry = new UserTimelineEntry(userId, postId, UserTimelineEntryAction.LIKE, now);
         repository.createEntry(entry);
 
-        // Vérification insertion
         assertEquals(1, repository.findByUserId(userId).size());
 
-        // Suppression
         repository.deleteEntry(entry);
 
-        // Vérification suppression
         List<UserTimelineEntry> resultAfterDelete = repository.findByUserId(userId);
         System.out.println(resultAfterDelete);
         assertTrue(resultAfterDelete.isEmpty());
     }
 
     @Test
+    public void testDeletePost_shouldRemoveAllEntriesWithGivenPostId() {
+        ObjectId anotherUserId = new ObjectId();
+        repository.createEntry(new UserTimelineEntry(anotherUserId, postId, UserTimelineEntryAction.LIKE, now));
+        repository.createEntry(new UserTimelineEntry(userId, postId, UserTimelineEntryAction.CREATE, now.plusSeconds(5)));
+
+        assertEquals(1, repository.findByUserId(userId).size());
+        assertEquals(1, repository.findByUserId(anotherUserId).size());
+
+        repository.deletePost(postId);
+
+        assertTrue(repository.findByUserId(userId).isEmpty());
+        assertTrue(repository.findByUserId(anotherUserId).isEmpty());
+    }
+
+
+    @Test
     public void testFindByUserId_shouldReturnEntriesInChronologicalOrder() {
-        // Insertion dans le désordre
         repository.createEntry(new UserTimelineEntry(userId, "post1", UserTimelineEntryAction.LIKE, now.plusSeconds(20)));
         repository.createEntry(new UserTimelineEntry(userId, "post2", UserTimelineEntryAction.LIKE, now));
         repository.createEntry(new UserTimelineEntry(userId, "post3", UserTimelineEntryAction.LIKE, now.plusSeconds(10)));
