@@ -15,4 +15,4 @@ COPY --from=build /build/repo-post/target/*.jar ./
 
 EXPOSE 8082
 
-CMD ["java", "-jar", "quarkus-app/quarkus-run.jar"]
+CMD ["java", "-Dquarkus.profile=prod", "-jar", "quarkus-app/quarkus-run.jar"]

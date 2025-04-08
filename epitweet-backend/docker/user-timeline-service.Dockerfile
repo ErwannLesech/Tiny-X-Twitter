@@ -15,4 +15,4 @@ COPY --from=build /build/user-timeline-service/target/*.jar ./
 
 EXPOSE 8085
 
-CMD ["java", "-jar", "quarkus-app/quarkus-run.jar"]
+CMD ["java", "-Dquarkus.profile=prod", "-jar", "quarkus-app/quarkus-run.jar"]

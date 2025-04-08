@@ -15,4 +15,4 @@ COPY --from=build /build/social-service/target/*.jar ./
 
 EXPOSE 8084
 
-CMD ["java", "-jar", "quarkus-app/quarkus-run.jar"]
+CMD ["java", "-Dquarkus.profile=prod", "-jar", "quarkus-app/quarkus-run.jar"]
