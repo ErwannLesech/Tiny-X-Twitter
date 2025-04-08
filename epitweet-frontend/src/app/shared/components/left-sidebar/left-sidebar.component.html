@@ -13,7 +13,7 @@
         <mat-icon>person</mat-icon>
         <span>Profile</span>
       </a>
-      <button class="post-creation-button">
+      <button class="post-creation-button" (click)="postClick()">
         <mat-icon>edit</mat-icon>
         <span>Poster</span>
       </button>
@@ -33,3 +33,4 @@
       <mat-icon>{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
     </button> -->
 </div>
+<app-post-modal #postModal></app-post-modal>

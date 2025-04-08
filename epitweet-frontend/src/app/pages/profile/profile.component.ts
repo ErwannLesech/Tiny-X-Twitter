@@ -14,6 +14,7 @@ import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { SocialService } from '../../services/social.service';
 import { HttpParams } from '@angular/common/http';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-profile',
@@ -54,7 +55,8 @@ export class ProfileComponent implements OnInit {
     private postService: PostService,
     private router: Router,
     private location: Location,
-    private socialService: SocialService
+    private socialService: SocialService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -166,9 +168,11 @@ export class ProfileComponent implements OnInit {
         this.replies = this.replies.filter(reply => reply._id !== postId);
         // Remove from liked posts array if it exists there
         this.likedPosts = this.likedPosts.filter(post => post._id !== postId);
+        this.notificationService.showSuccess('Post deleted successfully')
       },
       error: (err) => {
         console.error(`Error deleting post ${postId}:`, err);
+        this.notificationService.showError('Post deleted successfully')
       }
     });
   }

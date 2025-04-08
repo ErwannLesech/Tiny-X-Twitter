@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { SocialService } from '../../services/social.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-post',
@@ -41,6 +42,7 @@ export class PostComponent implements OnInit {
     private router: Router,
     private location: Location,
     private socialService: SocialService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -103,9 +105,11 @@ export class PostComponent implements OnInit {
         this.post.comments = this.post.comments || [];
         this.post.comments.unshift(reply);
         this.replyContent = '';
+        this.notificationService.showSuccess('Reply created successfully')
       },
       error: (err) => {
         console.error('Failed to post reply', err);
+        this.notificationService.showError('Error creating reply')
       }
     });
   }

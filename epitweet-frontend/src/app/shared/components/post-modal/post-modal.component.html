@@ -1,0 +1,51 @@
+<!-- Supprimer le conteneur extérieur ou le rendre transparent -->
+<div class="modal-overlay" 
+     *ngIf="isModalOpen" 
+     (click)="onOverlayClick($event)"
+     [@fadeAnimation]>
+  
+  <div class="modal-content" 
+       (click)="onModalContentClick($event)"
+       [@scaleAnimation]>
+    
+    <!-- Modal header -->
+    <div class="modal-header">
+      <button class="close-button" (click)="closeModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <h3>Créer un Poste</h3>
+    </div>
+    
+    <!-- Modal body -->
+    <div class="modal-body">
+      <div class="user-info" *ngIf="loggedUser">
+        <div class="avatar">
+          <img *ngIf="loggedUser.avatarUrl" [src]="loggedUser.avatarUrl" alt="User Avatar">
+        </div>
+        <span class="username">{{ loggedUser.userName }}</span>
+      </div>
+      
+      <div class="post-creator">
+        <textarea
+          placeholder="Quoi de neuf ?"
+          [(ngModel)]="newPostContent"
+          (keydown)="handleKeyDown($event)"></textarea>
+        <div class="post-creation-actions">
+          <mat-icon class="post-creation-tools" id="post-creation-image">image</mat-icon>
+          <mat-icon class="post-creation-tools" id="post-creation-gif">gif</mat-icon>
+          <mat-icon class="post-creation-tools" id="post-creation-emoticon">face</mat-icon>
+          <button
+            class="post-creation-button"
+            (click)="createPost()"
+            [disabled]="!newPostContent.trim() || isPosting">
+            <span *ngIf="!isPosting">Poster</span>
+            <span *ngIf="isPosting">Posting...</span>
+          </button>
+        </div>
+        <div *ngIf="postError" class="error-message">
+          {{ postError }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

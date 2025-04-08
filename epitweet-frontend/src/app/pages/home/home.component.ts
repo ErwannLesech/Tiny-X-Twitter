@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { SocialService } from '../../services/social.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-home',
@@ -39,6 +40,7 @@ export class HomeComponent implements OnInit {
     private userStateService: UserStateService,
     private postService: PostService,
     private socialService: SocialService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -65,11 +67,13 @@ export class HomeComponent implements OnInit {
         this.newPostContent = '';
         this.isPosting = false;
         console.log('Post created successfully', response);
+        this.notificationService.showSuccess('Post created successfully')
       },
       error: (err) => {
         this.isPosting = false;
         this.postError = 'Failed to create post. Please try again.';
         console.error('Error creating post', err);
+        this.notificationService.showError(this.postError)
       }
     });
   }
