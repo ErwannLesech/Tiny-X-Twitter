@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { UserService } from './user.service';
+import { SocialService } from './social.service';
 
 export interface User {
   userId: string;
@@ -11,6 +12,7 @@ export interface User {
   bio: string;
   followersCount: number;
   followingCount: number;
+  likedPosts?: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -19,7 +21,8 @@ export class UserStateService {
   loggedUser$ = this.loggedUserSubject.asObservable();
 
   constructor(
-    private userService: UserService
+    private userService: UserService,
+    private socialService: SocialService
   ) {}
 
   setLoggedUser(user: User) {
@@ -35,8 +38,8 @@ export class UserStateService {
   }
 
   resetLoggedUser(user: User) {
-    this.userService.getUserById(user.userId).subscribe({
-      next: (response) => {
+    this.userService.getUserById(user.userId).pipe(
+      switchMap((response) => {
         const updatedUser: User = {
           userId: response._id,
           userName: response.pseudo,
@@ -47,6 +50,17 @@ export class UserStateService {
           followersCount: response.followersCount || 0,
           followingCount: response.followingCount || 0
         };
+        
+        // Get liked posts for the user
+        return this.socialService.getUserLikedPostsIds(user.userId).pipe(
+          map((likedPostIds: string[]) => {
+            updatedUser.likedPosts = likedPostIds;
+            return updatedUser;
+          })
+        );
+      })
+    ).subscribe({
+      next: (updatedUser) => {
         this.loggedUserSubject.next(updatedUser);
         localStorage.setItem('loggedUser', JSON.stringify(updatedUser));
       },

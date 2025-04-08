@@ -26,7 +26,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Nouveau nom d'utilisateur</mat-label>
-      <input matInput [(ngModel)]="userName" name="userName"/>
+      <input matInput [(ngModel)]="userName" name="userName" [defaultValue]="this.logedUser?.userName" />
     </mat-form-field>
 
     <mat-form-field appearance="outline">

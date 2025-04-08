@@ -50,7 +50,10 @@
         <div class="post-content">Haha ? Moi puceau ? Sérieusement ? ça faisait longtemps qu'on me l'avait pas sortie celle là...
           Demande à mes potes si je suis puceau, tu verras ce que tu vas te prendre xD parce que tu m'as l'air tout d'un bon gros puceau de merde.</div>
         <div class="post-actions">
-          <button (click)="onLikeClick($event)"><mat-icon>favorite_border</mat-icon> 1</button>
+          <!-- <button (click)="onLikeClick(post._id, $event)">
+            <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+            {{ post.likes || 0 }}
+          </button> -->
           <button><mat-icon>chat_bubble_outline</mat-icon> 2</button>
         </div>
       </div>

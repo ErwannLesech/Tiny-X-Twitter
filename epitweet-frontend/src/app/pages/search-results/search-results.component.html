@@ -46,7 +46,10 @@
             </div>
             <div class="post-content">{{post.content}}</div>
             <div class="post-actions">
-              <button (click)="onLikeClick($event)"><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
+              <button (click)="onLikeClick(post, $event)">
+                <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+                {{ post.likes || 0 }}
+              </button>
               <button (click)="onCommentClick($event)"><mat-icon>chat_bubble_outline</mat-icon> {{ post.replies || 0 }}</button>
             </div>
           </div>

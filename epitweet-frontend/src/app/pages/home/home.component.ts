@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { User, UserStateService } from '../../services/user-state.service';
-import { PostService, PostRequest } from '../../services/post.service';
+import { PostService, PostRequest, Post } from '../../services/post.service';
 import { FormsModule } from '@angular/forms';
 import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
+import { SocialService } from '../../services/social.service';
 
 @Component({
   selector: 'app-home',
@@ -35,19 +36,13 @@ export class HomeComponent implements OnInit {
   @ViewChild('postTextarea') postTextarea!: ElementRef;
 
   constructor(
-    private router: Router,
     private userStateService: UserStateService,
-    private postService: PostService
+    private postService: PostService,
+    private socialService: SocialService,
   ) {}
 
   ngOnInit() {
     this.loggedUser = this.userStateService.getLoggedUser();
-  }
-
-  onLikeClick(event: Event): void {
-    event.stopPropagation();
-    console.log('Like button clicked');
-    // TODO: Add like logic here
   }
 
   createPost() {
@@ -85,4 +80,35 @@ export class HomeComponent implements OnInit {
       this.createPost();
     }
   }
+
+  onLikeClick(post: Post, event: Event): void {
+      event.stopPropagation();
+      if (!this.loggedUser) return;
+    
+      // Determine the new like state
+      const newLikeState = !post.isLiked;
+      
+      // Prepare the request
+      const likeRequest = {
+        likeUnlike: newLikeState,
+        postId: post._id,
+        userId: this.loggedUser.userId
+      };
+      
+      // Update UI optimistically
+      post.isLiked = newLikeState;
+      post.likes = newLikeState ? (post.likes || 0) + 1 : Math.max(0, (post.likes || 1) - 1);
+    
+      // Send the request
+      this.socialService.likePost(likeRequest).subscribe({
+        error: (err) => {
+          console.error('Error toggling like:', err);
+          // Revert UI changes if the request fails
+          post.isLiked = !newLikeState;
+          post.likes = newLikeState ? 
+            Math.max(0, (post.likes || 1) - 1) : 
+            (post.likes || 0) + 1;
+        }
+      });
+    }
 }

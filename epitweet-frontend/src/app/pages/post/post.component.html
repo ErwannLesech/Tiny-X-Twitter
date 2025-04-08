@@ -31,7 +31,10 @@
           </div>
           <div class="post-content">{{post.content}}</div>
           <div class="post-actions">
-            <button><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
+            <button (click)="onLikeClick(post, $event)">
+              <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+              {{ post.likes || 0 }}
+            </button>
             <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments?.length || 0 }}</button>
           </div>
         </div>
@@ -58,7 +61,10 @@
                 {{ reply.content }}
               </div>
               <div class="post-actions">
-                <button><mat-icon>favorite_border</mat-icon> {{ reply.likes || 0 }}</button>
+                <button (click)="onLikeClick(reply, $event)">
+                  <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+                  {{ post.likes || 0 }}
+                </button>
                 <button><mat-icon>chat_bubble_outline</mat-icon> {{ reply.comments?.length || 0 }}</button>
               </div>
             </div>

@@ -69,7 +69,19 @@ export class ProfileUpdateComponent {
 
     this.userService.updateUser(userRequest).subscribe({
       next: () => {
-          this.userStateService.resetLoggedUser(this.logedUser!)
+          // First reset the logged user with the updated data
+          const resetUser: User = {
+            userId: this.logedUser!.userId,
+            userName: this.userName,
+            userTag: this.logedUser!.userTag,
+            avatarUrl: this.avatarUrl,
+            bannerUrl: this.bannerUrl,
+            bio: this.bio,
+            followersCount: this.logedUser!.followersCount,
+            followingCount: this.logedUser!.followingCount
+          };
+      
+          this.userStateService.setLoggedUser(resetUser);
           this.notification.showSuccess('Profile updated successfully!');
           this.router.navigate(['/profile', this.logedUser?.userTag]).then(() => {
             window.location.reload()

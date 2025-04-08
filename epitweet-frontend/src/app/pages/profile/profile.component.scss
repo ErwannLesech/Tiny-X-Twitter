@@ -245,3 +245,59 @@
   padding: 0.5rem;
   text-align: center;
 }
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  align-self: flex-end;
+  
+  .follow-button {
+    height: 40px;
+    background: black;
+    color: white;
+    border: 1px solid #000000;
+    border-radius: 20px;
+    padding: 0 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    
+    &.following {
+      background: white;
+      color: black;
+      border: 1px solid #cfd9de;
+    }
+  }
+  
+  .block-button {
+    height: 40px;
+    background: white;
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+    border-radius: 9999px;
+    padding: 0 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+}
+
+.post-actions button {
+  &:hover {
+    color: var(--color-primary);
+  }
+  
+  mat-icon {
+    transition: color 0.2s;
+  }
+  
+  &:hover mat-icon {
+    color: var(--color-primary);
+  }
+  
+  &.liked {
+    color: var(--color-danger);
+    
+    mat-icon {
+      color: var(--color-danger);
+    }
+  }
+}
