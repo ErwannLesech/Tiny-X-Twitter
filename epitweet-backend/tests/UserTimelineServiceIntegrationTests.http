@@ -580,18 +580,11 @@ Content-Type: application/json
 %}
 
 ###
-# @name Prepare data : User1 unlike post1
-POST http://localhost:8084/api/social/like
-Content-Type: application/json
-
-{
-  "likeUnlike": false,
-  "postId": "{{post1Id}}",
-  "userId": "{{user1Id}}"
-}
+# @name Prepare data : User2 delete post1
+DELETE http://localhost:8082/api/posts/deletePost/{{post1Id}}
 
 ###
-# @name 15. Test timeline after unlike post1
+# @name 15. Test timeline after deletion post1
 GET http://localhost:8085/api/timeline/user/{{user1Id}}
 Content-Type: application/json
 
@@ -647,9 +640,5 @@ Content-Type: application/json
 %}
 
 ###
-# @name Clean data : User1 delete post1
-DELETE http://localhost:8082/api/posts/deletePost/{{post1Id}}
-
-###
-# @name Clean data : User1 delete post2
+# @name Clean data : User3 delete post2
 DELETE http://localhost:8082/api/posts/deletePost/{{post2Id}}
