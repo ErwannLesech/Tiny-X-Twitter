@@ -37,6 +37,45 @@
           outline: none;
         }
       }
+      
+      .selected-gif-container {
+        width: 100%;
+        padding: 0.5rem 0;
+        
+        .selected-gif {
+          position: relative;
+          display: inline-block;
+          max-width: 100%;
+          border-radius: 12px;
+          overflow: hidden;
+          
+          img {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+          }
+          
+          .remove-gif-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            
+            &:hover {
+              background-color: rgba(0, 0, 0, 0.8);
+            }
+          }
+        }
+      }
 
       .post-creation-actions {
         display: flex;
@@ -44,9 +83,20 @@
         flex-direction: row;
         gap: 5rem;
         margin-top: 0.5rem;
+        width: 100%;
 
         .post-creation-tools {
           margin-top: 0.5rem;
+          cursor: pointer;
+          transition: color 0.2s;
+          
+          &:hover {
+            color: var(--color-primary);
+          }
+          
+          &.active {
+            color: var(--color-primary);
+          }
         }
 
         .post-creation-button {
@@ -115,6 +165,26 @@
           line-height: 1.5;
           white-space: pre-wrap;
           word-break: break-word;
+        }
+        
+        .post-media {
+          margin-bottom: 1rem;
+          
+          img {
+            max-width: 100%;
+            border-radius: 12px;
+            max-height: 300px;
+            display: block;
+          }
+        }
+        
+        .post-media {
+          margin-bottom: 1rem;
+          
+          img {
+            max-width: 100%;
+            border-radius: 12px;
+          }
         }
         
         .post-actions {

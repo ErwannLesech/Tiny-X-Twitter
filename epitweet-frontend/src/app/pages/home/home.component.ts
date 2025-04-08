@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { NotificationService } from '../../services/notification.service';
+import { GifSelectorComponent } from '../../shared/components/gif-selector/gif-selector.component';
 
 @Component({
   selector: 'app-home',
@@ -22,8 +23,9 @@ import { NotificationService } from '../../services/notification.service';
     RouterModule,
     FormsModule,
     LeftSidebarComponent,
-    RightSidebarComponent
-],
+    RightSidebarComponent,
+    GifSelectorComponent
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -32,6 +34,8 @@ export class HomeComponent implements OnInit {
   newPostContent: string = '';
   isPosting: boolean = false;
   postError: string | null = null;
+  selectedGifUrl: string | null = null;
+  showGifSelector: boolean = false;
 
   @ViewChild('postTextarea') postTextarea!: ElementRef;
 
@@ -53,7 +57,7 @@ export class HomeComponent implements OnInit {
   }
 
   createPost() {
-    if (!this.newPostContent.trim() || !this.loggedUser?.userId) {
+    if ((!this.newPostContent.trim() && !this.selectedGifUrl) || !this.loggedUser?.userId) {
       return;
     }
 
@@ -63,13 +67,14 @@ export class HomeComponent implements OnInit {
     const postRequest: PostRequest = {
       postType: 'post',
       content: this.newPostContent,
-      mediaUrl: '',
+      mediaUrl: this.selectedGifUrl || '',
       parentId: null // This would be used for replies
     };
 
     this.postService.createPost(this.loggedUser.userId, postRequest).subscribe({
       next: (response) => {
         this.newPostContent = '';
+        this.selectedGifUrl = null;
         this.isPosting = false;
         console.log('Post created successfully', response);
         this.notificationService.showSuccess('Post created successfully')
@@ -88,5 +93,18 @@ export class HomeComponent implements OnInit {
       event.preventDefault();
       this.createPost();
     }
+  }
+  
+  toggleGifSelector() {
+    this.showGifSelector = !this.showGifSelector;
+  }
+  
+  onGifSelected(gifUrl: string) {
+    this.selectedGifUrl = gifUrl;
+    this.showGifSelector = false;
+  }
+  
+  removeSelectedGif() {
+    this.selectedGifUrl = null;
   }
 }

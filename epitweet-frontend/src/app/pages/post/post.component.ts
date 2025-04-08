@@ -12,6 +12,7 @@ import { UserService } from '../../services/user.service';
 import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { NotificationService } from '../../services/notification.service';
+import { GifSelectorComponent } from '../../shared/components/gif-selector/gif-selector.component';
 
 @Component({
   selector: 'app-post',
@@ -25,8 +26,10 @@ import { NotificationService } from '../../services/notification.service';
     MatFormFieldModule,
     MatInputModule,
     LeftSidebarComponent,
-    RightSidebarComponent
-]
+    RightSidebarComponent,
+    GifSelectorComponent
+  ],
+  standalone: true
 })
 export class PostComponent implements OnInit {
   post: any = null;
@@ -34,6 +37,8 @@ export class PostComponent implements OnInit {
   loggedUser: User | null = null;
   isLoading = true;
   error: string | null = null;
+  selectedGifUrl: string | null = null;
+  showGifSelector: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -90,12 +95,12 @@ export class PostComponent implements OnInit {
   }
 
   postReply() {
-    if (!this.replyContent.trim() || !this.loggedUser) return;
+    if ((!this.replyContent.trim() && !this.selectedGifUrl) || !this.loggedUser) return;
 
     const postRequest: PostRequest = {
       postType: 'reply',
       content: this.replyContent.trim(),
-      mediaUrl: '',
+      mediaUrl: this.selectedGifUrl || '',
       parentId: this.post._id
     };
 
@@ -104,6 +109,7 @@ export class PostComponent implements OnInit {
         this.post.comments = this.post.comments || [];
         this.post.comments.unshift(reply);
         this.replyContent = '';
+        this.selectedGifUrl = null;
         this.notificationService.showSuccess('Reply created successfully')
       },
       error: (err) => {
@@ -111,6 +117,19 @@ export class PostComponent implements OnInit {
         this.notificationService.showError('Error creating reply')
       }
     });
+  }
+  
+  toggleGifSelector() {
+    this.showGifSelector = !this.showGifSelector;
+  }
+  
+  onGifSelected(gifUrl: string) {
+    this.selectedGifUrl = gifUrl;
+    this.showGifSelector = false;
+  }
+  
+  removeSelectedGif() {
+    this.selectedGifUrl = null;
   }
 
   goBack() {

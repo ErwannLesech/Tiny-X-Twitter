@@ -89,7 +89,12 @@
                   </div>
                 </div>
               </div>
-              <div class="post-content">{{post.content}}</div>
+              <div>
+                <div class="post-content">{{post.content}}</div>
+                <div class="post-media" *ngIf="post.mediaUrl">
+                  <img [src]="post.mediaUrl" alt="Example GIF">
+                </div>
+              </div>
               <div class="post-actions">
                 <button (click)="onLikeClick($event)"><mat-icon>favorite_border</mat-icon> {{ post.likes || 0 }}</button>
                 <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.comments || 0 }}</button>
