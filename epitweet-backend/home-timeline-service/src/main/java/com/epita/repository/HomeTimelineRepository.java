@@ -11,18 +11,34 @@ import java.util.*;
 @ApplicationScoped
 public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimelineEntry> {
 
+    /**
+     * Get a {@code List<HomeTimelineEntry>} of a {@code ObjectId} user id.
+     *
+     * @param userId The {@code ObjectId} of the user who home timeline is to be to retrieve.
+     * @return The {@code List<HomeTimelineEntry>} representing the home timeline.
+     */
     public List<HomeTimelineEntry> getTimeline(final ObjectId userId) {
         return find("userId", userId).stream()
                 .sorted(Comparator.comparing(HomeTimelineEntry::getDate))
                 .toList();
     }
 
+    /**
+     * Add a {@code HomeTimelineEntry} to the database.
+     *
+     * @param entry The {@code HomeTimelineEntry} to add.
+     */
     public void addHomeEntry(HomeTimelineEntry entry) {
         this.persist(entry);
     }
 
-    public void removeHomeEntry(ObjectId userId, ObjectId userFollowedId, ObjectId postId, EntryType type) {
+    /**
+     * Add a {@code HomeTimelineEntry} to the database.
+     *
+     * @param entry The {@code HomeTimelineEntry} to add.
+     */
+    public void removeHomeEntry(HomeTimelineEntry entry, EntryType type) {
         delete("userId = ?1 and userFollowedId = ?2 and postId = ?3 and type in ?4",
-                userId, userFollowedId, postId, (type == null) ? List.of(EntryType.POST, EntryType.LIKE) : type);
+                entry.getUserId(), entry.getUserFollowedId(), entry.getPostId(), type);
     }
 }
