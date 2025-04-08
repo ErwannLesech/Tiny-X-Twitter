@@ -1,5 +1,6 @@
 package com.epita.controller;
 
+import com.epita.controller.contracts.HomeTimelineResponse;
 import com.epita.service.HomeTimelineService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,6 +28,10 @@ public class HomeTimelineController {
     @GET
     @Path("/timeline/home/{userId}")
     public Response getTimeline(@PathParam("userId") final ObjectId userId) {
-        return homeService.getHomeTimeline(userId);
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        HomeTimelineResponse res = homeService.getHomeTimeline(userId);
+        return Response.ok(res).build();
     }
 }

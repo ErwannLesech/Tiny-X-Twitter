@@ -38,7 +38,8 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
      * @param entry The {@code HomeTimelineEntry} to add.
      */
     public void removeHomeEntry(HomeTimelineEntry entry, EntryType type) {
-        delete("userId = ?1 and userFollowedId = ?2 and postId = ?3 and type in ?4",
+        delete("userId = ?1 and userFollowedId = ?2 and postId = ?3 and postType = ?4",
                 entry.getUserId(), entry.getUserFollowedId(), entry.getPostId(), type);
+
     }
 }

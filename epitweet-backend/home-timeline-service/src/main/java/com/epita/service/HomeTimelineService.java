@@ -12,12 +12,11 @@ import com.epita.payloads.homeTimeline.SocialHomeTimelineFollow;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineLike;
 import com.epita.repository.HomeTimelineRepository;
 import com.epita.repository.entity.EntryType;
-import com.epita.repository.restClients.PostRestClient;
+import com.epita.repository.restClient.PostRestClient;
 import com.epita.repository.entity.HomeTimelineEntry;
-import com.epita.repository.restClients.SocialRestClient;
+import com.epita.repository.restClient.SocialRestClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
@@ -52,15 +51,11 @@ public class HomeTimelineService {
      * @param userId the ID of the user
      * @return The {@code List<HomeTimelinePost>} timeline wrapped in {@code Response}
      */
-    public Response getHomeTimeline(final ObjectId userId) {
-        if (userId == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
+    public HomeTimelineResponse getHomeTimeline(final ObjectId userId) {
         List<HomeTimelinePost> timeline = homeRepository.getTimeline(userId).stream()
                 .map(HomeTimelineConverter::toPost)
                 .toList();
-        HomeTimelineResponse response = new HomeTimelineResponse(userId, timeline);
-        return Response.ok(response).build();
+        return new HomeTimelineResponse(userId, timeline);
     }
 
     /**

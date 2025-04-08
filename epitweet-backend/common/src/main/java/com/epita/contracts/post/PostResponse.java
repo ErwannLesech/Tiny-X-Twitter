@@ -1,9 +1,6 @@
 package com.epita.contracts.post;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
@@ -14,6 +11,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class PostResponse {
     public ObjectId _id;

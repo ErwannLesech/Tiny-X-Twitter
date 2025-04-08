@@ -1,4 +1,4 @@
-package com.epita.repository.restClients;
+package com.epita.repository.restClient;
 
 import com.epita.contracts.post.PostResponse;
 import jakarta.ws.rs.*;

@@ -21,7 +21,7 @@ public class HomeTimelineConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeTimelineConverter.class);
 
     public static HomeTimelinePost toPost(final HomeTimelineEntry entry) {
-        return new HomeTimelinePost(entry.getUserFollowedId(), entry.getPostId(), entry.getType());
+        return new HomeTimelinePost(entry.getUserFollowedId(), entry.getPostId(), entry.getPostType(), entry.getDate());
     }
     /**
      * Converts a {@code SocialHomeTimelineLike} to a {@code HomeTimelineEntry} entity.
@@ -35,7 +35,7 @@ public class HomeTimelineConverter {
         HomeTimelineEntry entry = new HomeTimelineEntry();
         entry.setUserFollowedId(likePost.getUserId());
         entry.setDate(likePost.getPostLikeDate().atZone(ZoneId.systemDefault()).toInstant());
-        entry.setType(EntryType.LIKE);
+        entry.setPostType(EntryType.LIKE);
         entry.setUserId(followerId);
         entry.setPostId(post.get_id());
         return entry;
@@ -53,7 +53,7 @@ public class HomeTimelineConverter {
         entry.setUserId(followUser.getUserId());
         entry.setUserFollowedId(followUser.getUserFollowedId());
         entry.setDate(post.createdAt);
-        entry.setType(EntryType.POST);
+        entry.setPostType(EntryType.POST);
         entry.setPostId(post.get_id());
         return entry;
     }
@@ -70,7 +70,7 @@ public class HomeTimelineConverter {
         entry.setUserFollowedId(post.getPost().getUserId());
         entry.setDate(post.getPost().createdAt);
         entry.setPostId(post.getPost().get_id());
-        entry.setType(EntryType.POST);
+        entry.setPostType(EntryType.POST);
         entry.setUserId(followerId);
         return entry;
     }

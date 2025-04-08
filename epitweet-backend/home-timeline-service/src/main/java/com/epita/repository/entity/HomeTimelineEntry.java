@@ -2,6 +2,7 @@ package com.epita.repository.entity;
 
 import com.epita.contracts.post.PostResponse;
 
+import io.quarkus.mongodb.panache.PanacheMongoEntityBase;
 import io.quarkus.mongodb.panache.common.MongoEntity;
 import lombok.*;
 
@@ -18,12 +19,12 @@ import java.time.Instant;
 @Setter
 @ToString
 @MongoEntity(collection = "HomeTimelineEntries")
-public class HomeTimelineEntry {
+public class HomeTimelineEntry extends PanacheMongoEntityBase {
 
     /**
      * Unique mongo identifier of the HomeTimelineEntries
      */
-    ObjectId _id;
+    ObjectId id;
 
     /**
      * The ID of the user's timeline.
@@ -43,7 +44,7 @@ public class HomeTimelineEntry {
     /**
      * The type of the post liked or posted by the followed user.
      */
-    EntryType type;
+    EntryType postType;
 
     /**
      * Date when the post have been posted or liked by the followed user.
