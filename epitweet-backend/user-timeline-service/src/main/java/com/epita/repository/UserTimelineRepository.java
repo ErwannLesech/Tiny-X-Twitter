@@ -60,4 +60,14 @@ public class UserTimelineRepository implements PanacheMongoRepository<UserTimeli
                 userTimelineEntry.getPostId(),
                 userTimelineEntry.getUserTimelineEntryAction());
     }
+
+    /**
+     * Deletes all timeline entries associated with the given post ID.
+     *
+     * @param postId The ID of the post to remove from user timelines.
+     */
+    public void deletePost(String postId) {
+        logger.infof("Deleting all user timeline entries related to postId: %s", postId);
+        delete("postId", postId);
+    }
 }
