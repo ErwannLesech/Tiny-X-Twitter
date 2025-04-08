@@ -1,0 +1,24 @@
+services:
+  - name : docker:dind
+    alias: docker
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+test:
+  stage: test
+  image: maven:3.9.9-eclipse-temurin-17-alpine
+  services:
+    - name: docker:20.10.9-dind
+      alias: docker
+      command: ["--tls=false"]
+  #tags:
+  #  [ shell ]
+  script:
+    - apk update && apk add --no-cache docker
+    - docker info
+    - cd epitweet-backend
+    - mvn install
+    - mvn test
+
