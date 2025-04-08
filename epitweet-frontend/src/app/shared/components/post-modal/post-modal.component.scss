@@ -175,6 +175,11 @@ $button-border-radius: 9999px; // Fully rounded
     flex-direction: row;
     gap: 2rem;
     margin-top: 0.5rem;
+
+    .media-tools {
+      display: flex;
+      gap: 1.5rem;
+    }
     
     .post-creation-tools {
       margin-top: 0.5rem;

@@ -11,6 +11,7 @@ import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
 import { NotificationService } from '../../services/notification.service';
 import { GifSelectorComponent } from '../../shared/components/gif-selector/gif-selector.component';
+import { EmojiSelectorComponent } from '../../shared/components/emoji-selector/emoji-selector.component';
 
 @Component({
   selector: 'app-home',
@@ -24,7 +25,8 @@ import { GifSelectorComponent } from '../../shared/components/gif-selector/gif-s
     FormsModule,
     LeftSidebarComponent,
     RightSidebarComponent,
-    GifSelectorComponent
+    GifSelectorComponent,
+    EmojiSelectorComponent
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
@@ -36,6 +38,7 @@ export class HomeComponent implements OnInit {
   postError: string | null = null;
   selectedGifUrl: string | null = null;
   showGifSelector: boolean = false;
+  showEmojiSelector: boolean = false;
 
   @ViewChild('postTextarea') postTextarea!: ElementRef;
 
@@ -97,11 +100,39 @@ export class HomeComponent implements OnInit {
   
   toggleGifSelector() {
     this.showGifSelector = !this.showGifSelector;
+    if (this.showGifSelector) {
+      this.showEmojiSelector = false;
+    }
+  }
+  
+  toggleEmojiSelector() {
+    this.showEmojiSelector = !this.showEmojiSelector;
+    if (this.showEmojiSelector) {
+      this.showGifSelector = false;
+    }
   }
   
   onGifSelected(gifUrl: string) {
     this.selectedGifUrl = gifUrl;
     this.showGifSelector = false;
+  }
+  
+  onEmojiSelected(emoji: string) {
+    // Insérer l'emoji à la position du curseur
+    const textArea = this.postTextarea.nativeElement;
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    
+    // Concaténer le texte avant l'emoji, l'emoji, puis le texte après
+    this.newPostContent = this.newPostContent.substring(0, start) + emoji + this.newPostContent.substring(end);
+    
+    // Replacer le curseur juste après l'emoji inséré
+    setTimeout(() => {
+      textArea.selectionStart = textArea.selectionEnd = start + emoji.length;
+      textArea.focus();
+    }, 0);
+    
+    this.showEmojiSelector = false;
   }
   
   removeSelectedGif() {

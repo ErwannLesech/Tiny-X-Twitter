@@ -37,7 +37,11 @@
           id="post-creation-gif"
           (click)="toggleGifSelector()"
           [class.active]="showGifSelector">gif</mat-icon>
-        <mat-icon class="post-creation-tools" id="post-creation-emoticon">face</mat-icon>
+          <mat-icon 
+          class="post-creation-tools" 
+          id="post-creation-emoticon" 
+          (click)="toggleEmojiSelector()"
+          [class.active]="showEmojiSelector">face</mat-icon>
         <button 
           class="post-creation-button" 
           (click)="createPost()"
@@ -49,6 +53,13 @@
       <div *ngIf="postError" class="error-message">
         {{ postError }}
       </div>
+    </div>
+
+    <div class="selector-container" *ngIf="showEmojiSelector">
+      <app-emoji-selector
+        (emojiSelected)="onEmojiSelected($event)"
+        (close)="toggleEmojiSelector()">
+      </app-emoji-selector>
     </div>
     
     <!-- GIF Selector Modal -->

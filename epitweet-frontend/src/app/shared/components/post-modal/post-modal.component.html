@@ -1,4 +1,4 @@
-<!-- Supprimer le conteneur extérieur ou le rendre transparent -->
+<!-- Modal overlay -->
 <div class="modal-overlay" 
      *ngIf="isModalOpen" 
      (click)="onOverlayClick($event)"
@@ -30,7 +30,8 @@
           <textarea
             placeholder="Quoi de neuf ?"
             [(ngModel)]="newPostContent"
-            (keydown)="handleKeyDown($event)"></textarea>
+            (keydown)="handleKeyDown($event)"
+            #postTextarea></textarea>
           
           <!-- Afficher le GIF sélectionné si présent -->
           <div class="selected-gif-container" *ngIf="selectedGifUrl">
@@ -44,13 +45,19 @@
         </div>
         
         <div class="post-creation-actions">
-          <mat-icon class="post-creation-tools" id="post-creation-image">image</mat-icon>
-          <mat-icon 
-            class="post-creation-tools" 
-            id="post-creation-gif"
-            (click)="toggleGifSelector()"
-            [class.active]="showGifSelector">gif</mat-icon>
-          <mat-icon class="post-creation-tools" id="post-creation-emoticon">face</mat-icon>
+          <div class="media-tools">
+            <mat-icon class="post-creation-tools" id="post-creation-image">image</mat-icon>
+            <mat-icon 
+              class="post-creation-tools" 
+              id="post-creation-gif"
+              (click)="toggleGifSelector()"
+              [class.active]="showGifSelector">gif</mat-icon>
+            <mat-icon 
+              class="post-creation-tools" 
+              id="post-creation-emoticon"
+              (click)="toggleEmojiSelector()"
+              [class.active]="showEmojiSelector">face</mat-icon>
+          </div>
           <button
             class="post-creation-button"
             (click)="createPost()"
@@ -60,12 +67,21 @@
           </button>
         </div>
         
-        <!-- GIF Selector Modal -->
-        <app-gif-selector 
-          *ngIf="showGifSelector" 
-          (gifSelected)="onGifSelected($event)"
-          (close)="toggleGifSelector()">
-        </app-gif-selector>
+        <!-- Emoji Selector -->
+        <div class="selector-container" *ngIf="showEmojiSelector">
+          <app-emoji-selector
+            (emojiSelected)="onEmojiSelected($event)"
+            (close)="toggleEmojiSelector()">
+          </app-emoji-selector>
+        </div>
+        
+        <!-- GIF Selector -->
+        <div class="selector-container" *ngIf="showGifSelector">
+          <app-gif-selector 
+            (gifSelected)="onGifSelected($event)"
+            (close)="toggleGifSelector()">
+          </app-gif-selector>
+        </div>
         
         <div *ngIf="postError" class="error-message">
           {{ postError }}

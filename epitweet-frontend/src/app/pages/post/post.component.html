@@ -45,7 +45,7 @@
 
       <!-- Reply Form -->
       <div class="reply-form">
-        <textarea placeholder="Post your reply" [(ngModel)]="replyContent"></textarea>
+        <textarea placeholder="Post your reply" [(ngModel)]="replyContent" #postTextarea></textarea>
         
         <!-- Display selected GIF for reply if any -->
         <div class="selected-gif-container" *ngIf="selectedGifUrl">
@@ -65,10 +65,17 @@
             <mat-icon (click)="toggleGifSelector()">gif</mat-icon>
           </div>
           <div class="reply-tools">
-            <mat-icon>face</mat-icon>
+            <mat-icon (click)="toggleEmojiSelector()">face</mat-icon>
           </div>
           <button class="reply-button" (click)="postReply()">Reply</button>
         </div>
+      </div>
+
+      <div class="selector-container" *ngIf="showEmojiSelector">
+        <app-emoji-selector
+          (emojiSelected)="onEmojiSelected($event)"
+          (close)="toggleEmojiSelector()">
+        </app-emoji-selector>
       </div>
       
       <!-- GIF Selector for replies -->
