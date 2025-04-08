@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: repo-post
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: repo-post
+  template:
+    metadata:
+      labels:
+        app: repo-post
+    spec:
+      containers:
+        - name: repo-post
+          image: epitweet/repo-post:latest # à adapter
+          ports:
+            - containerPort: 8082
+          env:
+            - name: QUARKUS_PROFILE
+              value: prod
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8082
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8082
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
