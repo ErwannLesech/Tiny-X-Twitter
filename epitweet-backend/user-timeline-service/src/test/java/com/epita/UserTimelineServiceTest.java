@@ -68,7 +68,7 @@ public class UserTimelineServiceTest {
 
         userTimelineService.handlePostTimeline(postTimeline);
 
-        verify(userTimelineRepository, times(1)).deleteEntry(any());
+        verify(userTimelineRepository, times(1)).deletePost(any());
     }
 
     @Test

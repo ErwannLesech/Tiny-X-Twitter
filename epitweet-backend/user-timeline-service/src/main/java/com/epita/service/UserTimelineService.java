@@ -61,7 +61,7 @@ public class UserTimelineService {
         if (postTimeline.getMethod().equalsIgnoreCase("creation")) {
             userTimelineRepository.createEntry(userTimelineEntry);
         } else if (postTimeline.getMethod().equalsIgnoreCase("deletion")) {
-            userTimelineRepository.deleteEntry(userTimelineEntry);
+            userTimelineRepository.deletePost(userTimelineEntry.getPostId());
         } else {
             logger.warnf(
                     "PostTimeline.method should be \\\"creation\\\" or \\\"deletion\\\", not \" %s",
