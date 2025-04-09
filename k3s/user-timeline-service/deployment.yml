@@ -1,35 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: repo-post
+  name: user-timeline-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: repo-post
+      app: user-timeline-service
   template:
     metadata:
       labels:
-        app: repo-post
+        app: user-timeline-service
     spec:
       containers:
-        - name: repo-post
-          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/repo-post # à adapter
+        - name: user-timeline-service
+          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/user-timeline-service:latest
           ports:
-            - containerPort: 8082
-          env:
-            - name: QUARKUS_PROFILE
-              value: prod
+            - containerPort: 8085
           readinessProbe:
             httpGet:
               path: /q/health/ready
-              port: 8082
+              port: 8085
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /q/health/live
-              port: 8082
+              port: 8085
             initialDelaySeconds: 5
             periodSeconds: 10
 
