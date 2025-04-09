@@ -356,7 +356,7 @@ Content-Type: application/json
 POST http://localhost:8083/api/search/searchPosts
 Content-Type: application/json
 
-"java elasticsearch"
+"ride"
 
 > {%
     client.test("Response status is 200", function() {
