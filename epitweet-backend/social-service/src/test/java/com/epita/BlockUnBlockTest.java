@@ -192,6 +192,33 @@ public class BlockUnBlockTest
     }
 
     /**
+     * TEST block:<br>
+     *  user123 block user456<br>
+     *  user123 block user456
+     */
+    @Test
+    public void testMultiBlockSameUser()
+    {
+        testBlock();
+
+        BlockUnblockRequest blockUnblockRequest = new BlockUnblockRequest(
+                true,
+                user456Id,
+                user123Id);
+
+        given().contentType(ContentType.JSON)
+                .body(blockUnblockRequest)
+                .when()
+                .post("/api/social/block")
+                .then()
+                .statusCode(200);
+
+        List<String> blocksId = socialRepository.getBlockedUsers(user123Id);
+        List<String> expectedBlocksId = List.of(user456Id);
+        testResult(blocksId, expectedBlocksId);
+    }
+
+    /**
      * TEST unBlock:<br>
      * user123 unblock user456<br>
      * After:
