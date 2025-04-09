@@ -193,6 +193,33 @@ public class FollowUnFollowTest
     }
 
     /**
+     * TEST follow:<br>
+     *  user123 follow user456<br>
+     *  user123 follow user456
+     */
+    @Test
+    public void testMultiFollowSameUser()
+    {
+        testFollow();
+
+        FollowUnfollowRequest followUnfollowRequest = new FollowUnfollowRequest(
+                true,
+                user456Id,
+                user123Id);
+
+        given().contentType(ContentType.JSON)
+                .body(followUnfollowRequest)
+                .when()
+                .post("/api/social/follow")
+                .then()
+                .statusCode(200);
+
+        List<String> followsId = socialRepository.getFollows(user123Id);
+        List<String> expectedFollowsId = List.of(user456Id);
+        testResult(followsId, expectedFollowsId);
+    }
+
+    /**
      * TEST unFollow:<br>
      * user123 unfollow user456<br>
      * After:
