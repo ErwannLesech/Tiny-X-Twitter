@@ -1,6 +1,5 @@
 package com.epita.service;
 
-import com.epita.contracts.post.PostResponse;
 import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.contracts.social.BlockedRelationResponse;
 import com.epita.controller.contracts.AppreciationRequest;
@@ -11,10 +10,13 @@ import com.epita.payloads.homeTimeline.SocialHomeTimelineBlock;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineFollow;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineLike;
 import com.epita.payloads.userTimeline.LikeTimeline;
-import com.epita.repository.restClient.PostRestClient;
 import com.epita.repository.SocialRepository;
+import com.epita.repository.publisher.LikeTimelinePublisher;
+import com.epita.repository.publisher.SocialHomeTimelineBlockPublisher;
+import com.epita.repository.publisher.SocialHomeTimelineFollowPublisher;
+import com.epita.repository.publisher.SocialHomeTimelineLikePublisher;
+import com.epita.repository.restClient.PostRestClient;
 import com.epita.repository.restClient.UserRestClient;
-import com.epita.repository.publisher.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -205,6 +207,11 @@ public class SocialService {
         }
         if (!socialRepository.postExists(request.getPostId())) {
             socialRepository.createResource(List.of(request.getPostId()), SocialRepository.TypeCreate.POST);
+        }
+        // check if the exact same like already exists (same post and same user)
+        List<String> likeUsers = socialRepository.getLikesPosts(request.getUserId());
+        if (request.isLikeUnlike() && likeUsers != null && likeUsers.contains(request.getPostId())) {
+            return true;
         }
 
         socialRepository.likeUnlike(request);

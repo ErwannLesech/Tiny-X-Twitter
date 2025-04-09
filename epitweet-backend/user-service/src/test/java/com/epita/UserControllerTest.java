@@ -15,7 +15,6 @@ import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 public class UserControllerTest {
-
     @Inject
     UserRepository userRepository;
 
@@ -90,6 +89,7 @@ public class UserControllerTest {
                 .then()
                 .statusCode(401);
     }
+
 
     @Test
     public void testAuthUserNotFound()
