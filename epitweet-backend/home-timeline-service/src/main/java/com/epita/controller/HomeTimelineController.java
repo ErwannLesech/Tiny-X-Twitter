@@ -23,7 +23,8 @@ public class HomeTimelineController {
     /**
      * Retrieves the home timeline for a given user.
      * @param userId User ID
-     * @return A {@code Response<List<HomeTimelineResponse>>} or a 400 error if userId is invalid, 404 error if user is unknown.
+     * @return A {@code Response<List<HomeTimelineResponse>>} or a 400 error if userId is invalid,
+     * 404 error if user is unknown.
      */
     @GET
     @Path("/timeline/home/{userId}")
