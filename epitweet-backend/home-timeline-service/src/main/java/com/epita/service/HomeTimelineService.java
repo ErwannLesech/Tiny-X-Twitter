@@ -63,7 +63,9 @@ public class HomeTimelineService {
      * @param message The {@code PostHomeTimeline} message received
      */
     public void updateOnPost(PostHomeTimeline message) {
-        List<ObjectId> followers = socialRestClient.getFollowers(message.getPost().getUserId().toString()).getEntity().stream()
+        List<ObjectId> followers = socialRestClient
+                .getFollowers(message.getPost().getUserId().toString())
+                .getEntity().stream()
                 .map(ObjectId::new)
                 .toList();
         for (ObjectId followerId : followers) {
@@ -71,7 +73,9 @@ public class HomeTimelineService {
                 HomeTimelineEntry entry = HomeTimelineConverter.PostToEntry(message, followerId);
                 homeRepository.addHomeEntry(entry);
             } else {
-                HomeTimelineEntry entry = entryToDelete(followerId, message.getPost().getUserId(), message.getPost().get_id());
+                ObjectId postUserId = message.getPost().getUserId();
+                ObjectId postId = message.getPost().get_id();
+                HomeTimelineEntry entry = entryToDelete(followerId, postUserId, postId);
                 homeRepository.removeHomeEntry(entry, EntryType.POST);
                 homeRepository.removeHomeEntry(entry, EntryType.LIKE);
             }
@@ -83,18 +87,25 @@ public class HomeTimelineService {
      * @param message The {@code SocialHomeTimelineLike} message received
      */
     public void updateOnLike(SocialHomeTimelineLike message) {
-        PostResponse post = postRestClient.getPost(message.getPostId()).getEntity();
+        PostResponse post = postRestClient
+                .getPost(message.getPostId())
+                .getEntity();
         if (post != null) {
             LOGGER.info("Update user timeline on liked/unliked post");
-            List<ObjectId> followers = socialRestClient.getFollowers(message.getUserId().toString()).getEntity().stream()
+            List<ObjectId> followers = socialRestClient.getFollowers(message.getUserId().toString())
+                    .getEntity().stream()
                     .map(ObjectId::new)
                     .toList();
             for (ObjectId followerId : followers) {
                 post.setCreatedAt(message.getPostLikeDate().atZone(ZoneId.systemDefault()).toInstant());
                 HomeTimelineEntry entry = HomeTimelineConverter.LikeToEntry(message, followerId, post);
 
-                BlockedRelationResponse blockedRelationResponse = socialRestClient.getBlockedRelation(new BlockedRelationRequest(followerId, post.getUserId())).getEntity();
-                if (Objects.equals(message.getMethod(), "like") && !blockedRelationResponse.getUserBlockedParentUser()) {
+                BlockedRelationRequest request = new BlockedRelationRequest(followerId, post.getUserId());
+                BlockedRelationResponse blockedRelationResponse = socialRestClient
+                        .getBlockedRelation(request)
+                        .getEntity();
+                if (Objects.equals(message.getMethod(), "like")
+                && !blockedRelationResponse.getUserBlockedParentUser()) {
                     homeRepository.addHomeEntry(entry);
                 } else {
                     homeRepository.removeHomeEntry(entry, EntryType.LIKE);
@@ -114,12 +125,21 @@ public class HomeTimelineService {
         if (posts != null && !posts.isEmpty()) {
             LOGGER.info("Update user timeline on follow/unfollow user");
             for (PostResponse post : posts) {
-                BlockedRelationResponse blockedRelationResponse = socialRestClient.getBlockedRelation(new BlockedRelationRequest(message.getUserId(), post.getUserId())).getEntity();
-                if (Objects.equals(message.getMethod(), "follow") && !blockedRelationResponse.getUserBlockedParentUser()) {
+                BlockedRelationRequest request = new BlockedRelationRequest(
+                        message.getUserId(),
+                        post.getUserId());
+                BlockedRelationResponse blockedRelationResponse = socialRestClient
+                        .getBlockedRelation(request)
+                        .getEntity();
+                if (Objects.equals(message.getMethod(), "follow")
+                && !blockedRelationResponse.getUserBlockedParentUser()) {
                     HomeTimelineEntry entry = HomeTimelineConverter.FollowToEntry(message, post);
                     homeRepository.addHomeEntry(entry);
                 } else {
-                    HomeTimelineEntry entry = entryToDelete(message.getUserId(), message.getUserFollowedId(), post.get_id());
+                    ObjectId userId = message.getUserId();
+                    ObjectId followedId = message.getUserFollowedId();
+                    ObjectId postId = post.get_id();
+                    HomeTimelineEntry entry = entryToDelete(userId, followedId, postId);
                     homeRepository.removeHomeEntry(entry, EntryType.POST);
                     homeRepository.removeHomeEntry(entry, EntryType.LIKE);
                 }
@@ -139,7 +159,10 @@ public class HomeTimelineService {
             LOGGER.info("Update user timeline on blocked/unblocked user");
             for (PostResponse post : posts) {
                 if (Objects.equals(message.getMethod(), "block")) {
-                    HomeTimelineEntry entry = entryToDelete(message.getUserId(), message.getUserBlockedId(), post.get_id());
+                    ObjectId userId = message.getUserId();
+                    ObjectId blockedId = message.getUserBlockedId();
+                    ObjectId postId = post.get_id();
+                    HomeTimelineEntry entry = entryToDelete(userId, blockedId, postId);
                     homeRepository.removeHomeEntry(entry, EntryType.POST);
                     homeRepository.removeHomeEntry(entry, EntryType.LIKE);
                 }
