@@ -31,7 +31,10 @@ public class HomeTimelineConverter {
      * @param post The {@code PostResponse} field to set.
      * @return The converted {@code HomeTimelineEntry} entity.
      */
-    public static HomeTimelineEntry LikeToEntry(SocialHomeTimelineLike likePost, ObjectId followerId, PostResponse post) {
+    public static HomeTimelineEntry LikeToEntry(SocialHomeTimelineLike likePost,
+                                                ObjectId followerId,
+                                                PostResponse post
+    ) {
         HomeTimelineEntry entry = new HomeTimelineEntry();
         entry.setUserFollowedId(likePost.getUserId());
         entry.setDate(likePost.getPostLikeDate().atZone(ZoneId.systemDefault()).toInstant());
