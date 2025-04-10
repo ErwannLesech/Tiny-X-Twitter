@@ -6,6 +6,7 @@ import com.epita.repository.SearchRepository;
 import com.epita.service.SearchService;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -223,5 +224,33 @@ class IndexSearchingTest {
         PostDocument hashtagMatch = result4.get(0);
         assertTrue(hashtagMatch.getPostId().equals(posts.get(0).getPostId()) || hashtagMatch.getPostId().equals(posts.get(1).getPostId()) || hashtagMatch.getPostId().equals(posts.get(3).getPostId()), "Should contain #java");
         assertEquals(hashtagMatch.getPostId(), posts.get(1).getPostId(), "Should contain #springboot");
+    }
+
+    @Test
+    void k_searchPost_empty() {
+        // 1. Préparation - créer un post pour s'assurer qu'il y a des données
+        IndexPost post = new IndexPost(
+                new ObjectId().toString(),
+                "post",
+                "java quarkus elasticsearch",
+                "",
+                null,
+                "creation"
+        );
+
+        searchService.indexPost(post);
+        allPostsIds.add(new ObjectId(post.getPostId()));
+
+        List<String> tokens = searchService.tokenizeText(""); // Doit retourner une liste vide
+        List<PostDocument> results = searchRepository.search(tokens);
+
+        assertTrue(results.isEmpty(), "La recherche avec une requête vide doit retourner une liste vide");
+
+        assertThrows(NotFoundException.class, () -> {
+            if (tokens.isEmpty()) {
+                throw new NotFoundException("Aucun terme de recherche fourni");
+            }
+            searchRepository.search(tokens);
+        });
     }
 }
