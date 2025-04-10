@@ -1,0 +1,644 @@
+@env = dev
+
+# ================== User Timeline Service ==================
+
+###
+# @name Create test user : Create user 1
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "User One",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.global.set("user1Id", response.body._id);
+%}
+
+###
+# @name Create test user : Create user 2
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user2",
+  "pseudo": "User Two",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.global.set("user2Id", response.body._id);
+%}
+
+###
+# @name Create test user : Create user 3
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user3",
+  "pseudo": "User Three",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.global.set("user3Id", response.body._id);
+%}
+
+###
+# ================== Simple tests ==================
+# @name 1. Test Empty timeline
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 0, "user timeline should be empty");
+    });
+%}
+
+###
+# @name Prepare data : User1 create post0
+POST http://localhost:8082/api/posts/createPost
+userId: {{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post0",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post0Id", response.body._id);
+%}
+
+###
+# @name 2. Test timeline after creation post0
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 1, "user timeline should contain 1 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post0Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "created", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 delete post0
+DELETE http://localhost:8082/api/posts/deletePost/{{post0Id}}
+
+###
+# @name 3. Test timeline after deletion post0
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 0, "user timeline should be empty");
+    });
+%}
+
+###
+# @name Prepare data : User2 create post0bis
+POST http://localhost:8082/api/posts/createPost
+userId: {{user2Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post0bis",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post0bisId", response.body._id);
+%}
+
+###
+# @name Prepare data : User1 like post0bis
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post0bisId}}",
+  "userId": "{{user1Id}}"
+}
+
+###
+# @name 4. Test timeline after like post0bis
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 1, "user timeline should contain 1 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post0bisId"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "liked", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 unlike post0bis
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": false,
+  "postId": "{{post0bisId}}",
+  "userId": "{{user1Id}}"
+}
+
+###
+# @name 5. Test timeline after unlike post0bis
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 0, "user timeline should be empty");
+    });
+%}
+
+###
+# @name Clean data : User2 delete post0bis
+DELETE http://localhost:8082/api/posts/deletePost/{{post0bisId}}
+
+###
+# ================== Advanced tests ==================
+# @name 6. Test Empty timeline
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 0, "user timeline should be empty");
+    });
+%}
+
+###
+# @name Prepare data : User2 create post1
+POST http://localhost:8082/api/posts/createPost
+userId: {{user2Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post1",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post1Id", response.body._id);
+%}
+
+###
+# @name Prepare data : User3 create post2
+POST http://localhost:8082/api/posts/createPost
+userId: {{user3Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post2",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post2Id", response.body._id);
+%}
+
+###
+# @name Prepare data : User1 create post3
+POST http://localhost:8082/api/posts/createPost
+userId: {{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post3",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post3Id", response.body._id);
+%}
+
+###
+# @name 7. Test timeline after creation post3
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 1, "user timeline should contain 1 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post3Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "created", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 like post1
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post1Id}}",
+  "userId": "{{user1Id}}"
+}
+
+###
+# @name 8. Test timeline after like post1
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 2, "user timeline should contain 2 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post3Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "created", "Unexpected action")
+
+        client.assert(response.body.userTimeline[1].postId === client.global.get("post1Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[1].action === "liked", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 like post2
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post2Id}}",
+  "userId": "{{user1Id}}"
+}
+
+###
+# @name 9. Test timeline after like post2
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 3, "user timeline should contain 3 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post3Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "created", "Unexpected action")
+
+        client.assert(response.body.userTimeline[1].postId === client.global.get("post1Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[1].action === "liked", "Unexpected action")
+
+        client.assert(response.body.userTimeline[2].postId === client.global.get("post2Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[2].action === "liked", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 unlike post1
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": false,
+  "postId": "{{post1Id}}",
+  "userId": "{{user1Id}}"
+}
+
+###
+# @name 10. Test timeline after unlike post1
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        console.log(response.body)
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 2, "user timeline should contain 2 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post3Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "created", "Unexpected action")
+
+        client.assert(response.body.userTimeline[1].postId === client.global.get("post2Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[1].action === "liked", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 create post4
+POST http://localhost:8082/api/posts/createPost
+userId: {{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post4",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post4Id", response.body._id);
+%}
+
+###
+# @name 11. Test timeline after creation post4
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 3, "user timeline should contain 3 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post3Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "created", "Unexpected action")
+
+        client.assert(response.body.userTimeline[1].postId === client.global.get("post2Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[1].action === "liked", "Unexpected action")
+
+        client.assert(response.body.userTimeline[2].postId === client.global.get("post4Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[2].action === "created", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 delete post3
+DELETE http://localhost:8082/api/posts/deletePost/{{post3Id}}
+
+###
+# @name 12. Test timeline after deletion post3
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 2, "user timeline should contain 2 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post2Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "liked", "Unexpected action")
+
+        client.assert(response.body.userTimeline[1].postId === client.global.get("post4Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[1].action === "created", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 like post1
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post1Id}}",
+  "userId": "{{user1Id}}"
+}
+
+###
+# @name 13. Test timeline after like post1
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 3, "user timeline should contain 3 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post2Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "liked", "Unexpected action")
+
+        client.assert(response.body.userTimeline[1].postId === client.global.get("post4Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[1].action === "created", "Unexpected action")
+
+        client.assert(response.body.userTimeline[2].postId === client.global.get("post1Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[2].action === "liked", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 delete post4
+DELETE http://localhost:8082/api/posts/deletePost/{{post4Id}}
+
+###
+# @name 14. Test timeline after deletion post4
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 2, "user timeline should contain 2 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post2Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "liked", "Unexpected action")
+
+        client.assert(response.body.userTimeline[1].postId === client.global.get("post1Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[1].action === "liked", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User2 delete post1
+DELETE http://localhost:8082/api/posts/deletePost/{{post1Id}}
+
+###
+# @name 15. Test timeline after deletion post1
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 1, "user timeline should contain 1 element");
+
+        client.assert(response.body.userTimeline[0].postId === client.global.get("post2Id"), "Unexpected postId");
+        client.assert(response.body.userTimeline[0].action === "liked", "Unexpected action")
+    });
+%}
+
+###
+# @name Prepare data : User1 unlike post2
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": false,
+  "postId": "{{post2Id}}",
+  "userId": "{{user1Id}}"
+}
+
+###
+# @name 16. Test timeline after unlike post2
+GET http://localhost:8085/api/timeline/user/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response is an object and response.userTimeline is an array", function () {
+        client.assert(typeof response.body === "object", "Response body should be an object");
+        client.assert(Array.isArray(response.body.userTimeline), "userTimeline should be an array");
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.userTimeline.length === 0, "user timeline should be empty");
+    });
+%}
+
+###
+# @name Clean data : User3 delete post2
+DELETE http://localhost:8082/api/posts/deletePost/{{post2Id}}
