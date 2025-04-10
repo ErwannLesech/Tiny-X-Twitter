@@ -218,7 +218,7 @@ public class PostService {
 
         // declare to home-timeline that we deleted a post
         postHomeTimelinePublisher.publish(PostTimelineConverter.toPostHomeTimeline(PostConverter.toResponse(post),
-                "deletion"));
+                "creation"));
 
         // declare to index service that we created a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "creation"));
