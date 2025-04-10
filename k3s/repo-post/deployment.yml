@@ -20,16 +20,3 @@ spec:
           env:
             - name: QUARKUS_PROFILE
               value: prod
-          readinessProbe:
-            httpGet:
-              path: /q/health/ready
-              port: 8082
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /q/health/live
-              port: 8082
-            initialDelaySeconds: 5
-            periodSeconds: 10
-

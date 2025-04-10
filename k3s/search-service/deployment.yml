@@ -17,16 +17,3 @@ spec:
           image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/search-service:latest  # Remplacez par le bon tag de votre image
           ports:
             - containerPort: 8083
-          readinessProbe:
-            httpGet:
-              path: /q/health/ready
-              port: 8083
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /q/health/live
-              port: 8083
-            initialDelaySeconds: 5
-            periodSeconds: 10
-
