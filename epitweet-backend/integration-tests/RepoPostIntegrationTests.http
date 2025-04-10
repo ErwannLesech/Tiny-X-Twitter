@@ -273,7 +273,7 @@ GET http://localhost:8082/api/posts/getPostRepost/{{repost1Id}}
 
     client.test("Response body is empty", function() {
         const body = response.body;
-        client.assert(body === undefined || body.length === 0, "Expected empty response body");
+        client.assert(body === undefined || body === null || body.length === 0, "Expected empty response body");
     });
 %}
 

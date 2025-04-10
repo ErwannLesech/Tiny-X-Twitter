@@ -143,34 +143,24 @@ Content-Type: application/json
 
 ###
 # @name 🔍 4. Search vague match (regular words only)
-POST http://localhost:8083/api/search/searchPosts
+POST http://localhost:8083/api/search/searchPosts/java elasticsearch
 Content-Type: application/json
-
-"java elasticsearch"
 
 ### 🔍 5. Search strict match (hashtags only, #dev and #java required)
-POST http://localhost:8083/api/search/searchPosts
+POST http://localhost:8083/api/search/searchPosts/%23dev%20%23java
 Content-Type: application/json
-
-"#dev #java"
 
 ### 🔍 6. Search strict match (hashtags only with one hashtag that does not appear in the tweet)
-POST http://localhost:8083/api/search/searchPosts
+POST http://localhost:8083/api/search/searchPosts/%23dev%20%23java%20%23snugus
 Content-Type: application/json
-
-"#dev #java #snugus"
 
 ### 🔍 7. Search mixed match (word + hashtag)
-POST http://localhost:8083/api/search/searchPosts
+POST http://localhost:8083/api/search/searchPosts/aujourd%27hui%20%23java
 Content-Type: application/json
-
-"aujourd’hui #java"
 
 ### 🚫 8. Hashtag should not match as word
-POST http://localhost:8083/api/search/searchPosts
+POST http://localhost:8083/api/search/searchPosts/java
 Content-Type: application/json
-
-"java"
 
 ### 🚫 9. Word should not match as hashtag
 POST http://localhost:8083/api/search/searchPosts
@@ -183,7 +173,5 @@ Content-Type: application/json
 DELETE http://localhost:8082/api/posts/deletePost/{{hashtagPostId}}
 
 ### 🚫 10. Re-search after delete
-POST http://localhost:8083/api/search/searchPosts
+POST http://localhost:8083/api/search/searchPosts/%23java
 Content-Type: application/json
-
-"#java"

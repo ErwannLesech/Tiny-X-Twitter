@@ -157,8 +157,8 @@ Content-Type: application/json
 %}
 
 ###
-# @name: 6. Axelle wants to get here Home Timeline
-# TODO
+# @name: 6. Axelle wants to get her Home Timeline
+GET http://localhost:8086/api/timeline/home/{{userAxelleId}}
 
 ###
 # @name: 7. Observing a new post of her friend, she wants to go on the Erwann Timeline
@@ -237,6 +237,10 @@ Content-Type: application/json
         client.global.set("reply1Id", body._id);
     });
 %}
+
+###
+# @name: 9.2. Axelle wants to get her Home Timeline after creating reply
+GET http://localhost:8086/api/timeline/home/{{userAxelleId}}
 
 ###
 # @name 10. Erwann likes the anwser
@@ -353,10 +357,8 @@ Content-Type: application/json
 
 ###
 # @name 14. Abel search posts with "ride" inside of it
-POST http://localhost:8083/api/search/searchPosts
+POST http://localhost:8083/api/search/searchPosts/ride
 Content-Type: application/json
-
-"ride"
 
 > {%
     client.test("Response status is 200", function() {
