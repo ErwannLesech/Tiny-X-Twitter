@@ -6,6 +6,7 @@ import com.epita.payloads.userTimeline.LikeTimeline;
 import com.epita.payloads.userTimeline.PostTimeline;
 import com.epita.repository.entity.UserTimelineEntry;
 import com.epita.repository.entity.UserTimelineEntryAction;
+import io.quarkus.test.junit.QuarkusTest;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,7 @@ import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@QuarkusTest
 public class UserTimelineConverterTest {
 
     @Test
