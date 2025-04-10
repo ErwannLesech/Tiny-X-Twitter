@@ -356,6 +356,9 @@ Content-Type: application/json
 %}
 
 ###
+# @name WaitForPostToIndex and refresh
+POST http://localhost:9200/posts/_doc?refresh=true
+###
 # @name 14. Abel search posts with "ride" inside of it
 POST http://localhost:8083/api/search/searchPosts/ride
 Content-Type: application/json
@@ -367,14 +370,40 @@ Content-Type: application/json
 
     client.test("Response contains expected user fields", function() {
         const body = response.body;
-        client.assert(body._id !== undefined, "User ID is missing");
-        client.assert(body.tag === "abel", "Tag mismatch");
-        client.assert(body.pseudo === "Abdoul", "Pseudo mismatch");
-        client.assert(typeof body.password === "string", "Password should be hashed string");
-        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
-        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
-        client.assert(body.profileDescription === null, "profileDescription should be null");
-        client.assert(typeof body.createdAt === "string", "createdAt must be a timestamp string");
-        client.global.set("userAbelId", body._id)
+        client.assert(body.length === 2, "Should have find 2 posts");
+
+        //for post 1:
+        client.assert(body[0]._id !== undefined, "Post ID is missing");
+        client.assert(body[0].userId === client.global.get("userErwannId"), "User Id mismatch");
+        client.assert(body[0].postType === "post", "Post type mismatch");
+        client.assert(body[0].content === "Who wants to ride with me ?", "Content should be 'Who wants to ride with me ?'");
+        client.assert(body[0].mediaUrl === null, "mediaUrl should be null");
+        client.assert(body[0].parentId === null, "parentId should be null");
+        client.assert(typeof body[0].createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body[0].updatedAt === "string", "updatedAt should be a string timestamp");
+
+        //for post 2:
+        client.assert(body[1]._id !== undefined, "Post ID is missing");
+        client.assert(body[1].userId === client.global.get("userAxelleId"), "User Id mismatch");
+        client.assert(body[1].postType === "reply", "Post type mismatch");
+        client.assert(body[1].content === "Yeah, let's go ride together !", "Content should be 'Who wants to ride with me ?'");
+        client.assert(body[1].mediaUrl === null, "mediaUrl should be null");
+        client.assert(body[1].parentId === body[0]._id, "parentId should be original post id");
+        client.assert(typeof body[1].createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body[1].updatedAt === "string", "updatedAt should be a string timestamp");
     });
 %}
+
+###
+# @name CleanupElasticsearch
+POST http://localhost:9200/posts/_delete_by_query
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+###
+
