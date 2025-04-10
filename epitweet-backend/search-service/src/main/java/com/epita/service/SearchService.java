@@ -34,7 +34,11 @@ public class SearchService {
      * @return list of matching posts.
      */
     public List<PostResponse> searchPosts(String request) {
-        List<PostDocument> documents =  searchRepository.search(tokenizeText(request));
+        List<String> tokens = tokenizeText(request);
+        if (tokens.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<PostDocument> documents =  searchRepository.search(tokens);
         LOGGER.info("Documents find: " + documents);
         List<PostResponse> posts = new ArrayList<>();
         for (PostDocument postDocument : documents) {

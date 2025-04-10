@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
+import java.util.Objects;
 
 @Path("/api/search")
 @Produces(MediaType.APPLICATION_JSON)
@@ -28,6 +29,9 @@ public class SearchController {
     @Path("/searchPosts/{request}")
     public Response searchPosts(@PathParam("request") String request) {
         try {
+            if (request.isEmpty()){
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
             List<PostResponse> results = searchService.searchPosts(request);
             if (results.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("No results found").build();
