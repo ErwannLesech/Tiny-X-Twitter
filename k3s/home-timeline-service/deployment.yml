@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-timeline-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home-timeline-service
+  template:
+    metadata:
+      labels:
+        app: home-timeline-service
+    spec:
+      containers:
+        - name: home-timeline-service
+          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/home-timeline-service:latest # à adapter
+          ports:
+            - containerPort: 8086
+          env:
+            - name: QUARKUS_PROFILE
+              value: prod
+

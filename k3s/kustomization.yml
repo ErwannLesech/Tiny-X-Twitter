@@ -1,0 +1,10 @@
+resources:
+  - repo-post/
+  - social-service/
+  - user-service/
+  - user-timeline-service/
+  - search-service/
+  - mongo/
+  - redis/
+  - neo4j/
+  - elasticsearch/
