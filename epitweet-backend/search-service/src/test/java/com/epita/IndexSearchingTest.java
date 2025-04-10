@@ -30,6 +30,8 @@ class IndexSearchingTest {
     SearchRepository searchRepository;
 
     private static final Logger LOGGER = Logger.getLogger(IndexSearchingTest.class.getName());
+    @Inject
+    org.jboss.logging.Logger logger;
 
     private List<ObjectId> allPostsIds = new ArrayList<>();
 
