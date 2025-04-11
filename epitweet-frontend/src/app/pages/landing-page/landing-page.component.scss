@@ -1,0 +1,80 @@
+.content-wrapper {
+    width: 90%;
+    height: 90%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+}
+
+.welcome-section {
+    text-align: center;
+    margin: auto 0;
+    margin-top: 0;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-height: 500px;
+
+    h1 {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+        color: #0f1419;
+    }
+
+    p {
+        font-size: 1.5rem;
+        color: #536471;
+        line-height: 1.5;
+        max-width: 80%;
+        margin: 0 auto;
+    }
+}
+
+.auth-buttons {
+    display: flex;
+    justify-content: flex-end; // This pushes all buttons to the right
+    gap: 1rem;
+    margin-top: auto;
+    margin-bottom: 0.5rem;
+    width: 100%;
+
+    .auth-button {
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        font-size: 1rem;
+        transition: all 0.2s;
+        flex: 1; // Makes buttons grow equally
+        min-width: 150px; // Minimum width for smaller screens
+        max-width: 300px; // Maximum width for larger screens
+        height: 35px; // Fixed height for buttons
+        text-align: center;
+        
+        &.signup {
+            background: white;
+            color: black;
+            border: 1px solid #c9ccce;
+            &:hover {
+                background: #dadee4;
+                border-color: black;
+            }
+        }
+        
+        &.login {
+            background: black;
+            color: white;        background: black;
+            color: white;
+        
+            &:hover {
+
+                background: white;
+                color: black;
+                border: 1px solid black;
+            }
+        }
+    }
+}

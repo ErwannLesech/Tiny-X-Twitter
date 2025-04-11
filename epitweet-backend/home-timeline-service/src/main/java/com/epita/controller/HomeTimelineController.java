@@ -9,6 +9,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 
+import org.jboss.logging.Logger;
+
 /**
  * REST controller to retrieve home timeline.
  */

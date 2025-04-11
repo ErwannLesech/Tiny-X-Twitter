@@ -1,0 +1,33 @@
+:root {
+  --color-primary: #000000; /* X/Twitter blue */
+  --color-primary-hover: #0a1822;
+  --color-secondary: #eff3f4;
+  --color-border: #eff3f4;
+  --color-background: #ffffff;
+  --color-text: #0f1419;
+  --color-text-light: #ffffff;
+  --color-info: #536471;
+  --color-icons: #0f1419;
+  --color-muted: #71767b;
+  --color-hover: #f7f9f9;
+  --color-danger: #ff4d4f;
+  --color-trends-bg: #f7f9f9;
+  --color-post-hover: #f7f7f7;
+}
+
+[data-theme='dark'] {
+  --color-primary: #1d9bf0;
+  --color-primary-hover: #1a8cd8;
+  --color-secondary: #2f3336;
+  --color-border: #2f3336;
+  --color-background: #000000;
+  --color-text: #e7e9ea;
+  --color-text-light: #e7e9ea;
+  --color-info: #71767b;
+  --color-icons: #e7e9ea;
+  --color-muted: #71767b;
+  --color-hover: #16181c;
+  --color-danger: #ff4d4f;
+  --color-trends-bg: #16181c;
+  --color-post-hover: #080808;
+}

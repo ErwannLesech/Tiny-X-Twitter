@@ -5,6 +5,7 @@ import com.epita.contracts.social.BlockedRelationResponse;
 import com.epita.controller.contracts.AppreciationRequest;
 import com.epita.controller.contracts.BlockUnblockRequest;
 import com.epita.controller.contracts.FollowUnfollowRequest;
+import com.epita.contracts.social.LikedPostInfo;
 import com.epita.converter.SocialConverter;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineBlock;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineFollow;
@@ -209,7 +210,10 @@ public class SocialService {
             socialRepository.createResource(List.of(request.getPostId()), SocialRepository.TypeCreate.POST);
         }
         // check if the exact same like already exists (same post and same user)
-        List<String> likeUsers = socialRepository.getLikesPosts(request.getUserId());
+        List<String> likeUsers = socialRepository.getLikesPosts(request.getUserId())
+                .stream()
+                .map(post -> post.getPostId().toString()).toList();
+
         if (request.isLikeUnlike() && likeUsers != null && likeUsers.contains(request.getPostId())) {
             return true;
         }
@@ -241,7 +245,7 @@ public class SocialService {
      * @param userId the user for whom to get the posts they liked
      * @return a list of postIds that the specified userId liked
      */
-    public List<String> getLikesPosts(String userId) {
+    public List<LikedPostInfo> getLikesPosts(String userId) {
         if (!socialRepository.userExists(userId)) {
             return null;
         }

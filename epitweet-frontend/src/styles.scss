@@ -1,1 +1,141 @@
-/* You can add global styles to this file, and also import other style files */
+@use 'styles/variables.scss' as *;
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+
+/* Global Styles */
+html {
+  width: 100vw !important;
+  height: 100vh !important;
+  min-width: 1000px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+body {
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  margin: auto;
+  background: var(--color-background);
+}
+
+/* Shared Card Style */
+.mat-card {
+  border-radius: 15px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 20px;
+}
+
+/* Button Styles */
+.mat-raised-button {
+  border-radius: 25px !important;
+  font-weight: bold !important;
+  text-transform: uppercase;
+  padding: 0 24px !important;
+
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* Form Field Styles */
+.mat-form-field {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e1e8ed;
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .logo-image {
+      height: 60px; // Adjust based on your logo's aspect ratio
+      width: auto;
+    }
+
+    .logo-text {
+      font-size: 2.5rem;
+      font-style: bold;
+      color: var(--color-text);;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 1.5rem;
+    
+    .auth-buttons {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .logo-image {
+    height: 35px;
+  }
+}
+
+.loading {
+  text-align: center;
+  margin-top: 10px;
+  padding: 2rem;
+  color: var(--color-info);
+}
+
+.error-message {
+  margin-top: 10px;
+  color: var(--color-danger);
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.hide {
+  display: none;
+}
+
+// Notifications
+
+// Custom snackbar styles
+.success-snackbar {
+  background-color: #4CAF50 !important;
+  color: white !important;
+}
+
+.error-snackbar {
+  background-color: #F44336 !important;
+  color: white !important;
+}
+
+.mat-snack-bar-container {
+  margin-top: 64px !important; // Adjust based on your header height
+  max-width: 100vw !important;
+  background: transparent !important;
+}

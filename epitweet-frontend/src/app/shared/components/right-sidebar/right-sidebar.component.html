@@ -1,0 +1,14 @@
+<!-- Right Sidebar (same as home) -->
+<div class="right-sidebar">
+    <div class="search-bar">
+        <mat-icon matPrefix>search</mat-icon>
+        <input 
+            matInput 
+            placeholder="Rechercher"
+            #searchInput
+            (keyup.enter)="search(searchInput.value)">
+    </div>
+    
+    <div class="trends">
+    </div>
+</div>

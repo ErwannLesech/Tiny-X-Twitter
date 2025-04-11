@@ -1,0 +1,4 @@
+<div class="notification" [class.success]="data.type === 'success'" [class.error]="data.type === 'error'">
+    <mat-icon>{{ data.type === 'success' ? 'check_circle' : 'error' }}</mat-icon>
+    <span>{{ data.message }}</span>
+</div>

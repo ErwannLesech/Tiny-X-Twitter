@@ -2,6 +2,7 @@ package com.epita.repository.restClient;
 
 import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.contracts.social.BlockedRelationResponse;
+import com.epita.contracts.social.LikedPostInfo;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
@@ -34,4 +35,13 @@ public interface SocialRestClient {
     @GET
     @Path("/getFollowers/{userId}")
     public RestResponse<List<String>> getFollowers(@PathParam("userId") String userId);
+
+    /**
+     * Gets the posts liked by a specific user.
+     * @param userId the user for whom to get the posts they liked
+     * @return a Response containing a list of postIds that the specified userId liked
+     */
+    @GET
+    @Path("/getLikedPosts/{userId}")
+    public RestResponse<List<LikedPostInfo>> getLikedPosts(@PathParam("userId") String userId);
 }
