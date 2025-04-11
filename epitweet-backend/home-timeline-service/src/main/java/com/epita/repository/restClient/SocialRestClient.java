@@ -2,9 +2,9 @@ package com.epita.repository.restClient;
 
 import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.contracts.social.BlockedRelationResponse;
+import com.epita.contracts.social.LikedPostInfo;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 
@@ -43,5 +43,5 @@ public interface SocialRestClient {
      */
     @GET
     @Path("/getLikedPosts/{userId}")
-    public RestResponse<List<String>> getLikedPosts(@PathParam("userId") String userId);
+    public RestResponse<List<LikedPostInfo>> getLikedPosts(@PathParam("userId") String userId);
 }
