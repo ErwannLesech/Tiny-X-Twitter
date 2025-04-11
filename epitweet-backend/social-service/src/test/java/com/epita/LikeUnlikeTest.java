@@ -46,8 +46,6 @@ public class LikeUnlikeTest
     String post456Id = "a00000000000000000000456";
     String post789Id = "a00000000000000000000789";
     String unknownId = "a000000000000000000f0f0f";
-    @Inject
-    Map map;
 
     /**
      * clean neo4j repository and append users

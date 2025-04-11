@@ -210,7 +210,10 @@ public class SocialService {
             socialRepository.createResource(List.of(request.getPostId()), SocialRepository.TypeCreate.POST);
         }
         // check if the exact same like already exists (same post and same user)
-        List<String> likeUsers = socialRepository.getLikesPosts(request.getUserId()).stream().map(post -> post.getPostId().toString()).toList();
+        List<String> likeUsers = socialRepository.getLikesPosts(request.getUserId())
+                .stream()
+                .map(post -> post.getPostId().toString()).toList();
+
         if (request.isLikeUnlike() && likeUsers != null && likeUsers.contains(request.getPostId())) {
             return true;
         }

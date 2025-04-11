@@ -21,8 +21,10 @@ import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -133,16 +135,24 @@ public class HomeTimelineService {
      * @param message The {@code SocialHomeTimelineFollow} message received
      */
     public void updateOnFollow(SocialHomeTimelineFollow message) {
-        logger.infof("User du demandeur de follow: %s", message.getUserId());
-        logger.infof("User du receveur de follow: %s", message.getUserFollowedId());
+        ObjectId userId = message.getUserId();
+        ObjectId followedId = message.getUserFollowedId();
 
-        List<PostResponse> posts = postRestClient.getPosts(message.getUserFollowedId()).getEntity();
-        List<LikedPostInfo> likedPosts = socialRestClient.getLikedPosts(message.getUserFollowedId().toString()).getEntity();
+        logger.infof("User du demandeur de follow: %s", userId);
+        logger.infof("User du receveur de follow: %s", followedId);
+
+        RestResponse<List<PostResponse>> postsResponse = postRestClient.getPosts(followedId);
+        List<PostResponse> posts = postsResponse != null ? postsResponse.getEntity() : null;
+
+        RestResponse<List<LikedPostInfo>> likedPostsResponse = socialRestClient.getLikedPosts(followedId.toString());
+        List<LikedPostInfo> likedPosts = likedPostsResponse != null ?
+                likedPostsResponse.getEntity() : new ArrayList<>();
+
         for (LikedPostInfo post : likedPosts) {
             SocialHomeTimelineLike plike = new SocialHomeTimelineLike();
             plike.setPostLikeDate(post.getDateTime());
             plike.setMethod("like");
-            plike.setUserId(message.getUserFollowedId());
+            plike.setUserId(followedId);
             plike.setPostId(post.getPostId());
             updateOnLike(plike);
         }
@@ -150,7 +160,7 @@ public class HomeTimelineService {
             logger.info("Update user timeline on follow/unfollow user");
             for (PostResponse post : posts) {
                 BlockedRelationRequest request = new BlockedRelationRequest(
-                        message.getUserId(),
+                        userId,
                         post.getUserId());
                 BlockedRelationResponse blockedRelationResponse = socialRestClient
                         .getBlockedRelation(request)
@@ -158,13 +168,11 @@ public class HomeTimelineService {
                 if (Objects.equals(message.getMethod(), "follow")
                         && !blockedRelationResponse.getUserBlockedParentUser()) {
                     logger.infof("Add post %s to the home timeline of %s",
-                            post.get_id(), message.getUserFollowedId());
+                            post.get_id(), followedId);
                     HomeTimelineEntry entry = HomeTimelineConverter.FollowToEntry(message, post);
                     homeRepository.addHomeEntry(entry);
 
                 } else {
-                    ObjectId userId = message.getUserId();
-                    ObjectId followedId = message.getUserFollowedId();
                     logger.infof("Remove every post relate to user %s from the home timeline of %s",
                             followedId, userId);
                     homeRepository.removeUserFromTimeline(userId, followedId);
