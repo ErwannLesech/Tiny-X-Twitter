@@ -268,8 +268,8 @@ Content-Type: application/json
 
     client.test("Timeline has correct structure and values", function() {
         client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
-        client.assert(response.body.timeline.length === 3, "home timeline should have 4 elements");
-        client.assert(response.body.timeline[2].postId === client.global.get("post3Id"), "Supposed to be post3Id")
+        client.assert(response.body.timeline.length === 4, "home timeline should have 4 elements");
+        client.assert(response.body.timeline[3].postId === client.global.get("post3Id"), "Supposed to be post3Id")
     });
 %}
 

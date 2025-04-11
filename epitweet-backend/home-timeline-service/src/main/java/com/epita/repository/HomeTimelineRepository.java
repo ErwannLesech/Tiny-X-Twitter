@@ -52,4 +52,14 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
     public void removeUserFromTimeline(final ObjectId userId, final ObjectId userFollowed) {
         delete("userId = ?1 and userFollowedId = ?2", userId, userFollowed);
     }
+
+    /**
+     * Remove a {@code HomeTimelineEntry} relate to {@code ObjectId} post from the timeline of {@code ObjectId} user
+     *
+     * @param userId The {@code ObjectId} user.
+     * @param postId The {@code ObjectIf} user to remove.
+     */
+    public void removePostFromTimeline(final ObjectId userId, final ObjectId postId) {
+        delete("userId = ?1 and postId= ?2", userId, postId);
+    }
 }

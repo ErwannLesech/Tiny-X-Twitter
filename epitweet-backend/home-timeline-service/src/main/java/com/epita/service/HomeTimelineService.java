@@ -3,6 +3,7 @@ package com.epita.service;
 import com.epita.contracts.post.PostResponse;
 import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.contracts.social.BlockedRelationResponse;
+import com.epita.contracts.social.LikedPostInfo;
 import com.epita.controller.contracts.HomeTimelinePost;
 import com.epita.controller.contracts.HomeTimelineResponse;
 import com.epita.converter.HomeTimelineConverter;
@@ -17,7 +18,6 @@ import com.epita.repository.entity.HomeTimelineEntry;
 import com.epita.repository.restClient.SocialRestClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.antlr.v4.runtime.misc.ObjectEqualityComparator;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
@@ -137,8 +137,15 @@ public class HomeTimelineService {
         logger.infof("User du receveur de follow: %s", message.getUserFollowedId());
 
         List<PostResponse> posts = postRestClient.getPosts(message.getUserFollowedId()).getEntity();
-        List<ObjectId> likedPosts = socialRestClient.getLikedPosts(message.getUserFollowedId().toString()).getEntity()
-                .stream().map(ObjectId::new).toList();
+        List<LikedPostInfo> likedPosts = socialRestClient.getLikedPosts(message.getUserFollowedId().toString()).getEntity();
+        for (LikedPostInfo post : likedPosts) {
+            SocialHomeTimelineLike plike = new SocialHomeTimelineLike();
+            plike.setPostLikeDate(post.getDateTime());
+            plike.setMethod("like");
+            plike.setUserId(message.getUserFollowedId());
+            plike.setPostId(post.getPostId());
+            updateOnLike(plike);
+        }
         if (posts != null && !posts.isEmpty()) {
             logger.info("Update user timeline on follow/unfollow user");
             for (PostResponse post : posts) {
@@ -179,6 +186,13 @@ public class HomeTimelineService {
             ObjectId userBlockedId = message.getUserBlockedId();
             logger.infof("Remove every post relate to user %s from the home timeline of %s", userBlockedId, userId);
             homeRepository.removeUserFromTimeline(userId, userBlockedId);
+
+            List<PostResponse> posts = postRestClient.getPosts(userBlockedId).getEntity();
+            if (posts != null && !posts.isEmpty()) {
+                for (PostResponse post : posts) {
+                    homeRepository.removePostFromTimeline(userId, post.get_id());
+                }
+            }
         }
     }
 
