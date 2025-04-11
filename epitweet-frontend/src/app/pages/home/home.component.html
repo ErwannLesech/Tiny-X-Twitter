@@ -3,8 +3,7 @@
   <app-left-sidebar 
     [avatarUrl]="loggedUser?.avatarUrl || ''"
     [userName]="loggedUser?.userName || ''"
-    [userTag]="loggedUser?.userTag || ''"
-    style="display: flex; flex-direction: column; justify-content: space-between;">
+    [userTag]="loggedUser?.userTag || ''">
   </app-left-sidebar>
   
   <!-- Main Content -->
@@ -69,37 +68,31 @@
       (close)="toggleGifSelector()">
     </app-gif-selector>
     
+    <!-- Homme Page Timeline -->
     <div class="timeline">
-      <div class="post" [routerLink]="['/post', 'no_Id']">
+      <div class="post" *ngFor="let post of posts" [routerLink]="['/post', post._id]">
         <div class="post-header">
-          <img src="assets/images/default-profile.png" alt="Profile" class="post-profile-pic">
+          <img [src]="post.user?.avatarUrl || 'assets/images/default-profile.png'" alt="Profile" class="post-profile-pic">
           <div class="post-user">
-            <a [routerLink]="['/profile', 'huschle']" class="nav-link">
-              <span class="userName">Huschle</span>
-              <span class="userTag">&#64;huschle</span>
+            <a [routerLink]="['/profile', post.user?.userTag]" class="nav-link">
+              <span class="userName">{{ post.user?.userName }}</span>
+              <span class="userTag">&#64;{{ post.user?.userTag }}</span>
             </a>
           </div>
         </div>
         <div>
-          <div class="post-content">Haha ? Moi puceau ? Sérieusement ? ça faisait longtemps qu'on me l'avait pas sortie celle là...
-            Demande à mes potes si je suis puceau, tu verras ce que tu vas te prendre xD parce que tu m'as l'air tout d'un bon gros puceau de merde.
+          <div class="post-content">{{ post.content }}</div>
+          <div *ngIf="post.mediaUrl">
+            <img [src]="post.mediaUrl" alt="Post media">
           </div>
-          <div>
-            <img src="https://media.giphy.com/media/3o7aCTPPm4OHfRLSH6/giphy.gif" alt="Example GIF">
-          </div>
-
         </div>
         <div class="post-actions">
-          <!-- <button (click)="onLikeClick(post._id, $event)">
+          <button (click)="onLikeClick(post, $event)">
             <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
             {{ post.likes || 0 }}
-          </button> -->
-          <button><mat-icon>chat_bubble_outline</mat-icon> 2</button>
+          </button>
+          <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.replies || 0 }}</button>
         </div>
-      </div>
-      
-      <div class="post">
-        <!-- Second post example -->
       </div>
     </div>
   </div>

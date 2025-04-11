@@ -134,13 +134,13 @@ export class PostService {
   getUserLikedPosts(userId: string): Observable<Post[] | null> {
     return this.socialService.getUserLikedPostsIds(userId).pipe(
       catchError(() => of([])), // Return empty array if error occurs
-      switchMap((postIds: string[]) => {
-        if (!postIds || postIds.length === 0) {
+      switchMap((postsLiked: any[]) => {
+        if (!postsLiked || postsLiked.length === 0) {
           return of([]);
         }
         
-        const postObservables = postIds.map((postId: string) => 
-          this.getPostById(postId).pipe(
+        const postObservables = postsLiked.map((postLiked: any) => 
+          this.getPostById(postLiked.postId).pipe(
             catchError(() => of(null))
           )
         );

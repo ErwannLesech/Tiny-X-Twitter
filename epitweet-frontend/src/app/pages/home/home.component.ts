@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { User, UserStateService } from '../../services/user-state.service';
 import { PostService, PostRequest, Post } from '../../services/post.service';
+import { HomeTimelineService } from '../../services/home-timeline.service';
 import { FormsModule } from '@angular/forms';
 import { LeftSidebarComponent } from "../../shared/components/left-sidebar/left-sidebar.component";
 import { RightSidebarComponent } from "../../shared/components/right-sidebar/right-sidebar.component";
@@ -13,6 +14,7 @@ import { SocialService } from '../../services/social.service';
 import { NotificationService } from '../../services/notification.service';
 import { GifSelectorComponent } from '../../shared/components/gif-selector/gif-selector.component';
 import { EmojiSelectorComponent } from '../../shared/components/emoji-selector/emoji-selector.component';
+
 
 @Component({
   selector: 'app-home',
@@ -40,6 +42,7 @@ export class HomeComponent implements OnInit {
   selectedGifUrl: string | null = null;
   showGifSelector: boolean = false;
   showEmojiSelector: boolean = false;
+  posts: Post[] = [];
 
   @ViewChild('postTextarea') postTextarea!: ElementRef;
 
@@ -47,11 +50,29 @@ export class HomeComponent implements OnInit {
     private userStateService: UserStateService,
     private postService: PostService,
     private socialService: SocialService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private homeTimelineService: HomeTimelineService,
   ) {}
 
   ngOnInit() {
     this.loggedUser = this.userStateService.getLoggedUser();
+    if (this.loggedUser) {
+      this.loadHomeTimeline();
+    }
+  }
+
+  loadHomeTimeline() {
+    if (!this.loggedUser?.userId) return;
+    
+    this.homeTimelineService.getHomeTimeline(this.loggedUser.userId).subscribe({
+      next: (posts) => {
+        this.posts = posts;
+      },
+      error: (err) => {
+        console.error('Error loading home timeline', err);
+        this.notificationService.showError('Failed to load timeline');
+      }
+    });
   }
 
   createPost() {
@@ -76,6 +97,7 @@ export class HomeComponent implements OnInit {
         this.isPosting = false;
         console.log('Post created successfully', response);
         this.notificationService.showSuccess('Post created successfully')
+        this.loadHomeTimeline(); // Reload timeline after posting
       },
       error: (err) => {
         this.isPosting = false;
@@ -113,6 +135,10 @@ export class HomeComponent implements OnInit {
     
       // Send the request
       this.socialService.likePost(likeRequest).subscribe({
+        next: (response) => {
+          console.log('Like toggled successfully', response);
+          this.loadHomeTimeline(); // Reload timeline after posting
+        },
         error: (err) => {
           console.error('Error toggling like:', err);
           // Revert UI changes if the request fails
@@ -120,6 +146,7 @@ export class HomeComponent implements OnInit {
           post.likes = newLikeState ? 
             Math.max(0, (post.likes || 1) - 1) : 
             (post.likes || 0) + 1;
+          this.notificationService.showError("you can't to like this post");
         }
       });
     }
