@@ -12,9 +12,11 @@ spec:
       labels:
         app: repo-post
     spec:
+      imagePullSecrets:
+        - name: epitweet-pull-secret
       containers:
         - name: repo-post
-          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/repo-post # à adapter
+          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/repo-post:latest
           ports:
             - containerPort: 8082
           env:

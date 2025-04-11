@@ -12,6 +12,8 @@ spec:
       labels:
         app: social-service
     spec:
+      imagePullSecrets:
+        - name: epitweet-pull-secret
       containers:
         - name: social-service
           image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/social-service:latest

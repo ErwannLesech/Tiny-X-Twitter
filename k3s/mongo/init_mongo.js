@@ -12,3 +12,5 @@ db.createUser(
 );
 db.createCollection("Users");
 db.createCollection("Posts");
+db.createCollection("user-timeline");
+db.createCollection("HomeTimelineEntries");

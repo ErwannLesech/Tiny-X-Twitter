@@ -12,9 +12,11 @@ spec:
       labels:
         app: home-timeline-service
     spec:
+      imagePullSecrets:
+        - name: epitweet-pull-secret
       containers:
         - name: home-timeline-service
-          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/home-timeline-service:latest # à adapter
+          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/home-timeline-service:latest
           ports:
             - containerPort: 8086
           env:

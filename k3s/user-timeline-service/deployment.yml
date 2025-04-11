@@ -12,6 +12,8 @@ spec:
       labels:
         app: user-timeline-service
     spec:
+      imagePullSecrets:
+        - name: epitweet-pull-secret
       containers:
         - name: user-timeline-service
           image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/user-timeline-service:latest

@@ -1,3 +1,6 @@
+kind: Kustomization
+namespace: epitweet
+
 resources:
   - repo-post/
   - social-service/
@@ -8,3 +11,4 @@ resources:
   - redis/
   - neo4j/
   - elasticsearch/
+  - home-timeline-service/
