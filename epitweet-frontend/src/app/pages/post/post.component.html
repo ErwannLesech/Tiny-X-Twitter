@@ -125,8 +125,8 @@
           </div>
           <div class="post-actions" (click)="$event.stopPropagation()">
             <button (click)="onLikeClick(reply, $event)">
-              <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
-              {{ post.likes || 0 }}
+              <mat-icon>{{ reply.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+              {{ reply.likes || 0 }}
             </button>
             <button><mat-icon>chat_bubble_outline</mat-icon> {{ reply.replies || 0 }}</button>
           </div>
