@@ -5,6 +5,7 @@ import com.epita.contracts.social.BlockedRelationResponse;
 import com.epita.controller.contracts.AppreciationRequest;
 import com.epita.controller.contracts.BlockUnblockRequest;
 import com.epita.controller.contracts.FollowUnfollowRequest;
+import com.epita.contracts.social.LikedPostInfo;
 import com.epita.service.SocialService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -297,7 +298,7 @@ public class SocialController {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        List<String> likedPosts = socialService.getLikesPosts(userId);
+        List<LikedPostInfo> likedPosts = socialService.getLikesPosts(userId);
         if (likedPosts == null) {
             logger.warnf("GetLikedPosts response 404 - Users not found during request");
             return Response.status(Response.Status.NOT_FOUND).build();

@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 import static io.quarkus.mongodb.runtime.dns.MongoDnsClientProvider.vertx;
 
 /**
- * A subscriber that listens to 'SocialHomeTimeline Block'
+ * A subscriber that listens to 'socialHomeTimelineBlock'
  * channel related to unblock/block user response with repo social service module.
  */
 @Startup
@@ -33,7 +33,7 @@ public class SocialBlockSubscriber implements Consumer<SocialHomeTimelineBlock> 
 
     public SocialBlockSubscriber(final RedisDataSource ds) {
         subscriber = ds.pubsub(SocialHomeTimelineBlock.class)
-                .subscribe("SocialHomeTimelineBlock", this);
+                .subscribe("socialHomeTimelineBlock", this);
     }
 
     @PostConstruct

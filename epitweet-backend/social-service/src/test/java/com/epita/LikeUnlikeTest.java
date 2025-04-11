@@ -1,6 +1,7 @@
 package com.epita;
 
 import com.epita.controller.contracts.AppreciationRequest;
+import com.epita.contracts.social.LikedPostInfo;
 import com.epita.repository.restClient.PostRestClient;
 import com.epita.repository.SocialRepository;
 import com.epita.repository.restClient.UserRestClient;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.mockito.ArgumentMatchers.any;
@@ -98,6 +100,12 @@ public class LikeUnlikeTest
         assert expectedCopy.isEmpty();
     }
 
+    public void testLikedPostResult(List<LikedPostInfo> result, List<LikedPostInfo> expected) {
+        List<String> resultString = result.stream().map(post -> post.getPostId().toString()).toList();
+        List<String> expectedString = expected.stream().map(post -> post.getPostId().toString()).toList();
+        testResult(resultString, expectedString);
+    }
+
     /**
      * TEST like ErrorUnknownUser:<br>
      *  user123 like unknown
@@ -117,9 +125,9 @@ public class LikeUnlikeTest
             .then()
             .statusCode(404);
 
-        List<String> likePostsId = socialRepository.getLikesPosts(user123Id);
-        List<String> expectedLikesId = List.of();
-        testResult(likePostsId, expectedLikesId);
+        List<LikedPostInfo> likePostsId = socialRepository.getLikesPosts(user123Id);
+        List<LikedPostInfo> expectedLikesId = List.of();
+        testLikedPostResult(likePostsId, expectedLikesId);
     }
 
     /**
@@ -180,7 +188,7 @@ public class LikeUnlikeTest
             .then()
             .statusCode(200);
 
-        List<String> likesId = socialRepository.getLikesPosts(user123Id);
+        List<String> likesId = socialRepository.getLikesPosts(user123Id).stream().map(post -> post.getPostId().toString()).toList();
         LOG.info(likesId.toString());
         List<String> expectedLikesId = List.of(post123Id);
         testResult(likesId, expectedLikesId);
@@ -208,7 +216,7 @@ public class LikeUnlikeTest
             .then()
             .statusCode(200);
 
-        List<String> likesId = socialRepository.getLikesPosts(user123Id);
+        List<String> likesId = socialRepository.getLikesPosts(user123Id).stream().map(post -> post.getPostId().toString()).toList();
         List<String> expectedLikesId = List.of(post123Id, post456Id);
         testResult(likesId, expectedLikesId);
     }
@@ -235,7 +243,7 @@ public class LikeUnlikeTest
                 .then()
                 .statusCode(200);
 
-        List<String> likesId = socialRepository.getLikesPosts(user123Id);
+        List<String> likesId = socialRepository.getLikesPosts(user123Id).stream().map(post -> post.getPostId().toString()).toList();
         List<String> expectedLikesId = List.of(post123Id);
         testResult(likesId, expectedLikesId);
     }
@@ -263,7 +271,7 @@ public class LikeUnlikeTest
             .then()
             .statusCode(200);
 
-        List<String> likesId = socialRepository.getLikesPosts(user123Id);
+        List<String> likesId = socialRepository.getLikesPosts(user123Id).stream().map(post -> post.getPostId().toString()).toList();
         List<String> expectedLikesId = List.of();
         testResult(likesId, expectedLikesId);
     }
@@ -298,7 +306,7 @@ public class LikeUnlikeTest
             .statusCode(200)
             .extract()
             .jsonPath()
-            .getList("$", String.class);
+            .getList("$", LikedPostInfo.class).stream().map(post -> post.getPostId().toString()).toList();
 
         List<String> expectedLikesId = List.of(post123Id, post456Id);
         testResult(likedPostsId, expectedLikesId);

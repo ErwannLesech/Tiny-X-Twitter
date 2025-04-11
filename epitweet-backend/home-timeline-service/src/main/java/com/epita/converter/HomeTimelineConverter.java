@@ -7,9 +7,10 @@ import com.epita.payloads.homeTimeline.SocialHomeTimelineFollow;
 import com.epita.payloads.homeTimeline.SocialHomeTimelineLike;
 import com.epita.repository.entity.EntryType;
 import com.epita.repository.entity.HomeTimelineEntry;
+import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.jboss.logging.Logger;
 
 import java.time.ZoneId;
 
@@ -18,7 +19,8 @@ import java.time.ZoneId;
  */
 public class HomeTimelineConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeTimelineConverter.class);
+    @Inject
+    Logger logger;
 
     public static HomeTimelinePost toPost(final HomeTimelineEntry entry) {
         return new HomeTimelinePost(entry.getUserFollowedId(), entry.getPostId(), entry.getPostType(), entry.getDate());
@@ -70,11 +72,11 @@ public class HomeTimelineConverter {
      */
     public static HomeTimelineEntry PostToEntry(PostHomeTimeline post, ObjectId followerId) {
         HomeTimelineEntry entry = new HomeTimelineEntry();
+        entry.setUserId(followerId);
         entry.setUserFollowedId(post.getPost().getUserId());
         entry.setDate(post.getPost().createdAt);
         entry.setPostId(post.getPost().get_id());
         entry.setPostType(EntryType.POST);
-        entry.setUserId(followerId);
         return entry;
     }
 }

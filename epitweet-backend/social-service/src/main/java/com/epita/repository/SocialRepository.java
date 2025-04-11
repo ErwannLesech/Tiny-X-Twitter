@@ -3,8 +3,10 @@ package com.epita.repository;
 import com.epita.controller.contracts.AppreciationRequest;
 import com.epita.controller.contracts.BlockUnblockRequest;
 import com.epita.controller.contracts.FollowUnfollowRequest;
+import com.epita.contracts.social.LikedPostInfo;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Record;
@@ -259,16 +261,18 @@ public class SocialRepository {
      * @param userId the user for whom to get the posts they liked
      * @return a list of postIds that the specified userId liked
      */
-    public List<String> getLikesPosts(String userId) {
+    public List<LikedPostInfo> getLikesPosts(String userId) {
         try (var session = neo4jDriver.session()) {
             String cypher = "MATCH (u:User {userId: $userId})-[r:LIKES]->(p:Post) " +
-                            "RETURN p.postId";
+                            "RETURN p.postId, r.dateTime";
             var result = session.executeRead(tx ->
                 tx.run(cypher, Map.of("userId", userId)).list()
             );
-            List<String> likedPosts = new ArrayList<>();
+            List<LikedPostInfo> likedPosts = new ArrayList<>();
             for (Record record : result) {
-                likedPosts.add(record.get("p.postId").asString());
+                ObjectId postId = new ObjectId(record.get("p.postId").asString());
+                LocalDateTime dateTime = LocalDateTime.parse(record.get("r.dateTime").asString());
+                likedPosts.add(new LikedPostInfo(postId, dateTime));
             }
             return likedPosts;
         } catch (Exception e) {
