@@ -3,12 +3,14 @@ package com.epita.controller.contracts;
 import com.epita.payloads.search.IndexPost;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
+@ToString
 public class PostDocument {
 
     public String postId;

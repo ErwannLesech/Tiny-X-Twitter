@@ -84,7 +84,7 @@ public class UserService {
      * @param userRequest the user request containing updated user details
      * @return true if the user was updated successfully, false otherwise
      */
-    public Boolean updateUser(final UserRequest userRequest) {
+    public UserResponse updateUser(final UserRequest userRequest) {
         User userToUpdate = userRepository.findByTag(userRequest.getTag());
         if (userToUpdate != null) {
             if (userRequest.getPseudo() != null && !userRequest.getPseudo().isEmpty()){
@@ -106,10 +106,10 @@ public class UserService {
             }
 
             userRepository.updateUser(userToUpdate);
-            return true;
+            return UserConverter.toResponse(userToUpdate);
         }
 
-        return false;
+        return null;
     }
 
     /**

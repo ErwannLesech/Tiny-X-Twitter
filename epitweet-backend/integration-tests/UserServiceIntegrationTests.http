@@ -1,0 +1,150 @@
+@env = dev
+
+# ================== User Service ==================
+
+###
+# @name 1. Test Create User
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "User One",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected user fields", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "User ID is missing");
+        client.assert(body.tag === "user1", "Tag mismatch");
+        client.assert(body.pseudo === "User One", "Pseudo mismatch");
+        client.assert(typeof body.password === "string", "Password should be hashed string");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
+        client.assert(body.profileDescription === null, "profileDescription should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a timestamp string");
+        client.global.set("user1Id", body._id)
+    });
+%}
+
+###
+# @name 2. Test Authenticate User
+POST http://localhost:8081/api/users/auth
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "User One",
+  "password": "password123"
+}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response body is empty", function() {
+        client.assert(response.body === null || response.body === "", "Expected empty response body");
+    });
+%}
+
+###
+# @name 3. Test Get User by Tag
+GET http://localhost:8081/api/users/getUser
+userTag: user1
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response contains expected user data", function() {
+        const body = response.body;
+
+        client.assert(body._id === client.global.get("user1Id"), "Unexpected user _id");
+        client.assert(body.tag === "user1", "Tag mismatch");
+        client.assert(body.pseudo === "User One", "Pseudo mismatch");
+        client.assert(typeof body.password === "string", "Password should be a hashed string");
+        client.assert(body.profilePictureUrl === null, "Expected profilePictureUrl to be null");
+        client.assert(body.profileBannerUrl === null, "Expected profileBannerUrl to be null");
+        client.assert(body.profileDescription === null, "Expected profileDescription to be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a string timestamp");
+    });
+%}
+
+###
+# @name 4. Test Update User
+PATCH http://localhost:8081/api/users/update
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "User One Updated",
+  "password": "newpassword123",
+  "blockedUsers": []
+}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response contains updated user fields", function() {
+        const body = response.body;
+
+        client.assert(body._id === client.global.get("user1Id"), "Unexpected user _id");
+        client.assert(body.tag === "user1", "Tag should remain unchanged");
+        client.assert(body.pseudo === "User One Updated", "Pseudo should be updated");
+        client.assert(typeof body.password === "string", "Password should be hashed string");
+        client.assert(body.password.startsWith("$2a$10$"), "Password should be bcrypt hashed");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should remain null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should remain null");
+        client.assert(body.profileDescription === null, "profileDescription should remain null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a string timestamp");
+    });
+%}
+
+###
+# @name 5. Test Delete User
+DELETE http://localhost:8081/api/users/delete
+userTag: user1
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response contains deleted user data", function() {
+        const body = response.body;
+
+        client.assert(body._id === client.global.get("user1Id"), "Unexpected user _id");
+        client.assert(body.tag === "user1", "Tag should match deleted user");
+        client.assert(body.pseudo === "User One Updated", "Pseudo should reflect last updated value");
+        client.assert(typeof body.password === "string", "Password should be hashed");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
+        client.assert(body.profileDescription === null, "profileDescription should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a string timestamp");
+    });
+%}
+
+###
+# @name 6. Test Get User After Delete
+GET http://localhost:8081/api/users/getUser
+userTag: user1
+
+> {%
+    client.test("Response status is 404 - User not found", function() {
+        client.assert(response.status === 404, "Expected status 404 but got " + response.status);
+    });
+
+    client.test("Response body is empty after deletion", function() {
+        client.assert(response.body === null || response.body === "", "Expected empty response body");
+    });
+%}

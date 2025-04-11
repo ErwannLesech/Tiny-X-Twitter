@@ -14,6 +14,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -35,6 +37,9 @@ public class SearchRepository {
      * @return list of matching posts.
      */
     public List<PostDocument> search(List<String> tokenizedRequest) {
+        if (tokenizedRequest.isEmpty()) {
+            return new ArrayList<>();
+        }
         LOGGER.info("Searching for: " + tokenizedRequest);
         try {
             // Separate words and hashtags
