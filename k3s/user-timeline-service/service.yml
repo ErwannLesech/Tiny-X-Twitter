@@ -7,6 +7,6 @@ spec:
     app: user-timeline-service
   ports:
     - protocol: TCP
-      port: 8085
+      port: 80
       targetPort: 8085
 
