@@ -18,11 +18,12 @@ spec:
       containers:
       - name: repo-post
         image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/repo-post:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8082
         env:
         - name: QUARKUS_MONGODB_CONNECTION_STRING
-          value: "mongodb://mongodb:27017"
+          value: "mongodb://admin:admin@mongodb:27017/EPITWEET?authSource=admin"
         - name: QUARKUS_MONGODB_DATABASE
           value: "EPITWEET"
         resources:
