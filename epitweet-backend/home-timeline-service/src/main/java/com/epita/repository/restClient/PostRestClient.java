@@ -33,5 +33,5 @@ public interface PostRestClient {
      */
     @GET
     @Path("/getPosts/")
-    public RestResponse<List<PostResponse>> getPosts(ObjectId userId);
+    public RestResponse<List<PostResponse>> getPosts(@HeaderParam("userId") ObjectId userId);
 }

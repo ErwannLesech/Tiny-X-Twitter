@@ -1,0 +1,304 @@
+@env = dev
+
+# ================== Home Timeline Service ==================
+
+###
+# @name Prepare data
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "Kemil",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.global.set("user1Id", response.body._id);
+%}
+
+###
+# @name Create user2
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user2",
+  "pseudo": "Maikil",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.global.set("user2Id", response.body._id);
+%}
+
+###
+# @name Create user3
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user3",
+  "pseudo": "Khatir",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.global.set("user3Id", response.body._id);
+%}
+
+###
+# @name Prepare data : User2 create post0
+POST http://localhost:8082/api/posts/createPost
+userId: {{user2Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "post0",
+  "mediaPath": ""
+}
+
+> {%
+    client.global.set("post0Id", response.body._id);
+%}
+
+###
+# ================== Basics tests ==================
+# @name 1. Test Empty timeline
+GET http://localhost:8086/api/timeline/home/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.timeline.length === 0, "user timeline should be empty");
+    });
+%}
+
+### @name Follow: user1 follows user2
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{user2Id}}",
+  "userFollowId": "{{user1Id}}"
+}
+
+
+###
+# @name 2. Test get user1 timeline after following user2
+GET http://localhost:8086/api/timeline/home/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.timeline.length === 1, "user timeline should be empty");
+        client.assert(response.body.timeline[0].userId === client.global.get("user2Id"), "Supposed to be user2Id")
+    });
+%}
+
+###
+# @name User2 create post1
+POST http://localhost:8082/api/posts/createPost
+userId: {{user2Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "post1",
+  "mediaPath": ""
+}
+
+###
+# @name 3. Test get user1 timeline user2 posted post1
+GET http://localhost:8086/api/timeline/home/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.timeline.length === 2, "user timeline should be empty");
+        client.assert(response.body.timeline[1].userId === client.global.get("user2Id"), "Supposed to be user2Id")
+    });
+%}
+
+###
+# @name User1 create post2
+POST http://localhost:8082/api/posts/createPost
+userId: {{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "post2",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post2Id", response.body._id);
+%}
+
+### @name Like: user2 like post2 create by user1
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post2Id}}",
+  "userId": "{{user2Id}}"
+}
+
+###
+# @name 4. Test get user1 timeline after user2 like his post
+GET http://localhost:8086/api/timeline/home/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.timeline.length === 3, "home timeline should have 3 elements");
+        client.assert(response.body.timeline[2].postId === client.global.get("post2Id"), "Supposed to be post2Id")
+    });
+%}
+
+### @name Block: user1 block user2
+POST http://localhost:8084/api/social/block
+Content-Type: application/json
+
+{
+  "blockUnblock": true,
+  "userBlockedId": "{{user2Id}}",
+  "userBlockId": "{{user1Id}}"
+}
+
+###
+# @name 4. Test get user1 timeline after blocked user2
+GET http://localhost:8086/api/timeline/home/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.timeline.length === 0, "user timeline should be empty");
+    });
+%}
+
+### @name Block: user1 unblock user2
+POST http://localhost:8084/api/social/block
+Content-Type: application/json
+
+{
+  "blockUnblock": false,
+  "userBlockedId": "{{user2Id}}",
+  "userBlockId": "{{user1Id}}"
+}
+
+###
+# ================== Tricky tests ==================
+
+# @name Follow: user1 follows user2
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{user2Id}}",
+  "userFollowId": "{{user1Id}}"
+}
+
+###
+# @name User3 create post2
+POST http://localhost:8082/api/posts/createPost
+userId: {{user3Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "post2",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post3Id", response.body._id);
+%}
+
+### @name Like: user2 like post3 create by user3
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post3Id}}",
+  "userId": "{{user2Id}}"
+}
+
+###
+# @name 5. Test get user1 timeline after user2 like post2 made by user3
+GET http://localhost:8086/api/timeline/home/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.timeline.length === 3, "home timeline should have 4 elements");
+        client.assert(response.body.timeline[2].postId === client.global.get("post3Id"), "Supposed to be post3Id")
+    });
+%}
+
+### @name Block: user1 block user3
+POST http://localhost:8084/api/social/block
+Content-Type: application/json
+
+{
+  "blockUnblock": true,
+  "userBlockedId": "{{user3Id}}",
+  "userBlockId": "{{user1Id}}"
+}
+
+###
+# @name 6. Test get user1 timeline after user1 block user3 after user 2 followed by user 1 like user3 post.
+GET http://localhost:8086/api/timeline/home/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200 - User timeline fetched", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Timeline has correct structure and values", function() {
+        client.assert(response.body.userId === client.global.get("user1Id"), "Unexpected userId");
+        client.assert(response.body.timeline.length === 2, "home timeline should have 3 elements");
+    });
+%}
+
+###
+# @name Clean data : User2 delete post0bis
+DELETE http://localhost:8082/api/posts/deletePost/67f845d07efcb53a1091c10f

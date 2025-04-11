@@ -17,10 +17,10 @@ import com.epita.repository.entity.HomeTimelineEntry;
 import com.epita.repository.restClient.SocialRestClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.antlr.v4.runtime.misc.ObjectEqualityComparator;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -43,7 +43,8 @@ public class HomeTimelineService {
     @RestClient
     SocialRestClient socialRestClient;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeTimelineService.class);
+    @Inject
+    Logger logger;
 
     /**
      * Retrieves the timeline for a given {@code ObjectId} userId.
@@ -52,6 +53,7 @@ public class HomeTimelineService {
      * @return The {@code List<HomeTimelinePost>} timeline wrapped in {@code Response}
      */
     public HomeTimelineResponse getHomeTimeline(final ObjectId userId) {
+        logger.infof("Getting home timeline for %s", userId);
         List<HomeTimelinePost> timeline = homeRepository.getTimeline(userId).stream()
                 .map(HomeTimelineConverter::toPost)
                 .toList();
@@ -60,19 +62,25 @@ public class HomeTimelineService {
 
     /**
      * Add/Remove a post from a user timeline when a post is either create or delete.
+     *
      * @param message The {@code PostHomeTimeline} message received
      */
     public void updateOnPost(PostHomeTimeline message) {
+
         List<ObjectId> followers = socialRestClient
                 .getFollowers(message.getPost().getUserId().toString())
                 .getEntity().stream()
                 .map(ObjectId::new)
                 .toList();
+        logger.info("Update user timeline on creation/deletion post");
         for (ObjectId followerId : followers) {
             if (Objects.equals(message.getMethod(), "creation")) {
+                logger.infof("Add post %s to the home timeline of %s", message.getPost().get_id(), followerId);
                 HomeTimelineEntry entry = HomeTimelineConverter.PostToEntry(message, followerId);
                 homeRepository.addHomeEntry(entry);
             } else {
+                logger.infof("Remove post %s from the home timeline of %s",
+                        message.getPost().get_id(), followerId);
                 ObjectId postUserId = message.getPost().getUserId();
                 ObjectId postId = message.getPost().get_id();
                 HomeTimelineEntry entry = entryToDelete(followerId, postUserId, postId);
@@ -84,6 +92,7 @@ public class HomeTimelineService {
 
     /**
      * Add/Remove a post from a user timeline when a post is either like or unlike.
+     *
      * @param message The {@code SocialHomeTimelineLike} message received
      */
     public void updateOnLike(SocialHomeTimelineLike message) {
@@ -91,7 +100,7 @@ public class HomeTimelineService {
                 .getPost(message.getPostId())
                 .getEntity();
         if (post != null) {
-            LOGGER.info("Update user timeline on liked/unliked post");
+            logger.info("Update user timeline on liked/unliked post");
             List<ObjectId> followers = socialRestClient.getFollowers(message.getUserId().toString())
                     .getEntity().stream()
                     .map(ObjectId::new)
@@ -105,25 +114,33 @@ public class HomeTimelineService {
                         .getBlockedRelation(request)
                         .getEntity();
                 if (Objects.equals(message.getMethod(), "like")
-                && !blockedRelationResponse.getUserBlockedParentUser()) {
+                        && !blockedRelationResponse.getUserBlockedParentUser()) {
+                    logger.infof("Add post %s to the home timeline of %s", post.get_id(), followerId);
                     homeRepository.addHomeEntry(entry);
                 } else {
+                    logger.infof("Remove post %s from the home timeline of %s", post.get_id(), followerId);
                     homeRepository.removeHomeEntry(entry, EntryType.LIKE);
                 }
             }
         } else {
-            LOGGER.error("Unable to add post to timeline");
+            logger.error("Unable to add post to timeline");
         }
     }
 
     /**
      * Add/Remove a post from a user timeline when a user is either follow or unfollow.
+     *
      * @param message The {@code SocialHomeTimelineFollow} message received
      */
     public void updateOnFollow(SocialHomeTimelineFollow message) {
-        List<PostResponse> posts = postRestClient.getPosts(message.getUserId()).getEntity();
+        logger.infof("User du demandeur de follow: %s", message.getUserId());
+        logger.infof("User du receveur de follow: %s", message.getUserFollowedId());
+
+        List<PostResponse> posts = postRestClient.getPosts(message.getUserFollowedId()).getEntity();
+        List<ObjectId> likedPosts = socialRestClient.getLikedPosts(message.getUserFollowedId().toString()).getEntity()
+                .stream().map(ObjectId::new).toList();
         if (posts != null && !posts.isEmpty()) {
-            LOGGER.info("Update user timeline on follow/unfollow user");
+            logger.info("Update user timeline on follow/unfollow user");
             for (PostResponse post : posts) {
                 BlockedRelationRequest request = new BlockedRelationRequest(
                         message.getUserId(),
@@ -132,49 +149,45 @@ public class HomeTimelineService {
                         .getBlockedRelation(request)
                         .getEntity();
                 if (Objects.equals(message.getMethod(), "follow")
-                && !blockedRelationResponse.getUserBlockedParentUser()) {
+                        && !blockedRelationResponse.getUserBlockedParentUser()) {
+                    logger.infof("Add post %s to the home timeline of %s",
+                            post.get_id(), message.getUserFollowedId());
                     HomeTimelineEntry entry = HomeTimelineConverter.FollowToEntry(message, post);
                     homeRepository.addHomeEntry(entry);
+
                 } else {
                     ObjectId userId = message.getUserId();
                     ObjectId followedId = message.getUserFollowedId();
-                    ObjectId postId = post.get_id();
-                    HomeTimelineEntry entry = entryToDelete(userId, followedId, postId);
-                    homeRepository.removeHomeEntry(entry, EntryType.POST);
-                    homeRepository.removeHomeEntry(entry, EntryType.LIKE);
+                    logger.infof("Remove every post relate to user %s from the home timeline of %s",
+                            followedId, userId);
+                    homeRepository.removeUserFromTimeline(userId, followedId);
                 }
             }
         } else {
-            LOGGER.error("Unable to update user timeline");
+            logger.error("Unable to update user timeline");
         }
     }
 
     /**
      * Add/Remove a post from a user timeline when a user is either block or unblock.
+     *
      * @param message The {@code SocialHomeTimelineBlock} message received
      */
     public void updateOnBlock(SocialHomeTimelineBlock message) {
-        List<PostResponse> posts = postRestClient.getPosts(message.getUserId()).getEntity();
-        if (posts != null && !posts.isEmpty()) {
-            LOGGER.info("Update user timeline on blocked/unblocked user");
-            for (PostResponse post : posts) {
-                if (Objects.equals(message.getMethod(), "block")) {
-                    ObjectId userId = message.getUserId();
-                    ObjectId blockedId = message.getUserBlockedId();
-                    ObjectId postId = post.get_id();
-                    HomeTimelineEntry entry = entryToDelete(userId, blockedId, postId);
-                    homeRepository.removeHomeEntry(entry, EntryType.POST);
-                    homeRepository.removeHomeEntry(entry, EntryType.LIKE);
-                }
-            }
+        if (Objects.equals(message.getMethod(), "block")) {
+            ObjectId userId = message.getUserId();
+            ObjectId userBlockedId = message.getUserBlockedId();
+            logger.infof("Remove every post relate to user %s from the home timeline of %s", userBlockedId, userId);
+            homeRepository.removeUserFromTimeline(userId, userBlockedId);
         }
     }
 
     /**
      * Utility private method to create a {@code HomeTimelineEntry}
-     * @param userId {@code ObjectId}
+     *
+     * @param userId         {@code ObjectId}
      * @param userFollowedId {@code ObjectId}
-     * @param postId {@code ObjectId}
+     * @param postId         {@code ObjectId}
      * @return The {@code HomeTimelineEntry} created.
      */
     private HomeTimelineEntry entryToDelete(ObjectId userId, ObjectId userFollowedId, ObjectId postId) {

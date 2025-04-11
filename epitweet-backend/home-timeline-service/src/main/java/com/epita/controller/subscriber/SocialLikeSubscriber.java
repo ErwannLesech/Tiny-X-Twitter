@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 import static io.quarkus.mongodb.runtime.dns.MongoDnsClientProvider.vertx;
 
 /**
- * A subscriber that listens to 'SocialHomeTimeline Like'
+ * A subscriber that listens to 'socialHomeTimelineLike'
  * channel related to unlike/like user response with repo social service module.
  */
 @Startup
@@ -33,7 +33,7 @@ public class SocialLikeSubscriber  implements Consumer<SocialHomeTimelineLike> {
 
     public SocialLikeSubscriber(final RedisDataSource ds) {
         subscriber = ds.pubsub(SocialHomeTimelineLike.class)
-                .subscribe("SocialHomeTimelineLike", this);
+                .subscribe("socialHomeTimelineLike", this);
     }
 
     @PostConstruct
