@@ -1,12 +1,8 @@
----
-kind: Kustomization
-
+namespace: epitweet
 resources:
-  - service.yml
-  - deployment.yml
-
+- deployment.yml
+- service.yml
 configMapGenerator:
-  - name: mongodb-initdb
-    behavior: create
-    files:
-      - init_mongo.js
+- name: mongo-init-script
+  files:
+  - init_mongo.js

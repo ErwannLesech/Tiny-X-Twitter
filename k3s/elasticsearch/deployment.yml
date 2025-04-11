@@ -2,8 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: elasticsearch
-  labels:
-    app: elasticsearch
+  namespace: epitweet
 spec:
   replicas: 1
   selector:
@@ -14,23 +13,19 @@ spec:
       labels:
         app: elasticsearch
     spec:
-      securityContext:
-        fsGroup: 1000
       containers:
-        - name: elasticsearch
-          image: docker.elastic.co/elasticsearch/elasticsearch:8.8.1
-          env:
-            - name: xpack.security.enabled
-              value: "false"
-            - name: discovery.type
-              value: "single-node"
-          resources:
-            limits:
-              memory: "2Gi"
-          securityContext:
-            capabilities:
-              add:
-                - IPC_LOCK
-          ports:
-            - containerPort: 9200
-            - containerPort: 9300
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        env:
+        - name: discovery.type
+          value: single-node
+        - name: ES_JAVA_OPTS
+          value: "-Xms1g -Xmx1g"
+        resources:
+          limits:
+            memory: 2Gi
+          requests:
+            memory: 1Gi

@@ -1,16 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: user-service
+  name: user-service-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx  # ← Add this
   rules:
-    - http:
-        paths:
-          - path: /api/users
-            pathType: Prefix
-            backend:
-              service:
-                name: user-service
-                port:
-                  number: 8081
-
+  - host: user-service.local  # ← Specific host
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8081

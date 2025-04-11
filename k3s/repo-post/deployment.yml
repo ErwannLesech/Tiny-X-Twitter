@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: repo-post
+  namespace: epitweet
 spec:
   replicas: 1
   selector:
@@ -15,10 +16,19 @@ spec:
       imagePullSecrets:
         - name: epitweet-pull-secret
       containers:
-        - name: repo-post
-          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/repo-post:latest
-          ports:
-            - containerPort: 8082
-          env:
-            - name: QUARKUS_PROFILE
-              value: prod
+      - name: repo-post
+        image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/repo-post:latest
+        ports:
+        - containerPort: 8082
+        env:
+        - name: QUARKUS_MONGODB_CONNECTION_STRING
+          value: "mongodb://mongodb:27017"
+        - name: QUARKUS_MONGODB_DATABASE
+          value: "EPITWEET"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

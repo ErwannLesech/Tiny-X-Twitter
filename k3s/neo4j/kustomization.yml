@@ -1,6 +1,4 @@
----
-kind: Kustomization
-
+namespace: epitweet
 resources:
-  - deployment.yml
-  - service.yml
+- deployment.yml
+- service.yml

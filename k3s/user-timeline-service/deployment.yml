@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-timeline-service
+  namespace: epitweet
 spec:
   replicas: 1
   selector:
@@ -15,7 +16,17 @@ spec:
       imagePullSecrets:
         - name: epitweet-pull-secret
       containers:
-        - name: user-timeline-service
-          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/user-timeline-service:latest
-          ports:
-            - containerPort: 8085
+      - name: user-timeline-service
+        image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/user-timeline-service:latest
+        ports:
+        - containerPort: 8085
+        env:
+        - name: QUARKUS_REDIS_HOSTS
+          value: "redis://redis:6379"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

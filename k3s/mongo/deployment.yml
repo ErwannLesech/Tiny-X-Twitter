@@ -1,40 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo
-  labels:
-    app: mongo
+  name: mongodb
+  namespace: epitweet
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongo
+      app: mongodb
   template:
     metadata:
       labels:
-        app: mongo
+        app: mongodb
     spec:
       containers:
-        - name: mongo
-          image: mongo:latest
-          ports:
-            - containerPort: 27017
-          env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              value: "admin"
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              value: "admin"
-            - name: MONGO_INITDB_DATABASE
-              value: "Epitweet"
-          volumeMounts:
-            - name: mongo-storage
-              mountPath: /data/db
-            - name: init-script
-              mountPath: /docker-entrypoint-initdb.d/init.js
-              subPath: init_mongo.js
-      volumes:
-        - name: mongo-storage
-          emptyDir: {}
+      - name: mongodb
+        image: mongo:5.0
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_DATABASE
+          value: epitweet
+        volumeMounts:
         - name: init-script
-          configMap:
-            name: mongodb-initdb
+          mountPath: /docker-entrypoint-initdb.d/init_mongo.js
+      volumes:
+      - name: init-script
+        configMap:
+          name: mongo-init-script

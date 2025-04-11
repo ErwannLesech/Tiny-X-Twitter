@@ -1,15 +1,16 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: user-timeline-service
+  name: user-timeline-service-ingress
 spec:
   rules:
-    - http:
-        paths:
-          - path: /api/timeline/user
-            pathType: Prefix
-            backend:
-              service:
-                name: user-timeline-service
-                port:
-                  number: 8085
+  - host: user-timeline-service.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: user-timeline-service
+            port:
+              number: 8085

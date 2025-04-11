@@ -1,16 +1,16 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: repo-post
+  name: repo-post-ingress
 spec:
   rules:
-     - http:
-        paths:
-          - path: /api/posts
-            pathType: Prefix
-            backend:
-              service:
-                name: repo-post
-                port:
-                  number: 8082
-
+  - host: post-service.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: repo-post
+            port:
+              number: 8082

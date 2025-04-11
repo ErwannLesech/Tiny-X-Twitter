@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: search-service
+  namespace: epitweet
 spec:
   replicas: 1
   selector:
@@ -12,8 +13,20 @@ spec:
       labels:
         app: search-service
     spec:
+      imagePullSecrets:
+        - name: epitweet-pull-secret
       containers:
-        - name: search-service
-          image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/search-service:latest  # Remplacez par le bon tag de votre image
-          ports:
-            - containerPort: 8083
+      - name: search-service
+        image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/search-service:latest
+        # ports:
+        # - containerPort: 8083
+        # env:
+        # - name: QUARKUS_ELASTICSEARCH_HOSTS
+        #   value: "http://elasticsearch:9200"
+        # resources:
+        #   requests:
+        #     memory: "256Mi"
+        #     cpu: "100m"
+        #   limits:
+        #     memory: "512Mi"
+        #     cpu: "500m"
