@@ -2,14 +2,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: social-service
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - host: social-service.local
-      http:
+    - http:
         paths:
-          - path: /
+          - path: /api/social
             pathType: Prefix
             backend:
               service:
