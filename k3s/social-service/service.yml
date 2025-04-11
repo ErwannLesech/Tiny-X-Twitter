@@ -7,6 +7,6 @@ spec:
     app: social-service
   ports:
     - protocol: TCP
-      port: 80
+      port: 8084
       targetPort: 8084
 
