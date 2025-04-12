@@ -1,16 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: user-service-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: user-service
 spec:
-  ingressClassName: nginx
   rules:
-  - host: user-service.local
     http:
       paths:
-      - path: /
+      - path: /api/users
         pathType: Prefix
         backend:
           service:

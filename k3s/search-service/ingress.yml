@@ -1,13 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: search-service-ingress
+  name: search-service
 spec:
   rules:
-  - host: search-service.local
     http:
       paths:
-      - path: /
+      - path: /api/search
         pathType: Prefix
         backend:
           service:

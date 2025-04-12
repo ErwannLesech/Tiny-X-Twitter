@@ -1,13 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: social-service-ingress
+  name: social-service
 spec:
   rules:
-  - host: social-service.local
     http:
       paths:
-      - path: /
+      - path: /api/social
         pathType: Prefix
         backend:
           service:

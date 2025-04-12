@@ -18,7 +18,7 @@ spec:
       containers:
       - name: user-service
         image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/user-service:latest
-        imagepullPolicy: Always
+        imagePullPolicy: Always
         ports:
         - containerPort: 8081
         env:
