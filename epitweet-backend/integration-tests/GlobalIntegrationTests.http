@@ -1,5 +1,36 @@
 @env = dev
 
+###
+
+DELETE http://localhost:8081/api/users/delete
+userTag:erwann
+Content-Type: application/json
+
+###
+
+DELETE http://localhost:8081/api/users/delete
+userTag:axelle
+Content-Type: application/json
+
+###
+
+DELETE http://localhost:8081/api/users/delete
+userTag:abel
+Content-Type: application/json
+
+###
+
+POST http://localhost:9200/posts/_delete_by_query
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+###
+
 # ================== Scenarios I ==================
 
 ###
@@ -393,6 +424,27 @@ Content-Type: application/json
         client.assert(typeof body[1].updatedAt === "string", "updatedAt should be a string timestamp");
     });
 %}
+
+###
+# @name Erwan delete his account
+
+DELETE http://localhost:8081/api/users/delete
+userTag:erwann
+Content-Type: application/json
+
+###
+# @name Axelle delete her account
+
+DELETE http://localhost:8081/api/users/delete
+userTag:axelle
+Content-Type: application/json
+
+###
+# @name Abel delete his account
+
+DELETE http://localhost:8081/api/users/delete
+userTag:abel
+Content-Type: application/json
 
 ###
 # @name CleanupElasticsearch
