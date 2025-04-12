@@ -84,3 +84,7 @@ This repository contains Kubernetes manifests for deploying our complete applica
    ```bash
    kubectl apply -k .
    ```
+
+## Accessing the application
+
+You can then access the application via ```localhost``` in you browser, if you wanna see an deployed exemple you can check ```http://tinyx.sortifal.fr``` [here](http://tinyx.sortifal.fr)
