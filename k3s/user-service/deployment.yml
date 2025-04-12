@@ -23,7 +23,7 @@ spec:
         - containerPort: 8081
         env:
         - name: QUARKUS_MONGODB_CONNECTION_STRING
-          value: "mongodb://admin:admin@mongodb:27017/EPITWEET?authSource=admin"
+          value: "mongodb://admin:admin@mongodb:27017/EPITWEET?authSource=EPITWEET"
         - name: QUARKUS_MONGODB_DATABASE
           value: "EPITWEET"
         resources:

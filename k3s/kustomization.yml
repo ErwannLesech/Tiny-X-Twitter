@@ -16,3 +16,4 @@ resources:
 - search-service
 - user-timeline-service
 - home-timeline-service
+- frontend

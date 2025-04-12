@@ -25,7 +25,7 @@ spec:
         - name: QUARKUS_REDIS_HOSTS
           value: "redis://redis:6379"
         - name: QUARKUS_MONGODB_CONNECTION_STRING
-          value: "mongodb://admin:admin@mongodb:27017/EPITWEET?authSource=admin"
+          value: "mongodb://admin:admin@mongodb:27017/EPITWEET?authSource=EPITWEET"
         - name: QUARKUS_MONGODB_DATABASE
           value: "EPITWEET"
         resources:

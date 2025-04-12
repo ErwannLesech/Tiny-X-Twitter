@@ -8,7 +8,7 @@ import { SocialService } from './social.service';
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {
-  private apiUrl = 'http://localhost:8083/api/search';
+  private apiUrl = '/api/search';
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'

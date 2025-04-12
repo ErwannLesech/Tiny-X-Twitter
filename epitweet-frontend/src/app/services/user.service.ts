@@ -4,7 +4,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root'})
 export class UserService {
-  private apiUrl = 'http://localhost:8081/api/users';
+  private apiUrl = '/api/users';
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'

@@ -4,12 +4,12 @@ metadata:
   name: search-service
 spec:
   rules:
-    http:
-      paths:
-      - path: /api/search
-        pathType: Prefix
-        backend:
-          service:
-            name: search-service
-            port:
-              number: 8083
+    - http:
+       paths:
+       - path: /api/search
+         pathType: Prefix
+         backend:
+           service:
+             name: search-service
+             port:
+               number: 8083

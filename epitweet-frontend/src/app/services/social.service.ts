@@ -4,7 +4,7 @@ import { catchError, forkJoin, map, Observable, of, switchMap, throwError } from
 
 @Injectable({ providedIn: 'root' })
 export class SocialService {
-  private apiUrl = 'http://localhost:8084/api/social';
+  private apiUrl = '/api/social';
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'

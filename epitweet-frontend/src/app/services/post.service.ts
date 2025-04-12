@@ -31,7 +31,7 @@ export interface PostRequest {
 
 @Injectable({ providedIn: 'root'})
 export class PostService {
-  private apiUrl = 'http://localhost:8082/api/posts';
+  private apiUrl = '/api/posts';
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'

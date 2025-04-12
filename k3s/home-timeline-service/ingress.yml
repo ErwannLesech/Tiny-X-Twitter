@@ -4,11 +4,11 @@ metadata:
   name: home-timeline-service
 spec:
   rules:
-    http:
-      paths:
-      - path: /api/timeline/home
-        pathType: Prefix
-        backend:
+    - http:
+       paths:
+       - path: /api/timeline/home
+         pathType: Prefix
+         backend:
           service:
             name: home-timeline-service
             port:
