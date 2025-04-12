@@ -4,6 +4,7 @@ This repository contains Kubernetes manifests for deploying our complete applica
 
 ## Repository Structure
 
+```bash
 ├── README.md 
 ├── kustomization.yml 
 ├── namespace.yml 
@@ -60,9 +61,7 @@ This repository contains Kubernetes manifests for deploying our complete applica
     ├── ingress.yml 
     ├── kustomization.yml 
     └── service.yml
-
-markdown
-Copy
+```
 
 ### Overview
 
