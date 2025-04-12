@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 @ApplicationScoped
 public class PostRestClient {
-    private static final String POST_URL = "http://localhost:8082/api/posts";
+    private static final String POST_URL = "http://repo-post:8082/api/posts";
     private final Client client;
     private static final Logger LOGGER = Logger.getLogger(PostRestClient.class.getName());
 
