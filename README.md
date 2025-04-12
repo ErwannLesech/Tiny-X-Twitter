@@ -2,6 +2,18 @@
 
 Epitweet is a **proof-of-concept distributed micro-blogging application** developed as part of the EPITA TinyX SCALE project. Inspired by Twitter, this platform allows users to post short messages, interact through likes and follows, and perform full-text search on posts — all using a modern **microservices-based architecture**.
 
+---
+
+## 🌐 Accessing the Application
+
+Skip the setup and explore the live application directly at:  
+🔗 [http://tinyx.sortifal.fr](http://tinyx.sortifal.fr)
+
+
+---
+
+## 🔧 Technical leverages
+
 This project leverages:
 - **Java with Quarkus** for backend services
 - **Angular** for the frontend
