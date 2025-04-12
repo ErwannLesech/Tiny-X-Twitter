@@ -243,6 +243,12 @@ class IndexSearchingTest {
         searchService.indexPost(post);
         allPostsIds.add(new ObjectId(post.getPostId()));
 
+        try {
+            Thread.sleep(1000); // 1000 milliseconds = 1 seconds
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         List<String> tokens = searchService.tokenizeText(""); // Doit retourner une liste vide
         List<PostDocument> results = searchRepository.search(tokens);
 
