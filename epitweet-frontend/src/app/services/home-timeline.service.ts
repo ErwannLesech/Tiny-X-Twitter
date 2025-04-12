@@ -20,7 +20,7 @@ interface HomeTimelinePost {
 
 @Injectable({ providedIn: 'root' })
 export class HomeTimelineService {
-  private apiUrl = 'http://localhost:8086/api/timeline';
+  private apiUrl = '/api/timeline/home';
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'
@@ -37,7 +37,7 @@ export class HomeTimelineService {
 
   getHomeTimeline(userId: string): Observable<Post[]> {
     this.httpOptions.headers = this.httpOptions.headers.set('userId', userId);
-    return this.http.get<HomeTimelineResponse>(`${this.apiUrl}/home/${userId}`, this.httpOptions).pipe(
+    return this.http.get<HomeTimelineResponse>(`${this.apiUrl}/${userId}`, this.httpOptions).pipe(
       switchMap((response: HomeTimelineResponse) => {
         console.log('Timeline response', response);
 
@@ -123,7 +123,7 @@ export class HomeTimelineService {
   }
 
   private getReplies(postId: string): Observable<Post[]> {
-    return this.http.get<Post[]>(`http://localhost:8082/api/posts/getPostReply/${postId}`).pipe(
+    return this.http.get<Post[]>(`/api/posts/getPostReply/${postId}`).pipe(
       catchError(() => of([]))
     );
   }
