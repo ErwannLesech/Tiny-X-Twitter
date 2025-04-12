@@ -59,8 +59,7 @@ Epitweet/
 │   └── README.md
 │
 ├── k3s/                        # Kustomize deployment configs
-│   ├── base/
-│   └── overlays/
+│   ├── *
 │
 ├── README.md                   # This file
 ```
@@ -81,14 +80,41 @@ Epitweet/
 
 ---
 
-
-
 ## 📚 Project Context
 
 This project was built in the context of the **TinyX SCALE Project at EPITA**. It aims to:
 - Transition students from monolithic to microservice architectures
 - Train them in NoSQL, message queues, and container orchestration
 - Encourage real-world engineering practices: modularity, testing, documentation
+
+---
+
+## 🚀 Build & Run Instructions
+
+You can run **Epitweet** either via full **Kubernetes deployment** (frontend + backend) or locally run **only the backend**. Choose the option that suits your needs:
+
+---
+
+### 🔁 Option 1: Full Deployment with Kubernetes (Frontend + Backend)
+
+
+1. Navigate to the Kubernetes config directory:
+    ```bash
+    cd k3s/
+    ```
+2. Apply all deployments and services using Kustomize:
+    ```bash
+    kubectl apply -k .
+    ```
+3. Follow any additional setup or service exposure instructions detailed in the k3s/README.md to connect to our tinyTwitter.
+
+### 🛠️ Option 2: Local Backend Development (Backend Only)
+
+1. Navigate to the backend directory:
+    ```
+    cd backend/
+    ```
+2. Refer to the backend README for more detailed instructions and setup to run backend services.
 
 ---
 
