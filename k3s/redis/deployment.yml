@@ -2,8 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  labels:
-    app: redis
+  namespace: epitweet
 spec:
   replicas: 1
   selector:
@@ -15,8 +14,14 @@ spec:
         app: redis
     spec:
       containers:
-        - name: redis
-          image: redis:alpine
-          command: ["redis-server"]
-          ports:
-            - containerPort: 6379
+      - name: redis
+        image: redis:6.2
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

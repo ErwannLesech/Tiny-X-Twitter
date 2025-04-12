@@ -2,18 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: repo-post
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - host: repo-post.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: repo-post
-                port:
-                  number: 8082
-
+    - http:
+       paths:
+       - path: /api/posts
+         pathType: Prefix
+         backend:
+          service:
+            name: repo-post
+            port:
+              number: 8082

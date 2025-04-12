@@ -1,29 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: search-service
+  name: frontend
   namespace: epitweet
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: search-service
+      app: frontend
   template:
     metadata:
       labels:
-        app: search-service
+        app: frontend
     spec:
       imagePullSecrets:
         - name: epitweet-pull-secret
       containers:
-      - name: search-service
-        image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/search-service:latest
+      - name: frontend
+        image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/frontend:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8083
-        env:
-        - name: QUARKUS_ELASTICSEARCH_HOSTS
-          value: "elasticsearch:9200"
+          - name: http
+            containerPort: 4200
         resources:
           requests:
             memory: "256Mi"

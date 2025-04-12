@@ -21,4 +21,4 @@ COPY --from=build /app/dist/browser /app/
 
 EXPOSE 4200
 
-CMD ["http-server", "/app", "-p", "4200"]
+CMD ["http-server", "/app", "-p", "4200", "-a", "0.0.0.0", "--proxy", "http://0.0.0.0:4200?"]

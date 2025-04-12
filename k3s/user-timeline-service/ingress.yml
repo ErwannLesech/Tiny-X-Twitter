@@ -2,18 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: user-timeline-service
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - host: user-timeline-service.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: user-timeline-service
-                port:
-                  number: 8085
-
+    - http:
+       paths:
+       - path: /api/timeline/user
+         pathType: Prefix
+         backend:
+          service:
+            name: user-timeline-service
+            port:
+              number: 8085

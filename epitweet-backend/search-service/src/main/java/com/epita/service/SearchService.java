@@ -3,10 +3,14 @@ package com.epita.service;
 import com.epita.contracts.post.PostResponse;
 import com.epita.controller.contracts.PostDocument;
 import com.epita.payloads.search.IndexPost;
-import com.epita.repository.PostRestClient;
 import com.epita.repository.SearchRepository;
+import com.epita.repository.restClient.PostRestClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import org.bson.types.ObjectId;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -23,6 +27,7 @@ public class SearchService {
     SearchRepository searchRepository;
 
     @Inject
+    @RestClient
     PostRestClient postRestClient;
 
     private static final Logger LOGGER = Logger.getLogger(SearchService.class.getName());
@@ -42,7 +47,10 @@ public class SearchService {
         LOGGER.info("Documents find: " + documents);
         List<PostResponse> posts = new ArrayList<>();
         for (PostDocument postDocument : documents) {
-            posts.add(postRestClient.getPost(postDocument.getPostId()));
+            RestResponse<PostResponse> restResponse = postRestClient.getPost(new ObjectId(postDocument.getPostId()));
+            if (restResponse.getStatus() == Response.Status.OK.getStatusCode()) {
+                posts.add(restResponse.getEntity());
+            }
         }
         return posts;
     }
