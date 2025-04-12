@@ -23,7 +23,7 @@ spec:
         - containerPort: 8083
         env:
         - name: QUARKUS_ELASTICSEARCH_HOSTS
-          value: "http://elasticsearch:9200"
+          value: "elasticsearch:9200"
         resources:
           requests:
             memory: "256Mi"

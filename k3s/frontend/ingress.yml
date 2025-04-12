@@ -1,8 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: frontend-ingress
-    
+  name: frontend
+  annotations:
+    traefik.ingress.kubernetes.io/router.priority: "1"
 spec:
   rules:
     - http:
@@ -13,4 +14,4 @@ spec:
             service:
               name: frontend
               port:
-                number: 80
+                number: 4200
