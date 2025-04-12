@@ -1,7 +1,0 @@
----
-kind: Kustomization
-
-resources:
-  - deployment.yml
-  - service.yml
-
