@@ -1,0 +1,59 @@
+openapi: 3.0.1
+
+info:
+  title: User-Timeline-Service
+  description: User-Timeline-Service endpoints
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8085
+    description: User Timeline Service
+
+paths:
+  /api/timeline/user/{userId}:
+    get:
+      summary: Get user timeline
+      description: Retrieves user timeline for a given user.
+      operationId: getUserTimeline
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ObjectId of the user whose timeline is requested.
+          schema:
+            type: string
+            example: "6606e4c91d4a4d00f32f25df"
+      responses:
+        '200':
+          description: Successfully retrieved user timeline
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTimelineResponse'
+components:
+  schemas:
+    UserTimelineResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: ObjectId
+          example: "6606e4c91d4a4d00f32f25df"
+        userTimeline:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserTimelinePost'
+
+    UserTimelinePost:
+      type: object
+      properties:
+        postId:
+          type: string
+          example: "post_123"
+        action:
+          type: string
+          example: "liked"
+        at:
+          type: string
+          format: date-time
+          example: "2025-04-07T18:30:00Z"

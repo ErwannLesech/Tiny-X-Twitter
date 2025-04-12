@@ -1,0 +1,461 @@
+@env = dev
+
+###
+
+DELETE http://localhost:8081/api/users/delete
+userTag:erwann
+Content-Type: application/json
+
+###
+
+DELETE http://localhost:8081/api/users/delete
+userTag:axelle
+Content-Type: application/json
+
+###
+
+DELETE http://localhost:8081/api/users/delete
+userTag:abel
+Content-Type: application/json
+
+###
+
+POST http://localhost:9200/posts/_delete_by_query
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+###
+
+# ================== Scenarios I ==================
+
+###
+# @name 1. Create User Erwann
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "erwann",
+  "pseudo": "R-One",
+  "password": "erwannpwd",
+  "blockedUsers": []
+}
+
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected user fields", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "User ID is missing");
+        client.assert(body.tag === "erwann", "Tag mismatch");
+        client.assert(body.pseudo === "R-One", "Pseudo mismatch");
+        client.assert(typeof body.password === "string", "Password should be hashed string");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
+        client.assert(body.profileDescription === null, "profileDescription should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a timestamp string");
+        client.global.set("userErwannId", body._id)
+    });
+%}
+
+
+###
+# @name 2. Create User Axelle
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "axelle",
+  "pseudo": "Lunaria",
+  "password": "axellepwd",
+  "blockedUsers": []
+}
+
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected user fields", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "User ID is missing");
+        client.assert(body.tag === "axelle", "Tag mismatch");
+        client.assert(body.pseudo === "Lunaria", "Pseudo mismatch");
+        client.assert(typeof body.password === "string", "Password should be hashed string");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
+        client.assert(body.profileDescription === null, "profileDescription should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a timestamp string");
+        client.global.set("userAxelleId", body._id)
+    });
+%}
+
+###
+# @name 3. Axelle follows Erwann
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{userErwannId}}",
+  "userFollowId": "{{userAxelleId}}"
+}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+%}
+
+###
+# @name 4. Erwann creates a post
+POST http://localhost:8082/api/posts/createPost
+userId:{{userErwannId}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Who wants to ride with me ?",
+  "mediaPath": "https://cdn.example.com/image.jpg"
+}
+
+> {%
+    client.test("Response status is 201 - Post created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected post fields", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected post _id");
+        client.assert(body.userId === client.global.get("userErwannId") , "User ID mismatch");
+        client.assert(body.postType === "post", "Post type should be 'post'");
+        client.assert(body.content === "Who wants to ride with me ?", "Content mismatch");
+        client.assert(body.mediaUrl === null, "Expected mediaUrl to be null (mediaPath not stored directly)");
+        client.assert(body.parentId === null, "Expected parentId to be null");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+        client.global.set("post1Id", body._id);
+    });
+%}
+
+###
+# @name: 5.1. Axelle connects herself on the app - first time, she fails password input
+POST http://localhost:8081/api/users/auth
+Content-Type: application/json
+
+{
+  "tag": "axelle",
+  "pseudo": "Lunaria",
+  "password": "axellepw"
+}
+
+> {%
+    client.test("Response status is 401", function() {
+        client.assert(response.status === 401, "Expected status 401 but got " + response.status);
+    });
+
+    client.test("Response body is empty", function() {
+        client.assert(response.body === null || response.body === "", "Expected empty response body");
+    });
+%}
+
+###
+# @name: 5.2. Axelle connects herself on the app - second time, she success
+POST http://localhost:8081/api/users/auth
+Content-Type: application/json
+
+{
+  "tag": "axelle",
+  "pseudo": "Lunaria",
+  "password": "axellepwd"
+}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response body is empty", function() {
+        client.assert(response.body === null || response.body === "", "Expected empty response body");
+    });
+%}
+
+###
+# @name: 6. Axelle wants to get her Home Timeline
+GET http://localhost:8086/api/timeline/home/{{userAxelleId}}
+
+###
+# @name: 7. Observing a new post of her friend, she wants to go on the Erwann Timeline
+GET http://localhost:8085/api/timeline/user/{{userErwannId}}
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response contains expected post fields", function() {
+        const body = response.body;
+
+        client.assert(body.userId === client.global.get("userErwannId"), "Unexpected post _id");
+
+        const userTimeline = body.userTimeline;
+        client.assert(userTimeline.length > 0, "Expected at least one post in the timeline.");
+
+        const firstPost = userTimeline[0];
+        client.assert(firstPost.hasOwnProperty('postId'), "Missing postId in the first post.");
+        client.assert(firstPost.hasOwnProperty('action'), "Missing action in the first post.");
+        client.assert(firstPost.hasOwnProperty('at'), "Missing timestamp in the first post.");
+
+        client.assert(firstPost.postId === client.global.get("post1Id"));
+        client.assert(firstPost.action === "created", "Expected action 'created' but got: " + firstPost.action);
+    });
+%}
+
+###
+# @name 8. Axelle wants to like the post
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post1Id}}",
+  "userId": "{{userAxelleId}}"
+}
+
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+%}
+
+###
+# @name 9. Axelle wants to reply to the post
+POST http://localhost:8082/api/posts/createPost
+userId:{{userAxelleId}}
+Content-Type: application/json
+
+{
+  "postType": "reply",
+  "content": "Yeah, let's go ride together !",
+  "parentId": "{{post1Id}}"
+}
+
+> {%
+    client.test("Response status is 201 - Repost created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Repost fields are correctly set", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected _id for repost");
+        client.assert(body.userId === client.global.get("userAxelleId"), "userId mismatch");
+        client.assert(body.postType === "reply", "postType should be 'repost'");
+        client.assert(body.content === "Yeah, let's go ride together !", "Content mismatch");
+        client.assert(body.mediaUrl === null, "mediaUrl should be null for repost");
+        client.assert(body.parentId === client.global.get("post1Id"), "parentId mismatch (should reference original post)");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+        client.global.set("reply1Id", body._id);
+    });
+%}
+
+###
+# @name: 9.2. Axelle wants to get her Home Timeline after creating reply
+GET http://localhost:8086/api/timeline/home/{{userAxelleId}}
+
+###
+# @name 10. Erwann likes the anwser
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{reply1Id}}",
+  "userId": "{{userErwannId}}"
+}
+
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+%}
+
+###
+# @name 11. Erwann wants to reply to the Axelle's reply
+POST http://localhost:8082/api/posts/createPost
+userId:{{userErwannId}}
+Content-Type: application/json
+
+{
+  "postType": "reply",
+  "content": "Perfect, let's do this on 10th of next month.",
+  "parentId": "{{reply1Id}}"
+}
+
+> {%
+    client.test("Response status is 201 - Repost created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Repost fields are correctly set", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected _id for repost");
+        client.assert(body.userId === client.global.get("userErwannId"), "userId mismatch");
+        client.assert(body.postType === "reply", "postType should be 'repost'");
+        client.assert(body.content === "Perfect, let's do this on 10th of next month.", "Content mismatch");
+        client.assert(body.mediaUrl === null, "mediaUrl should be null for repost");
+        client.assert(body.parentId === client.global.get("reply1Id"), "parentId mismatch (should reference original post)");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+        client.global.set("reply2Id", body._id);
+    });
+%}
+
+###
+# @name 12. Axelle wants to repost Erwann's answer to show this to her future friends.
+POST http://localhost:8082/api/posts/createPost
+userId:{{userAxelleId}}
+Content-Type: application/json
+
+{
+  "postType": "repost",
+  "mediaUrl": "https://exemple.domain.com/great",
+  "parentId": "{{reply2Id}}"
+}
+
+> {%
+    client.test("Response status is 201 - Repost created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Repost fields are correctly set", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected _id for repost");
+        client.assert(body.userId === client.global.get("userAxelleId"), "userId mismatch");
+        client.assert(body.postType === "repost", "postType should be 'repost'");
+        client.assert(body.content ===  null, "mediaUrl should be null for this repost")
+        client.assert(body.mediaUrl === "https://exemple.domain.com/great", "mediaUrl should not be null");
+        client.assert(body.parentId === client.global.get("reply2Id"), "parentId mismatch (should reference original post)");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+        client.global.set("repost1Id", body._id);
+    });
+%}
+
+###
+# @name 13. New user "Abel" is created after Axelle invited him to check these posts on riding
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "abel",
+  "pseudo": "Abdoul",
+  "password": "abelpwd",
+  "blockedUsers": []
+}
+
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected user fields", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "User ID is missing");
+        client.assert(body.tag === "abel", "Tag mismatch");
+        client.assert(body.pseudo === "Abdoul", "Pseudo mismatch");
+        client.assert(typeof body.password === "string", "Password should be hashed string");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
+        client.assert(body.profileDescription === null, "profileDescription should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a timestamp string");
+        client.global.set("userAbelId", body._id)
+    });
+%}
+
+###
+# @name WaitForPostToIndex and refresh
+POST http://localhost:9200/posts/_doc?refresh=true
+###
+# @name 14. Abel search posts with "ride" inside of it
+POST http://localhost:8083/api/search/searchPosts/ride
+Content-Type: application/json
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+
+    client.test("Response contains expected user fields", function() {
+        const body = response.body;
+        client.assert(body.length === 2, "Should have find 2 posts");
+
+        //for post 1:
+        client.assert(body[0]._id !== undefined, "Post ID is missing");
+        client.assert(body[0].userId === client.global.get("userErwannId"), "User Id mismatch");
+        client.assert(body[0].postType === "post", "Post type mismatch");
+        client.assert(body[0].content === "Who wants to ride with me ?", "Content should be 'Who wants to ride with me ?'");
+        client.assert(body[0].mediaUrl === null, "mediaUrl should be null");
+        client.assert(body[0].parentId === null, "parentId should be null");
+        client.assert(typeof body[0].createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body[0].updatedAt === "string", "updatedAt should be a string timestamp");
+
+        //for post 2:
+        client.assert(body[1]._id !== undefined, "Post ID is missing");
+        client.assert(body[1].userId === client.global.get("userAxelleId"), "User Id mismatch");
+        client.assert(body[1].postType === "reply", "Post type mismatch");
+        client.assert(body[1].content === "Yeah, let's go ride together !", "Content should be 'Who wants to ride with me ?'");
+        client.assert(body[1].mediaUrl === null, "mediaUrl should be null");
+        client.assert(body[1].parentId === body[0]._id, "parentId should be original post id");
+        client.assert(typeof body[1].createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body[1].updatedAt === "string", "updatedAt should be a string timestamp");
+    });
+%}
+
+###
+# @name Erwan delete his account
+
+DELETE http://localhost:8081/api/users/delete
+userTag:erwann
+Content-Type: application/json
+
+###
+# @name Axelle delete her account
+
+DELETE http://localhost:8081/api/users/delete
+userTag:axelle
+Content-Type: application/json
+
+###
+# @name Abel delete his account
+
+DELETE http://localhost:8081/api/users/delete
+userTag:abel
+Content-Type: application/json
+
+###
+# @name CleanupElasticsearch
+POST http://localhost:9200/posts/_delete_by_query
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+###
+

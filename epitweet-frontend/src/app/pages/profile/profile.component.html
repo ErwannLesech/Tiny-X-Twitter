@@ -1,0 +1,203 @@
+<div class="profile-container">
+  <!-- Left Sidebar -->
+  <app-left-sidebar 
+    [avatarUrl]="loggedUser?.avatarUrl || ''"
+    [userName]="loggedUser?.userName || ''"
+    [userTag]="loggedUser?.userTag || ''"
+    style="display: flex; flex-direction: column; justify-content: space-between;">
+  </app-left-sidebar>
+  
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading">
+    Loading profile...
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="userError" class="error-message">
+    {{ userError }}
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading && !userError">
+    <!-- Profile Content -->
+    <div class="profile-content">
+      <div class="profile-header">
+        <div class="profile-nav">
+          <button mat-icon-button (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <h1>Profile</h1>
+        </div>
+        <div class="profile-banner">
+          <img [src]="targetUser?.bannerUrl" alt="Profile Banner">
+        </div>
+        <div class="profile-info">
+          <img [src]="targetUser?.avatarUrl" alt="Profile" class="profile-picture">
+          <div class="profile-actions">
+            <button *ngIf="targetUser !== loggedUser" 
+              class="follow-button" 
+              [class.following]="isFollowing"
+              (click)="toggleFollow()">
+              {{ isFollowing ? 'Following' : 'Follow' }}
+            </button>
+            <button *ngIf="targetUser !== loggedUser" 
+              class="block-button"
+              (click)="toggleBlock()">
+              {{ isBlocked ? 'Unblock' : 'Block' }}
+            </button>
+            <button *ngIf="targetUser === loggedUser" 
+              class="edit-profile-button" 
+              (click)="openPopup()">
+              Modifier le profil
+            </button>
+          </div>
+          <app-profile-update *ngIf="isPopupOpen" [userTag]="loggedUser?.userTag || ''" (close)="closePopup()"></app-profile-update>
+        </div>
+
+        <div class="profile-details">
+          <h2>{{ targetUser?.userName }}</h2>
+          <span class="userTag">&#64;{{ targetUser?.userTag }}</span>
+          <p class="bio">{{ targetUser?.bio }}</p>
+          
+          <div class="stats">
+            <span><strong>{{ targetUser?.followingCount }}</strong> abonnements</span>
+            <span><strong>{{ targetUser?.followersCount }}</strong> abonnés</span>
+          </div>
+          
+          <div class="tabs">
+            <button 
+              class="tab" 
+              [class.active]="activeTab === 'posts'"
+              (click)="setActiveTab('posts')">
+              Posts
+            </button>
+            <button 
+              class="tab"
+              [class.active]="activeTab === 'replies'"
+              (click)="setActiveTab('replies')">
+              Réponses
+            </button>
+            <button class="tab">Médias</button>
+            <button 
+              class="tab"
+              [class.active]="activeTab === 'likes'"
+              (click)="setActiveTab('likes'); loadLikedPosts()">
+              J'aime
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-posts">
+        <div *ngIf="postError" class="error-message">
+          {{ postError }}
+        </div>
+        
+        <!-- Posts Tab -->
+        <div *ngIf="activeTab === 'posts' && !isLoading && !postError">
+          <div *ngFor="let post of posts" class="post" [routerLink]="['/post', post._id]">
+            <div class="post-header">
+              <img [src]="targetUser?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+              <div class="post-user">
+                <span class="userName">{{ targetUser?.userName }}</span>
+                <span class="userTag">&#64;{{ targetUser?.userTag }}</span>
+                <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
+              </div>
+              <div *ngIf="targetUser === loggedUser" class="post-options">
+                <button mat-icon-button (click)="toggleDropdown(post._id, $event)">
+                  <mat-icon>more_horiz</mat-icon>
+                </button>
+                <div *ngIf="dropdownOpen === post._id" class="dropdown-menu">
+                  <button (click)="onDeletePost(post._id, $event)">Delete</button>
+                </div>
+              </div>
+            </div>
+            <div class="post-content">{{post.content}}</div>
+            <div class="post-actions">
+              <button (click)="onLikeClick(post, $event)">
+                <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+                {{ post.likes || 0 }}
+              </button>
+              <button><mat-icon>chat_bubble_outline</mat-icon> {{ post.replies || 0 }}</button>
+            </div>
+          </div>
+          <div *ngIf="posts.length === 0" class="no-posts">
+            No posts yet
+          </div>
+        </div>
+        
+        <!-- Replies Tab -->
+        <div *ngIf="activeTab === 'replies' && !isLoading && !postError">
+          <div *ngFor="let reply of replies" class="post">
+            <div class="post-header">
+              <img [src]="targetUser?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+              <div class="post-user">
+                <span class="userName">{{ targetUser?.userName }}</span>
+                <span class="userTag">&#64;{{ targetUser?.userTag }}</span>
+                <span class="post-time">· {{ formatPostDate(reply.createdAt) }}</span>
+              </div>
+              <div *ngIf="targetUser === loggedUser" class="post-options">
+                <button mat-icon-button (click)="toggleDropdown(reply._id, $event)">
+                  <mat-icon>more_horiz</mat-icon>
+                </button>
+                <div *ngIf="dropdownOpen === reply._id" class="dropdown-menu">
+                  <button (click)="onDeletePost(reply._id, $event)">Delete</button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="post-content" [routerLink]="['/post', reply._id]">
+                {{ reply.content }}
+              </div>
+              <div class="post-media" *ngIf="reply.mediaUrl">
+                <img [src]="reply.mediaUrl" alt="Example GIF">
+              </div>
+            </div>
+            <div class="post-actions">
+              <button (click)="onLikeClick(reply, $event)">
+                <mat-icon>{{ reply.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+                {{ reply.likes || 0 }}
+              </button>
+              <button [routerLink]="['/post', reply._id]"><mat-icon>chat_bubble_outline</mat-icon> {{ reply.replies || 0 }}</button>
+            </div>
+          </div>
+          <div *ngIf="replies.length === 0" class="no-posts">
+            No replies yet
+          </div>
+        </div>
+        
+        <!-- Likes Tab -->
+        <div *ngIf="activeTab === 'likes' && !isLoading && !postError">
+          <div *ngFor="let post of likedPosts" class="post">
+            <div class="post-header">
+              <img [src]="post.user?.avatarUrl || 'assets/images/default-profile.png'" class="post-profile-pic">
+              <div class="post-user">
+                <a [routerLink]="['/profile', post.user?.userTag]" class="nav-link">
+                  <span class="userName">{{ post.user?.userName }}</span>
+                  <span class="userTag">&#64;{{ post.user?.userTag }}</span>
+                </a>
+                <span class="post-time">· {{ formatPostDate(post.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="post-content" [routerLink]="['/post', post._id]">
+              {{ post.content }}
+            </div>
+            <div class="post-actions">
+              <button (click)="onLikeClick(post, $event)">
+                <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon> 
+                {{ post.likes || 0 }}
+              </button>
+              <button [routerLink]="['/post', post._id]"><mat-icon>chat_bubble_outline</mat-icon> {{ post.replies || 0 }}</button>
+            </div>
+          </div>
+          <div *ngIf="likedPosts.length === 0" class="no-posts">
+            No liked posts yet
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar -->
+  <app-right-sidebar></app-right-sidebar>
+</div>

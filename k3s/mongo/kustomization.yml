@@ -1,0 +1,13 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: epitweet
+resources:
+  - statefulset.yml
+  - service.yml
+
+configMapGenerator:
+  - name: mongodb-initdb
+    files:
+      - init.js
+

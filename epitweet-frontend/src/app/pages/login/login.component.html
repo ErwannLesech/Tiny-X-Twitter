@@ -1,0 +1,36 @@
+<div class="container login-container">
+  <div class="header">
+    <div class="logo">
+      <img src="assets/images/tiny-twitter-logo.png" alt="TinyTwitter Logo" class="logo-image">
+      <span class="logo-text">TinyTwitter</span>
+    </div>
+  </div>
+
+  <div class="welcome-section">
+    <h2>Bienvenue sur TinyTwitter</h2>
+  </div>
+
+  <div class="login-form">
+    <h3>Se connecter</h3>
+    
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input type="text" [(ngModel)]="userName" name="userName" placeholder="Tag d'utilisateur" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
+        <input type="password" [(ngModel)]="password" name="password" placeholder="Mot de passe*" class="form-input" required>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+      
+      <div class="signup-link">
+        Vous n'avez pas de compte ? <a routerLink="/sign-up">Inscription</a>
+      </div>
+      
+      <button type="submit" class="submit-btn">Se connecter</button>
+    </form>
+  </div>
+</div>

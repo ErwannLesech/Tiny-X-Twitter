@@ -1,0 +1,37 @@
+<div class="gif-selector-overlay">
+    <div class="gif-selector-modal">
+      <div class="gif-selector-header">
+        <h3>Sélectionner un GIF</h3>
+        <button class="close-button" (click)="closeSelector()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <div class="gif-search">
+        <mat-icon>search</mat-icon>
+        <input 
+          type="text" 
+          placeholder="Rechercher des GIFs" 
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange(searchQuery)">
+      </div>
+      
+      <div class="gif-container" *ngIf="!isLoading">
+        <div class="no-results" *ngIf="gifs.length === 0">
+          Aucun résultat trouvé
+        </div>
+        <div class="gif-grid">
+          <div 
+            class="gif-item" 
+            *ngFor="let gif of gifs" 
+            (click)="selectGif(gif)">
+            <img [src]="gif.images.fixed_height.url" [alt]="gif.title">
+          </div>
+        </div>
+      </div>
+      
+      <div class="loading" *ngIf="isLoading">
+        Chargement...
+      </div>
+    </div>
+  </div>

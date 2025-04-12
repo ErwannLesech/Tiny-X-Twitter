@@ -1,0 +1,47 @@
+<div class="popup-overlay" (click)="closePopup()"></div>
+<div class="popup-content">
+  <h2>Modifier le profil</h2>
+  <form (ngSubmit)="onSubmit()">
+    <div class="image-upload-section">
+      <div class="image-upload">
+        <label>Avatar URL</label>
+        <mat-form-field appearance="outline">
+          <input matInput [(ngModel)]="avatarUrl" name="avatarUrl" placeholder="Enter new avatar URL"/>
+        </mat-form-field>
+        <div class="image-preview" *ngIf="avatarUrl">
+          <img [src]="avatarUrl" alt="Avatar Preview"/>
+        </div>
+      </div>
+      
+      <div class="image-upload">
+        <label>Banner URL</label>
+        <mat-form-field appearance="outline">
+          <input matInput [(ngModel)]="bannerUrl" name="bannerUrl" placeholder="Enter new banner URL"/>
+        </mat-form-field>
+        <div class="image-preview" *ngIf="bannerUrl">
+          <img [src]="bannerUrl" alt="Banner Preview"/>
+        </div>
+      </div>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nouveau nom d'utilisateur</mat-label>
+      <input matInput [(ngModel)]="userName" name="userName" [defaultValue]="this.logedUser?.userName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description/Bio</mat-label>
+      <textarea matInput [(ngModel)]="bio" name="bio" rows="3"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nouveau mot de passe</mat-label>
+      <input matInput type="password" [(ngModel)]="password" name="password"/>
+    </mat-form-field>
+
+    <div class="popup-actions">
+      <button mat-raised-button color="primary" type="submit">Mettre à jour</button>
+      <button mat-raised-button color="warn" (click)="onDelete($event)">Supprimer le compte</button>
+    </div>
+  </form>
+</div>

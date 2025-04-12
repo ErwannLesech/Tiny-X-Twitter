@@ -1,0 +1,223 @@
+.home-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  min-height: 100vh;
+  position: relative;
+  
+.main-content {    
+  .header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .post-creator {
+    box-shadow: 1px 2px 0px 0px var(--color-border);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    position: relative; /* Important pour positionnement des sélecteurs */
+    
+    .error-message {
+      color: var(--color-danger);
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .post-text-container {
+      width: 100%;
+    }
+
+    textarea {
+      width: 100%;
+      border: 0.5px solid var(--color-border);
+      border-radius: 10px;
+      height: 150px;
+      resize: none;
+      min-height: 100px;
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      
+      &:focus {
+        outline: none;
+      }
+    }
+    
+    .selected-gif-container {
+      width: 100%;
+      padding: 0.5rem 0;
+      
+      .selected-gif {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        
+        img {
+          max-width: 100%;
+          max-height: 300px;
+          display: block;
+        }
+        
+        .remove-gif-button {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background-color: rgba(0, 0, 0, 0.6);
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+          }
+        }
+      }
+    }
+
+    .post-creation-actions {
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row;
+      width: 100%;
+      margin-top: 0.5rem;
+
+      .media-tools {
+        display: flex;
+        gap: 1.5rem;
+      }
+
+      .post-creation-tools {
+        margin-top: 0.5rem;
+        cursor: pointer;
+        transition: color 0.2s;
+        
+        &:hover {
+          color: var(--color-primary);
+        }
+        
+        &.active {
+          color: var(--color-primary);
+        }
+      }
+
+      .post-creation-button {
+        background: var(--color-primary);
+        color: var(--color-text-light);
+        border: solid 1px var(--color-primary);
+        padding: 0.5rem 1.5rem;
+        border-radius: 9999px;
+        font-weight: bold;
+        cursor: pointer;
+        min-width: 100px;
+
+        &:hover {
+          background: var(--color-secondary);
+          color: var(--color-text);
+        }
+      }
+
+      .post-creation-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: var(--color-disabled);
+        color: var(--color-info);
+        border-color: var(--color-muted);
+      }
+    }
+    
+    /* Conteneur pour les sélecteurs (GIF et emoji) */
+    .selector-container {
+      position: absolute;
+      top: calc(100% - 1rem);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .timeline {
+    .post {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      
+      .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+
+        a {
+          text-decoration: none;
+          color: black;
+        }
+
+        .post-profile-pic {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          margin-right: 10px;
+        }
+        
+        .userName {
+          font-weight: bold;
+          margin-right: 5px;
+        }
+        
+        .handle {
+          color: var(--color-info);
+        }
+      }
+      
+      .post-content {
+        margin-bottom: 1rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      
+      .post-media {
+        margin-bottom: 1rem;
+        
+        img {
+          max-width: 100%;
+          border-radius: 12px;
+          max-height: 300px;
+          display: block;
+        }
+      }
+      
+      .post-actions {
+        display: flex;
+        
+        button {
+          background: none;
+          border: none;
+          display: flex;
+          align-items: center;
+          margin-right: 2rem;
+          color: #657786;
+          cursor: pointer;
+          
+          mat-icon {
+            margin-right: 5px;
+            color: var(--color-icons);
+          }
+        }
+      }
+    }
+  }
+}
+}

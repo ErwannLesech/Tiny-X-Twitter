@@ -1,0 +1,118 @@
+.search-result-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  
+  .main-content {
+    flex-shrink: 1;
+    height: 100%;
+    border-right: 1px solid #e1e8ed;
+    display: flex;
+    flex-direction: column;
+    
+    .search-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding-left: 20px;
+      border-bottom: 1px solid #e1e8ed;
+    }
+    
+    .no-results {
+      padding: 2rem;
+      text-align: center;
+      color: #657786;
+    }
+    
+    .timeline {
+      flex: 1; // Take all remaining space
+      overflow-y: auto; // Enable scrolling for posts
+      max-height: calc(100vh - 80px); // Adjust based on header heigh
+
+      .post {
+        padding: 1rem;
+        border-bottom: 1px solid #e1e8ed;
+        
+        .post-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 0.5rem;
+          
+          .post-profile-pic {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 10px;
+          }
+          
+          .post-user {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            
+            .userName {
+              font-weight: bold;
+              margin-right: 5px;
+            }
+            
+            .userTag, .post-time {
+              color: #657786;
+              margin-right: 5px;
+            }
+
+            a.nav-link {
+              text-decoration: none;
+              color: inherit;
+
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+          }
+        }
+        
+        .post-content {
+          margin-bottom: 1rem;
+          line-height: 1.5;
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+        
+        .post-actions {
+          display: flex;
+          
+          button {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            margin-right: 2rem;
+            color: #657786;
+            cursor: pointer;
+            
+            mat-icon {
+              margin-right: 5px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.loading {
+  text-align: center;
+  margin-top: 200px;
+  padding: 2rem;
+  color: #666;
+}
+
+.error-message {
+  margin-top: 200px;
+  color: #7e7e7e;
+  padding: 0.5rem;
+  text-align: center;
+}

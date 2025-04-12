@@ -1,0 +1,48 @@
+<div class="emoji-selector-container">
+    <div class="emoji-selector-header">
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input 
+          type="text" 
+          placeholder="Rechercher un emoji" 
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()">
+      </div>
+      <button class="close-button" (click)="closeSelector()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="emoji-categories">
+      <button 
+        class="category-button" 
+        [class.active]="activeCategory === 'Fréquents'"
+        (click)="setActiveCategory('Fréquents')">
+        <span class="category-icon">🕒</span>
+      </button>
+      
+      <button 
+        *ngFor="let category of categories"
+        class="category-button"
+        [class.active]="activeCategory === category.name"
+        (click)="setActiveCategory(category.name)">
+        <span class="category-icon">{{ category.icon }}</span>
+      </button>
+    </div>
+    
+    <div class="emoji-grid-container">
+      <div class="emoji-grid">
+        <div 
+          *ngFor="let emoji of getDisplayedEmojis()"
+          class="emoji-item" 
+          (click)="selectEmoji(emoji)"
+          [attr.title]="emoji.name">
+          {{ emoji.char }}
+        </div>
+        
+        <div *ngIf="activeCategory === 'Recherche' && searchResults.length === 0 && searchQuery.trim() !== ''" class="no-results">
+          Aucun emoji trouvé pour "{{ searchQuery }}"
+        </div>
+      </div>
+    </div>
+  </div>

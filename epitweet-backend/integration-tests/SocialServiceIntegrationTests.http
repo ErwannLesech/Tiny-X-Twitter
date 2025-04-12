@@ -1,0 +1,225 @@
+@env = dev
+
+# ================== Repo Social Service ==================
+
+### Prepare data: Create user3
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user3",
+  "pseudo": "User Three",
+  "password": "password123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("user3Id", response.body._id);
+%}
+
+### Prepare data: Create user4
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user4",
+  "pseudo": "User Four",
+  "password": "password123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("user4Id", response.body._id);
+%}
+
+### Prepare data: Create user5
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user5",
+  "pseudo": "User Five",
+  "password": "password123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("user5Id", response.body._id);
+%}
+
+### Prepare data: Create post to user3
+POST http://localhost:8082/api/posts/createPost
+userId: {{user3Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Bonjour je suis plus puissant que Java lui meme",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post1Id", response.body._id);
+%}
+
+### Prepare data: Create post to user4
+POST http://localhost:8082/api/posts/createPost
+userId: {{user4Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "C'est plus oui le plus puissant",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post2Id", response.body._id);
+%}
+
+### Prepare data: Create post to user5
+POST http://localhost:8082/api/posts/createPost
+userId: {{user4Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Mange mon chibbre pelo",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post3Id", response.body._id);
+%}
+
+### 1. Follow: user3 follows user4
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{user4Id}}",
+  "userFollowId": "{{user3Id}}"
+}
+
+### 2. Get Follows: Retrieve users followed by user3 (should return user4)
+GET http://localhost:8084/api/social/getFollows/{{user3Id}}
+Accept: application/json
+
+### 3. Follow: user3 follows user5
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{user5Id}}",
+  "userFollowId": "{{user3Id}}"
+}
+
+### 4. Get Follows: Retrieve users followed by user3 (should return user4 and user5)
+GET http://localhost:8084/api/social/getFollows/{{user3Id}}
+Accept: application/json
+
+### 5. Get Followers: Retrieve users following user4 (should return user1)
+GET http://localhost:8084/api/social/getFollowers/{{user4Id}}
+Accept: application/json
+
+### 6. Unfollow: user3 unfollows user4
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": false,
+  "userFollowedId": "{{user4Id}}",
+  "userFollowId": "{{user3Id}}"
+}
+
+### 7. Get Follows: Retrieve users followed by user3 again (should return only user5)
+GET http://localhost:8084/api/social/getFollows/{{user3Id}}
+Accept: application/json
+
+### 8. Block: user3 blocks user4
+POST http://localhost:8084/api/social/block
+Content-Type: application/json
+
+{
+  "blockUnblock": true,
+  "userBlockedId": "{{user4Id}}",
+  "userBlockId": "{{user3Id}}"
+}
+
+### 9. Get Blocks: Retrieve users blocked by user3 (should return user4)
+GET http://localhost:8084/api/social/getBlocked/{{user3Id}}
+Accept: application/json
+
+### 10. Block: user3 blocks user5
+POST http://localhost:8084/api/social/block
+Content-Type: application/json
+
+{
+  "blockUnblock": true,
+  "userBlockedId": "{{user5Id}}",
+  "userBlockId": "{{user3Id}}"
+}
+
+### 11. Get Blocks: Retrieve users blocked by user3 (should return user4 and user5)
+GET http://localhost:8084/api/social/getBlocked/{{user3Id}}
+Accept: application/json
+
+### 12. Get Blocks: Retrieve users blocking user4 (should return user1)
+GET http://localhost:8084/api/social/getBlock/{{user4Id}}
+Accept: application/json
+
+### 13. Unblock: user3 unblocks user4
+POST http://localhost:8084/api/social/block
+Content-Type: application/json
+
+{
+  "blockUnblock": false,
+  "userBlockedId": "{{user4Id}}",
+  "userBlockId": "{{user3Id}}"
+}
+
+### 14. Get Blocks: Retrieve users blocked by user3 again (should return only user5)
+GET http://localhost:8084/api/social/getBlocked/{{user3Id}}
+Accept: application/json
+
+### 15. Like: user3 like post1
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post1Id}}",
+  "userId": "{{user3Id}}"
+}
+
+### 16. Get Likes: Retrieve posts liked by user3 (should return post1)
+GET http://localhost:8084/api/social/getLikedPosts/{{user3Id}}
+Accept: application/json
+
+### 17. Likes: user3 likes post2
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post2Id}}",
+  "userId": "{{user3Id}}"
+}
+
+### 18. Get Likes: Retrieve posts liked by user3 (should return post1 and post2)
+GET http://localhost:8084/api/social/getLikedPosts/{{user3Id}}
+Accept: application/json
+
+### 19. Get Likes: Retrieve users who like post1 (should return user3)
+GET http://localhost:8084/api/social/getLikeUsers/{{post1Id}}
+Accept: application/json
+
+### 20. Unlike: user3 unlikes post1
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "liekUnlike": false,
+  "postId": "{{post1Id}}",
+  "userId": "{{user3Id}}"
+}
+
+### 21. Get Likes: Retrieve posts liked by user3 again (should return only post2)
+GET http://localhost:8084/api/social/getLikedPosts/{{user3Id}}
+Accept: application/json

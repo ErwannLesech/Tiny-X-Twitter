@@ -1,0 +1,19 @@
+---
+
+kind: Kustomization
+namespace: epitweet
+
+resources:
+- namespace.yml
+- secrets.yml
+- elasticsearch
+- mongo
+- neo4j
+- redis
+- user-service
+- repo-post
+- social-service
+- search-service
+- user-timeline-service
+- home-timeline-service
+- frontend

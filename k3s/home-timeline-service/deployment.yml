@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-timeline-service
+  namespace: epitweet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home-timeline-service
+  template:
+    metadata:
+      labels:
+        app: home-timeline-service
+    spec:
+      imagePullSecrets:
+        - name: epitweet-pull-secret
+      containers:
+      - name: home-timeline-service
+        image: registry.cri.epita.fr/ing/majeures/tc/info/student/2026/2025-epitweet-tinyx-03/home-timeline-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8086
+        env:
+        - name: QUARKUS_REDIS_HOSTS
+          value: "redis://redis:6379"
+        - name: QUARKUS_MONGODB_CONNECTION_STRING
+          value: "mongodb://admin:admin@mongodb:27017/EPITWEET?authSource=EPITWEET"
+        - name: QUARKUS_MONGODB_DATABASE
+          value: "EPITWEET"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
