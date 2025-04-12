@@ -80,9 +80,6 @@ This repository contains Kubernetes manifests for deploying our complete applica
 
 ## Deploying the Application
 
-1. **Create the Namespace (if not already created)**
-
-   First, apply the namespace definition:
 
    ```bash
    kubectl apply -k .
