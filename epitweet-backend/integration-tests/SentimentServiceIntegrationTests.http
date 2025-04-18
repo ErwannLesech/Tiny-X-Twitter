@@ -119,3 +119,24 @@ GET http://localhost:8087/api/sentiment/getPostSentiment/{{post2Id}}
     });
 %}
 
+###
+# @name 5. Remove a post
+DELETE http://localhost:8082/api/posts/deletePost/{{post2Id}}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+%}
+
+###
+# @name 6. Get Sentiment for deleted Post
+GET http://localhost:8087/api/sentiment/getPostSentiment/{{post2Id}}
+
+> {%
+    client.test("Got sentiment for post2", function () {
+        const body = response.body;
+        client.assert(response.status === 404, "Expected 404");
+    });
+%}
+
