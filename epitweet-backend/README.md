@@ -28,7 +28,7 @@ Epitweet Backend is a Twitter-like API developed using **Quarkus** and **Maven**
 
 ## API Documentation
 The APIs for Epitweet are documented using **Swaggers**:
-- [Swagger UI - Epitweet Backend](https://app.swaggerhub.com/apis/info8-925/Epitweet/1.0.0/) to interact with all available endpoints. You can test the endpoints and view request/response formats.
+- [Swagger UI - Epitweet Backend](https://app.swaggerhub.com/apis/info8-925/Epitweet_Evolved/1.0.0/) to interact with all available endpoints. You can test the endpoints and view request/response formats.
 - Each module contains their proper part swagger in `resources/`
 
 ## Project Structure

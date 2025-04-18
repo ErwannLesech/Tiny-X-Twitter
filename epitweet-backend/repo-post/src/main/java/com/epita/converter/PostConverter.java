@@ -4,11 +4,10 @@ import com.epita.contracts.social.BlockedRelationRequest;
 import com.epita.controller.contracts.PostRequest;
 import com.epita.contracts.post.PostResponse;
 import com.epita.payloads.search.IndexPost;
+import com.epita.payloads.sentiment.AnalysePost;
 import com.epita.repository.entity.Post;
 import com.epita.repository.entity.PostType;
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,8 +16,6 @@ import java.util.List;
  * Utility class for converting between different representations of a Post.
  */
 public class PostConverter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostConverter.class);
 
     /**
      * Converts a {@code PostRequest} to a {@code Post} entity.
@@ -79,6 +76,14 @@ public class PostConverter {
                 post.getContent(),
                 post.getMediaUrl(),
                 post.getParentId(),
+                method
+        );
+    }
+
+    public static AnalysePost toAnalysePost(Post post, String method) {
+        return new AnalysePost(
+                post.getId().toString(),
+                post.getContent(),
                 method
         );
     }

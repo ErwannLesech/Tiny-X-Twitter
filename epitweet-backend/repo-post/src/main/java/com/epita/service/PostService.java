@@ -7,6 +7,7 @@ import com.epita.controller.contracts.PostRequest;
 import com.epita.converter.PostTimelineConverter;
 import com.epita.contracts.post.PostResponse;
 import com.epita.converter.PostConverter;
+import com.epita.repository.publisher.AnalysePostPublisher;
 import com.epita.repository.restClient.SocialRestClient;
 import com.epita.repository.restClient.UserRestClient;
 import com.epita.repository.PostRepository;
@@ -45,6 +46,9 @@ public class PostService {
 
     @Inject
     IndexPostPublisher indexPostPublisher;
+
+    @Inject
+    AnalysePostPublisher analysePostPublisher;
 
     @Inject
     @RestClient
@@ -223,6 +227,8 @@ public class PostService {
         // declare to index service that we created a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "creation"));
 
+        analysePostPublisher.publish(PostConverter.toAnalysePost(post, "creation"));
+
         return post;
     }
 
@@ -254,6 +260,9 @@ public class PostService {
 
         // declare to index service that we deleted a Post
         indexPostPublisher.publish(PostConverter.toIndexPost(post, "deletion"));
+
+        // declare to sentiment that post has been deleted
+        analysePostPublisher.publish(PostConverter.toAnalysePost(post, "deletion"));
 
         return postResponse;
     }
