@@ -5,8 +5,6 @@ import io.quarkus.mongodb.panache.common.MongoEntity;
 import lombok.*;
 import org.bson.types.ObjectId;
 
-import java.time.Instant;
-
 /**
  * Represents a Post entity in the MongoDB collection "Posts".
  */
@@ -18,7 +16,12 @@ import java.time.Instant;
 @MongoEntity(collection = "Sentiments")
 public class Sentiment extends PanacheMongoEntityBase {
     /**
-     * Unique mongo identifier of the Post
+     * Unique mongo id of the sentiment
+     */
+    private ObjectId id;
+
+    /**
+     * Unique identifier of the Post
      */
     private ObjectId postId;
 

@@ -1,17 +1,18 @@
 package com.epita.service;
 
 import com.epita.contracts.sentiment.SentimentResponse;
-import com.epita.contracts.user.UserResponse;
 import com.epita.converter.SentimentConverter;
 import com.epita.payloads.sentiment.AnalysePost;
 import com.epita.repository.SentimentRepository;
 import com.epita.repository.entity.Sentiment;
 import com.epita.repository.restClient.SentimentRestClient;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.RestResponse;
 
+@ApplicationScoped
 public class SentimentService {
 
     @Inject
@@ -49,12 +50,12 @@ public class SentimentService {
         }
     }
 
-    private String analysePost(String content) {
+    public String analysePost(String content) {
 
         RestResponse<SentimentResponse> response;
 
         try {
-            response = sentimentRestClient.analyse(content);
+            response = sentimentRestClient.analyse(SentimentConverter.toAnalyseRequest(content));
             if (response == null || response.getStatus() != 200) {
                 return null;
             }

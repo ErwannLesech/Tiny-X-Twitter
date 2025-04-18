@@ -1,6 +1,7 @@
 package com.epita.repository.restClient;
 
 import com.epita.contracts.sentiment.SentimentResponse;
+import com.epita.payloads.sentiment.AnalyseRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
@@ -17,5 +18,7 @@ public interface SentimentRestClient {
 
     @POST
     @Path("/analyse")
-    public RestResponse<SentimentResponse> analyse(String content);
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    RestResponse<SentimentResponse> analyse(AnalyseRequest content);
 }

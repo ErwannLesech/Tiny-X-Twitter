@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 
 /**
@@ -35,7 +36,7 @@ public class SentimentController {
 
         logger.infof("getPostSentiment Request: %s", postId);
 
-        if (postId == null || postId.isEmpty()) {
+        if (postId == null || postId.isEmpty() || !ObjectId.isValid(postId)) {
             logger.warn("getPostSentiment response 400 - postId is null or empty");
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

@@ -29,7 +29,8 @@ public enum SentimentType {
      *
      * @param text The string value to convert to a {@code SentimentType}.
      * @return The {@code SentimentType} enum constant corresponding to the specified string value.
-     * @throws IllegalArgumentException If the specified string value does not match any {@code SentimentType} enum constant.
+     * @throws IllegalArgumentException If the specified string value does not match any {@code SentimentType}
+     * enum constant.
      */
     public static SentimentType fromString(String text) {
         for (SentimentType SentimentType : SentimentType.values()) {

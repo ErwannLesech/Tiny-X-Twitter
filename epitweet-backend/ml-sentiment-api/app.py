@@ -11,28 +11,36 @@ tokenizer = XLMRobertaTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 
 LABELS = ['negative', 'neutral', 'positive']
-
-@app.route("/analyze", methods=["POST"])
+@app.route("/analyse", methods=["POST"])
 def analyze_sentiment():
-    data = request.get_json()
-    text = data.get("content", "")
+    try:
+        print("Headers:", request.headers)
+        print("Data (raw):", request.data)
+        print("JSON:", request.get_json())
 
-    if not text:
-        return jsonify({"error": "Missing 'content' in request"}), 400
+        data = request.get_json()
+        text = data.get("content", "")
 
-    inputs = tokenizer(text, return_tensors="pt", truncation=True)
-    with torch.no_grad():
-        logits = model(**inputs).logits
-        probs = F.softmax(logits, dim=1)
+        if not text:
+            return jsonify({"error": "Missing 'content' in request"}), 400
 
-    max_index = torch.argmax(probs)
-    sentiment = LABELS[max_index]
-    confidence = probs[0][max_index].item()
+        inputs = tokenizer(text, return_tensors="pt", truncation=True)
+        with torch.no_grad():
+            logits = model(**inputs).logits
+            probs = F.softmax(logits, dim=1)
 
-    return jsonify({
-        "sentiment": sentiment,
-        "confidence": round(confidence, 4)
-    })
+        max_index = torch.argmax(probs)
+        sentiment = LABELS[max_index]
+        confidence = probs[0][max_index].item()
+
+        return jsonify({
+            "sentiment": sentiment,
+            "confidence": round(confidence, 4)
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8088))

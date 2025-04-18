@@ -1,7 +1,6 @@
 package com.epita.controller.subscriber;
 
 import com.epita.payloads.sentiment.AnalysePost;
-import com.epita.payloads.user.DeleteUserPost;
 import com.epita.service.SentimentService;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
