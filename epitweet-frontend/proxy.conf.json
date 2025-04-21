@@ -1,0 +1,31 @@
+{
+    "/api/social/*": {
+      "target": "http://localhost:8084",
+      "secure": false
+    },
+    "/api/social/*/*": {
+      "target": "http://localhost:8084",
+      "secure": false
+    },
+    "/api/users/*": {
+      "target": "http://localhost:8081",
+      "secure": false
+    },
+    "/api/search/*/*": {
+      "target": "http://localhost:8083",
+      "secure": false
+    },
+    "/api/posts/*": {
+      "target": "http://localhost:8082",
+      "secure": false
+    },
+    "/api/posts/*/*": {
+        "target": "http://localhost:8082",
+        "secure": false
+    },
+    "/api/timeline/home/*": {
+      "target": "http://localhost:8086",
+      "secure": false,
+      "changeOrigin": true
+    }
+  }
