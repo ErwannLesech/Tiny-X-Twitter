@@ -1,0 +1,142 @@
+@env = dev
+
+# ================== Repo Post Service ==================
+
+###
+# @name Prepare data
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user2",
+  "pseudo": "User Two",
+  "password": "password123",
+  "blockedUsers": []
+}
+
+> {%
+    client.test("Response status is 201", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected user fields", function() {
+        const body = response.body;
+        client.assert(body._id !== undefined, "User ID is missing");
+        client.assert(body.tag === "user2", "Tag mismatch");
+        client.assert(body.pseudo === "User Two", "Pseudo mismatch");
+        client.assert(typeof body.password === "string", "Password should be hashed string");
+        client.assert(body.profilePictureUrl === null, "profilePictureUrl should be null");
+        client.assert(body.profileBannerUrl === null, "profileBannerUrl should be null");
+        client.assert(body.profileDescription === null, "profileDescription should be null");
+        client.assert(typeof body.createdAt === "string", "createdAt must be a timestamp string");
+        client.global.set("user1Id", body._id)
+    });
+%}
+
+###
+# @name 1. Create positive post
+POST http://localhost:8082/api/posts/createPost
+userId:{{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "This is my first post! I'm so glad to subscribe to this TinyX !",
+  "mediaPath": "https://cdn.example.com/image.jpg"
+}
+
+> {%
+    client.test("Response status is 201 - Post created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected post fields", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected post _id");
+        client.assert(body.userId === client.global.get("user1Id") , "User ID mismatch");
+        client.assert(body.postType === "post", "Post type should be 'post'");
+        client.assert(body.content === "This is my first post! I'm so glad to subscribe to this TinyX !", "Content mismatch");
+        client.assert(body.mediaUrl === null, "Expected mediaUrl to be null (mediaPath not stored directly)");
+        client.assert(body.parentId === null, "Expected parentId to be null");
+        client.assert(typeof body.createdAt === "string", "createdAt should be a string timestamp");
+        client.assert(typeof body.updatedAt === "string", "updatedAt should be a string timestamp");
+        client.global.set("post1Id", body._id);
+    });
+%}
+
+###
+# @name 2. Create Negative Post
+POST http://localhost:8082/api/posts/createPost
+userId:{{user1Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "I’m feeling really bad today... nothing is going right.",
+  "mediaPath": null
+}
+
+> {%
+    client.test("Response status is 201 - Negative post created", function() {
+        client.assert(response.status === 201, "Expected status 201 but got " + response.status);
+    });
+
+    client.test("Response contains expected fields", function() {
+        const body = response.body;
+
+        client.assert(body._id !== undefined, "Unexpected post _id");
+        client.assert(body.userId === client.global.get("user1Id"), "User ID mismatch");
+        client.assert(body.postType === "post", "Post type should be 'post'");
+        client.assert(body.content.includes("bad") || body.content.includes("nothing is going right"), "Content mismatch");
+        client.global.set("post2Id", body._id);
+    });
+%}
+
+###
+# @name 3. Get Sentiment for Positive Post
+GET http://localhost:8087/api/sentiment/getPostSentiment/{{post1Id}}
+
+> {%
+    client.test("Got sentiment for post1", function () {
+        const body = response.body;
+        client.assert(response.status === 200, "Expected 200 OK");
+        client.assert(body.postId === client.global.get("post1Id"), "Post ID mismatch");
+        client.assert(body.sentiment === "positive", "Expected sentiment to be 'positive'");
+    });
+%}
+
+###
+# @name 4. Get Sentiment for Negative Post
+GET http://localhost:8087/api/sentiment/getPostSentiment/{{post2Id}}
+
+> {%
+    client.test("Got sentiment for post2", function () {
+        const body = response.body;
+        client.assert(response.status === 200, "Expected 200 OK");
+        client.assert(body.postId === client.global.get("post2Id"), "Post ID mismatch");
+        client.assert(body.sentiment === "negative", "Expected sentiment to be 'negative'");
+    });
+%}
+
+###
+# @name 5. Remove a post
+DELETE http://localhost:8082/api/posts/deletePost/{{post2Id}}
+
+> {%
+    client.test("Response status is 200", function() {
+        client.assert(response.status === 200, "Expected status 200 but got " + response.status);
+    });
+%}
+
+###
+# @name 6. Get Sentiment for deleted Post
+GET http://localhost:8087/api/sentiment/getPostSentiment/{{post2Id}}
+
+> {%
+    client.test("Got sentiment for post2", function () {
+        const body = response.body;
+        client.assert(response.status === 404, "Expected 404");
+    });
+%}
+
