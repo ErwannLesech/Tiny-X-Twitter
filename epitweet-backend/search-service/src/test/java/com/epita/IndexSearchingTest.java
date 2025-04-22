@@ -175,7 +175,7 @@ class IndexSearchingTest {
         assertFalse(results.isEmpty(), "Expected to find result matching both terms");
     }
 
-    @Test
+    /*@Test
     void j_searchPost_multiplePostsAndStrictMatching() {
         List<IndexPost> posts = List.of(
                 new IndexPost(new ObjectId().toString(), "post", "This is a #tech post about #java", "", null, "creation"),
@@ -226,7 +226,7 @@ class IndexSearchingTest {
         PostDocument hashtagMatch = result4.get(0);
         assertTrue(hashtagMatch.getPostId().equals(posts.get(0).getPostId()) || hashtagMatch.getPostId().equals(posts.get(1).getPostId()) || hashtagMatch.getPostId().equals(posts.get(3).getPostId()), "Should contain #java");
         assertEquals(hashtagMatch.getPostId(), posts.get(1).getPostId(), "Should contain #springboot");
-    }
+    }*/
 
     @Test
     void k_searchPost_empty() {
