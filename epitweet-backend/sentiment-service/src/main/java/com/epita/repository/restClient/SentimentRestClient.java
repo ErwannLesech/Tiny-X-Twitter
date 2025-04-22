@@ -9,7 +9,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 
 
 /**
- * REST client for interacting with the User Service.
+ * REST client for interacting from Sentiment Service with the User Service.
  */
 @RegisterRestClient()
 @Consumes(MediaType.APPLICATION_JSON)

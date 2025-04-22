@@ -33,9 +33,9 @@ public enum SentimentType {
      * enum constant.
      */
     public static SentimentType fromString(String text) {
-        for (SentimentType SentimentType : SentimentType.values()) {
-            if (SentimentType.getValue().equalsIgnoreCase(text)) {
-                return SentimentType;
+        for (SentimentType sentimentType : SentimentType.values()) {
+            if (sentimentType.getValue().equalsIgnoreCase(text)) {
+                return sentimentType;
             }
         }
         throw new IllegalArgumentException("No enum constant for value: " + text);
