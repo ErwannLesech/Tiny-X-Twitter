@@ -2,9 +2,15 @@ name: CI - Quarkus Maven
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: 
+    - main
+    - develop
+    - ERLE_implement_cicd
   pull_request:
-    branches: [ "main", "develop" ]
+    branches:
+    - main
+    - develop
+    - ERLE_implement_cicd
 
 jobs:
   test:
