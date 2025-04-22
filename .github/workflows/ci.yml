@@ -48,7 +48,7 @@ jobs:
 
       - name: Start services with Docker Compose
         working-directory: ./epitweet-backend/docker
-        run: docker-compose up -d --wait
+        run: docker compose up -d --wait
 
       - name: Run Maven tests
         working-directory: ./epitweet-backend
