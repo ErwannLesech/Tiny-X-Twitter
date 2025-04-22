@@ -38,6 +38,7 @@
         <module>social-service</module>
         <module>user-timeline-service</module>
         <module>home-timeline-service</module>
+        <module>sentiment-service</module>
     </modules>
 
     <dependencyManagement>
