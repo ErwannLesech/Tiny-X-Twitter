@@ -4,13 +4,10 @@ on:
   push:
     branches: 
       - main
-      - develop
-      - ERLE_implement_cicd
   pull_request:
     branches:
       - main
       - develop
-      - ERLE_implement_cicd
 
 jobs:
   build:
@@ -48,7 +45,7 @@ jobs:
 
       - name: Start services with Docker Compose
         working-directory: ./epitweet-backend/docker
-        run: docker compose up -d --wait
+        run: docker &compose up -d --wait
 
       - name: Run Maven tests
         working-directory: ./epitweet-backend
