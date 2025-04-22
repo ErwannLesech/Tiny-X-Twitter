@@ -70,7 +70,8 @@
               "buildTarget": "epitweet-frontend:build:production"
             },
             "development": {
-              "buildTarget": "epitweet-frontend:build:development"
+              "buildTarget": "epitweet-frontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
