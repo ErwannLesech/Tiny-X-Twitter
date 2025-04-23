@@ -193,7 +193,7 @@ class IndexSearchingTest {
         }
 
         try {
-            Thread.sleep(1000); // 1000 milliseconds = 1 seconds
+            Thread.sleep(5000); // 5000 milliseconds = 5 seconds
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
