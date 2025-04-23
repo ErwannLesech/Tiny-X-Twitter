@@ -64,3 +64,15 @@ services:
     expose:
       - "7474"
       - "7687"
+
+  sentiment_api:
+    build: 
+      context: ../ml-sentiment-api
+      dockerfile: Dockerfile
+    container_name: epitweet_backend_ml_sentiment_api
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    expose:
+      - "8088"
+    
