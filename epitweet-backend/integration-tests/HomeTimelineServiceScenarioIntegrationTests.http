@@ -1,0 +1,301 @@
+# Users: Alice, Bob, Charlie, Dave.
+#
+# Follow network:
+#
+# Alice follows Bob and Charlie.
+# Bob follows Charlie.
+# Charlie follows Alice.
+#
+# Posting events:
+#
+# Bob posts Post1.
+# Charlie posts Post2.
+# Dave posts Post3 (Alice doesn’t follow Dave directly).
+# Bob reply to post2 of Charlie
+#
+# Likes:
+# Bob and Alice like Charlie's Post2.
+# Charlie likes Bob's Post1.
+# Alice likes Dave's Post3 before following Dave.
+
+# Block test:
+#
+# Alice blocks Charlie later → Post2 should disappear from Alice’s timeline.
+
+@env = dev
+
+# ================== Create Users ==================
+
+###
+# @name Alice
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "alice",
+  "pseudo": "Alice",
+  "password": "alice123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("aliceId", response.body._id);
+%}
+
+###
+# @name Bob
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "bob",
+  "pseudo": "Bob",
+  "password": "bob123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("bobId", response.body._id);
+%}
+
+###
+# @name Charlie
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "charlie",
+  "pseudo": "Charlie",
+  "password": "charlie123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("charlieId", response.body._id);
+%}
+
+###
+# @name Dave
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "dave",
+  "pseudo": "Dave",
+  "password": "dave123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("daveId", response.body._id);
+%}
+
+### ================== Follow Logic ==================
+
+###
+# @name Alice follows Bob & Charlie
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{bobId}}",
+  "userFollowId": "{{aliceId}}"
+}
+
+###
+# @name Alice follows Charlie
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{charlieId}}",
+  "userFollowId": "{{aliceId}}"
+}
+
+###
+# @name Bob follows Charlie
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{charlieId}}",
+  "userFollowId": "{{bobId}}"
+}
+
+###
+# @name Charlie follows Alice
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{aliceId}}",
+  "userFollowId": "{{charlieId}}"
+}
+
+### ================== Posts ==================
+
+###
+# @name Bob Post1
+POST http://localhost:8082/api/posts/createPost
+userId: {{bobId}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post1 from Bob",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post1Id", response.body._id);
+%}
+
+###
+# @name Charlie Post2
+POST http://localhost:8082/api/posts/createPost
+userId: {{charlieId}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post2 from Charlie",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post2Id", response.body._id);
+%}
+
+###
+# @name Dave Post3 (not followed by Alice yet)
+POST http://localhost:8082/api/posts/createPost
+userId: {{daveId}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "Post3 from Dave",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("post3Id", response.body._id);
+%}
+
+### ================== Replies ==================
+
+###
+# @name Bob replies to Post2 (Charlie's post)
+POST http://localhost:8082/api/posts/createPost
+userId: {{bobId}}
+Content-Type: application/json
+
+{
+  "postType": "reply",
+  "content": "Reply from Bob to Charlie's Post2",
+  "parentId": "{{post2Id}}",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("reply1Id", response.body._id);
+%}
+
+### ================== Likes ==================
+
+###
+# @name Bob & Alice like Charlie's Post2
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post2Id}}",
+  "userId": "{{bobId}}"
+}
+
+###
+# @name Alice likes post2
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post2Id}}",
+  "userId": "{{aliceId}}"
+}
+
+###
+# @name Charlie likes Bob's Post1
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post1Id}}",
+  "userId": "{{charlieId}}"
+}
+
+###
+# @name Alice likes Dave's Post3 BEFORE following Dave
+POST http://localhost:8084/api/social/like
+Content-Type: application/json
+
+{
+  "likeUnlike": true,
+  "postId": "{{post3Id}}",
+  "userId": "{{aliceId}}"
+}
+
+### ================== Timeline Check Before Follow Dave ==================
+
+###
+# @name Alice's timeline before following Dave
+GET http://localhost:8086/api/timeline/home/{{aliceId}}
+Content-Type: application/json
+
+> {%
+    client.test("Timeline includes liked post3 even without follow", function() {
+        const ids = response.body.timeline.map(p => p.postId);
+        client.assert(ids.includes(client.global.get("post1Id")), "Bob's Post1 should be visible");
+        client.assert(ids.includes(client.global.get("post2Id")), "Charlie's Post2 should be visible");
+        client.assert(ids.includes(client.global.get("post3Id")), "Dave's Post3 (liked) should be visible");
+        client.assert(ids.includes(client.global.get("reply1Id")), "Reply to Charlie's Post2 should be visible");
+    });
+%}
+
+###
+# @name Now Alice follows Dave
+
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{daveId}}",
+  "userFollowId": "{{aliceId}}"
+}
+
+###
+# @name Alice Blocks Charlie
+
+POST http://localhost:8084/api/social/block
+Content-Type: application/json
+
+{
+  "blockUnblock": true,
+  "userBlockedId": "{{charlieId}}",
+  "userBlockId": "{{aliceId}}"
+}
+
+### ================== Final Timeline Check ==================
+
+###
+# @name Alice's timeline after blocking Charlie
+GET http://localhost:8086/api/timeline/home/{{aliceId}}
+Content-Type: application/json
+
+> {%
+    client.test("Charlie's content should be filtered", function() {
+        const ids = response.body.timeline.map(p => p.postId);
+        client.assert(!ids.includes(client.global.get("post2Id")), "Charlie's Post2 should NOT appear");
+        client.assert(ids.includes(client.global.get("post1Id")), "Bob's Post1 should still appear");
+        client.assert(ids.includes(client.global.get("post3Id")), "Dave's Post3 should still appear");
+    });
+%}

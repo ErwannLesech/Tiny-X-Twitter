@@ -4,12 +4,17 @@ import com.epita.repository.entity.EntryType;
 import com.epita.repository.entity.HomeTimelineEntry;
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
+import org.jboss.logging.Logger;
 
 import java.util.*;
 
 @ApplicationScoped
 public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimelineEntry> {
+
+    @Inject
+    Logger logger;
 
     /**
      * Get a {@code List<HomeTimelineEntry>} of a {@code ObjectId} user id.
@@ -29,6 +34,18 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
      * @param entry The {@code HomeTimelineEntry} to add.
      */
     public void addHomeEntry(HomeTimelineEntry entry) {
+        // Check for already existing same entry
+        List<HomeTimelineEntry> entries = getTimeline(entry.getUserId());
+
+        for (HomeTimelineEntry e : entries) {
+            // avoid adding same post to timeline
+            if (e.getPostId().equals(entry.getPostId())) {
+                return;
+            }
+        }
+
+        logger.infof("Adding entry: %s", entry.toString());
+
         this.persist(entry);
     }
 
@@ -39,6 +56,9 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
      * @param type The {@code EntryType} of the {@code HomeTimelineEntry} to add.
      */
     public void removeHomeEntry(HomeTimelineEntry entry, EntryType type) {
+
+        logger.infof("Removing entry: %s", entry.toString());
+
         delete("userId = ?1 and userFollowedId = ?2 and postId = ?3 and postType = ?4",
                 entry.getUserId(), entry.getUserFollowedId(), entry.getPostId(), type);
     }
@@ -50,6 +70,9 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
      * @param userFollowed The {@code ObjectIf} user to remove.
      */
     public void removeUserFromTimeline(final ObjectId userId, final ObjectId userFollowed) {
+
+        logger.infof("Removing user: %s", userId.toString());
+
         delete("userId = ?1 and userFollowedId = ?2", userId, userFollowed);
     }
 
@@ -60,6 +83,7 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
      * @param postId The {@code ObjectIf} user to remove.
      */
     public void removePostFromTimeline(final ObjectId userId, final ObjectId postId) {
+        logger.infof("Removing post: %s", postId.toString());
         delete("userId = ?1 and postId= ?2", userId, postId);
     }
 }

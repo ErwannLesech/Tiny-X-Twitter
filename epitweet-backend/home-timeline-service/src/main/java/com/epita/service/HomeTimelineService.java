@@ -63,7 +63,7 @@ public class HomeTimelineService {
     }
 
     /**
-     * Add/Remove a post from a user timeline when a post is either create or delete.
+     * Add/Remove a post from a user timeline when a post is either created or deleted.
      *
      * @param message The {@code PostHomeTimeline} message received
      */
@@ -74,7 +74,9 @@ public class HomeTimelineService {
                 .getEntity().stream()
                 .map(ObjectId::new)
                 .toList();
+
         logger.info("Update user timeline on creation/deletion post");
+
         for (ObjectId followerId : followers) {
             if (Objects.equals(message.getMethod(), "creation")) {
                 logger.infof("Add post %s to the home timeline of %s", message.getPost().get_id(), followerId);
@@ -98,18 +100,32 @@ public class HomeTimelineService {
      * @param message The {@code SocialHomeTimelineLike} message received
      */
     public void updateOnLike(SocialHomeTimelineLike message) {
+
         PostResponse post = postRestClient
                 .getPost(message.getPostId())
                 .getEntity();
+
         if (post != null) {
             logger.info("Update user timeline on liked/unliked post");
+
+            post.setCreatedAt(message.getPostLikeDate().atZone(ZoneId.systemDefault()).toInstant());
+            HomeTimelineEntry entry = HomeTimelineConverter.LikeToEntry(message, message.getUserId(), post);
+
+            if (Objects.equals(message.getMethod(), "like")){
+                homeRepository.addHomeEntry(entry);
+            }
+            else
+            {
+                homeRepository.removeHomeEntry(entry, EntryType.LIKE);
+            }
+
             List<ObjectId> followers = socialRestClient.getFollowers(message.getUserId().toString())
                     .getEntity().stream()
                     .map(ObjectId::new)
                     .toList();
+
             for (ObjectId followerId : followers) {
-                post.setCreatedAt(message.getPostLikeDate().atZone(ZoneId.systemDefault()).toInstant());
-                HomeTimelineEntry entry = HomeTimelineConverter.LikeToEntry(message, followerId, post);
+                entry = HomeTimelineConverter.LikeToEntry(message, followerId, post);
 
                 BlockedRelationRequest request = new BlockedRelationRequest(followerId, post.getUserId());
                 BlockedRelationResponse blockedRelationResponse = socialRestClient
