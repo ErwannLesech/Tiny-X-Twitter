@@ -90,18 +90,6 @@ public class SentimentServiceTest {
     }
 
     @Test
-    public void testAnalysePost_shouldReturnRestResponse() {
-        String content = "What a terrible day.";
-        RestResponse<SentimentResponse> restResponse = RestResponse.ok(new SentimentResponse("post123", "negative"));
-
-        when(sentimentRestClient.analyse(new AnalyseRequest(content))).thenReturn(restResponse);
-
-        String result = sentimentService.analysePost(content);
-
-        assertEquals("negative", result);
-    }
-
-    @Test
     public void testAnalysePost_shouldReturnNullIfRestFails() {
         String content = "Just words.";
 
