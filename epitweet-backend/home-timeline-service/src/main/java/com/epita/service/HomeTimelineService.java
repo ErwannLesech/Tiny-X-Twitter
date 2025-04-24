@@ -25,6 +25,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -55,10 +56,14 @@ public class HomeTimelineService {
      * @return The {@code List<HomeTimelinePost>} timeline wrapped in {@code Response}
      */
     public HomeTimelineResponse getHomeTimeline(final ObjectId userId) {
+
         logger.infof("Getting home timeline for %s", userId);
+
         List<HomeTimelinePost> timeline = homeRepository.getTimeline(userId).stream()
+                .sorted(Comparator.comparing(HomeTimelineEntry::getDate).reversed())
                 .map(HomeTimelineConverter::toPost)
                 .toList();
+
         return new HomeTimelineResponse(userId, timeline);
     }
 

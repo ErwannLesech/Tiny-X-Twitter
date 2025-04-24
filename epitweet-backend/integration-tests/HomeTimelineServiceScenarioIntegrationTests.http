@@ -284,6 +284,10 @@ Content-Type: application/json
   "userBlockId": "{{aliceId}}"
 }
 
+###
+# @name Sleep for 1 seconds using httpbin to assure blocking redis time
+GET https://httpbin.org/delay/1
+
 ### ================== Final Timeline Check ==================
 
 ###
