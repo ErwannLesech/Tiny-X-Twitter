@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing HomeTimeline entry.
@@ -61,10 +62,58 @@ public class HomeTimelineService {
 
         List<HomeTimelinePost> timeline = homeRepository.getTimeline(userId).stream()
                 .sorted(Comparator.comparing(HomeTimelineEntry::getDate).reversed())
-                .map(HomeTimelineConverter::toPost)
+                .map(entry -> HomeTimelineConverter.toPost(entry, false))
                 .toList();
 
         return new HomeTimelineResponse(userId, timeline);
+    }
+
+    public HomeTimelineResponse getHomeTimelineWithRandom(final ObjectId userId) {
+        logger.infof("Getting home timeline with random for %s", userId);
+
+        List<HomeTimelinePost> userTimeline = homeRepository.getTimeline(userId).stream()
+                .sorted(Comparator.comparing(HomeTimelineEntry::getDate).reversed())
+                .map(entry -> HomeTimelineConverter.toPost(entry, false))
+                .toList();
+
+        List<HomeTimelinePost> randomTimeline = homeRepository.getRandomTimeline(userId).stream()
+                .sorted(Comparator.comparing(HomeTimelineEntry::getDate).reversed())
+                .map(entry -> HomeTimelineConverter.toPost(entry, true))
+                .toList();
+
+        List<HomeTimelinePost> finalTimeline = new ArrayList<>();
+
+        int userTimelineIndex = 0;
+        int randomTimelineIndex = 0;
+        int userTimelineCount = userTimeline.size();
+        int randomTimelineCount = randomTimeline.size();
+        int finalTimelineCount = 0;
+
+        while (userTimelineIndex < userTimelineCount && finalTimelineCount < 50) {
+
+            int userPostsToAdd = 3;
+            while (userPostsToAdd > 0 && userTimelineIndex < userTimelineCount) {
+                finalTimeline.add(userTimeline.get(userTimelineIndex));
+                userTimelineIndex++;
+                userPostsToAdd--;
+            }
+
+            if (randomTimelineIndex < randomTimelineCount) {
+                finalTimeline.add(randomTimeline.get(randomTimelineIndex));
+                randomTimelineIndex++;
+                finalTimelineCount += 4;
+            }
+            else {
+                finalTimelineCount += 3;
+            }
+        }
+
+        // Limiter à 50 entrées
+        finalTimeline = finalTimeline.stream().limit(50).collect(Collectors.toList());
+
+        finalTimeline.sort(Comparator.comparing(HomeTimelinePost::getPostOrLikeTime).reversed());
+
+        return new HomeTimelineResponse(userId,  finalTimeline);
     }
 
     /**

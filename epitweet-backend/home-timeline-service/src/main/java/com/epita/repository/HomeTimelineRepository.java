@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimelineEntry> {
@@ -26,6 +27,21 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
         return find("userId", userId).stream()
                 .sorted(Comparator.comparing(HomeTimelineEntry::getDate))
                 .toList();
+    }
+
+    public List<HomeTimelineEntry> getRandomTimeline(final ObjectId userId) {
+        List<HomeTimelineEntry> entries =  find("userId != ?1", userId).stream()
+                .sorted(Comparator.comparing(HomeTimelineEntry::getDate))
+                .toList();
+
+        Map<ObjectId, HomeTimelineEntry> uniqueEntriesMap = entries.stream()
+                .collect(Collectors.toMap(
+                        HomeTimelineEntry::getUserId,
+                        user -> user,
+                        (existing, replacement) -> existing
+                ));
+
+        return new ArrayList<>(uniqueEntriesMap.values());
     }
 
     /**

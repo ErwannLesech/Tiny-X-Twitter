@@ -34,7 +34,13 @@ public class HomeTimelineController {
         if (userId == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        HomeTimelineResponse res = homeService.getHomeTimeline(userId);
+
+        // Basic Timeline
+        // HomeTimelineResponse res = homeService.getHomeTimeline(userId);
+
+        // Timeline including suggestions
+        HomeTimelineResponse res = homeService.getHomeTimelineWithRandom(userId);
+
         return Response.ok(res).build();
     }
 }
