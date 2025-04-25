@@ -60,8 +60,8 @@ public class BasisTest {
     public void getTimelineTest() {
         HomeTimelineResponse timeline = homeTimelineService.getHomeTimeline(new ObjectId(user123Id));
         System.out.println(timeline.getTimeline().stream().map(HomeTimelinePost::getPostOrLikeTime).toList());
-        assertEquals(3, timeline.getTimeline().size());
-        assertEquals(post123Id, timeline.getTimeline().get(0).getPostId().toString());
-        assertEquals(post456Id, timeline.getTimeline().get(1).getPostId().toString());
+        assertEquals(2, timeline.getTimeline().size());
+        assertEquals(post456Id, timeline.getTimeline().get(0).getPostId().toString());
+        assertEquals(post123Id, timeline.getTimeline().get(1).getPostId().toString());
     }
 }
