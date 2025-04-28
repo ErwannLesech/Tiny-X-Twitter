@@ -79,6 +79,14 @@ public class HomeTimelineRepository implements PanacheMongoRepository<HomeTimeli
                 entry.getUserId(), entry.getUserFollowedId(), entry.getPostId(), type);
     }
 
+    public void removeHomeEntryWithoutLink(HomeTimelineEntry entry, EntryType type) {
+
+        logger.infof("Removing entry: %s", entry.toString());
+
+        delete("userId = ?1 and postId = ?2 and postType = ?3",
+                entry.getUserId(), entry.getPostId(), type);
+    }
+
     /**
      * Remove every {@code HomeTimelineEntry} relate to {@code ObjectId} user from the timeline of {@code ObjectId} user
      *

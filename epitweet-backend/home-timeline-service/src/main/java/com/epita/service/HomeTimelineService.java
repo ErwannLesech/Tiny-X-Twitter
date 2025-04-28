@@ -111,23 +111,47 @@ public class HomeTimelineService {
         // Limiter à 50 entrées
         finalTimeline = finalTimeline.stream().limit(50).collect(Collectors.toList());
 
-        finalTimeline.sort(Comparator.comparing(HomeTimelinePost::getPostOrLikeTime).reversed());
-
         return new HomeTimelineResponse(userId,  finalTimeline);
     }
 
     /**
      * Add/Remove a post from a user timeline when a post is either created or deleted.
-     *
+     *s
      * @param message The {@code PostHomeTimeline} message received
      */
     public void updateOnPost(PostHomeTimeline message) {
 
-        List<ObjectId> followers = socialRestClient
-                .getFollowers(message.getPost().getUserId().toString())
-                .getEntity().stream()
-                .map(ObjectId::new)
-                .toList();
+        int followerCount = 0;
+        List<ObjectId> followers = new ArrayList<>();
+
+        try {
+            followers = socialRestClient
+                    .getFollowers(message.getPost().getUserId().toString())
+                    .getEntity().stream()
+                    .map(ObjectId::new)
+                    .toList();
+
+            logger.infof("Followers %s", followers);
+            followerCount = followers.size();
+        } catch (Exception e) {
+            logger.errorf("Failed to update post for user %s: %s",
+                    message.getPost().getUserId(), e.getMessage(), e);
+        }
+
+        if (followerCount == 0) {
+            // Add it without link to someone for suggestion
+            if (Objects.equals(message.getMethod(), "creation")) {
+                HomeTimelineEntry entry = HomeTimelineConverter.PostToEntry(message, new ObjectId());
+                homeRepository.addHomeEntry(entry);
+            }
+            else {
+                ObjectId postUserId = message.getPost().getUserId();
+                ObjectId postId = message.getPost().get_id();
+                HomeTimelineEntry entry = entryToDelete(new ObjectId(), postUserId, postId);
+                homeRepository.removeHomeEntryWithoutLink(entry, EntryType.POST);
+                homeRepository.removeHomeEntryWithoutLink(entry, EntryType.LIKE);
+            }
+        }
 
         logger.info("Update user timeline on creation/deletion post");
 
