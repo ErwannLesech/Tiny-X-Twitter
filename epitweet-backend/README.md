@@ -99,6 +99,11 @@ This will start:
 
 Then, you can build the entire project or individual modules.
 
+If you want to connect to Mongo DB from container:
+```sh
+docker exec -it epitweet_td_mongo mongosh -u admin -p admin --authenticationDatabase admin Epitweet
+```
+
 ### 2. Build Modules
 Run one of the following command at the root of the project:
 ```sh

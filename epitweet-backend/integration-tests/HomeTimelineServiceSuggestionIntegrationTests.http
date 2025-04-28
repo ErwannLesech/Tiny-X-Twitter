@@ -1,0 +1,259 @@
+@env = dev
+
+# ================== Create Users ==================
+
+###
+# @name User1
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user1",
+  "pseudo": "User1",
+  "password": "user1123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("user1Id", response.body._id);
+%}
+
+###
+# @name User2
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user2",
+  "pseudo": "User2",
+  "password": "user2123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("user2Id", response.body._id);
+%}
+
+###
+# @name User3
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user3",
+  "pseudo": "User3",
+  "password": "user3123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("user3Id", response.body._id);
+%}
+
+###
+# @name User4
+POST http://localhost:8081/api/users/create
+Content-Type: application/json
+
+{
+  "tag": "user4",
+  "pseudo": "User4",
+  "password": "user4123",
+  "blockedUsers": []
+}
+> {%
+    client.global.set("user4Id", response.body._id);
+%}
+
+### ================== Follow Logic ==================
+
+###
+# @name User1 follows User2
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{user2Id}}",
+  "userFollowId": "{{user1Id}}"
+}
+
+###
+# @name User1 follows User3
+POST http://localhost:8084/api/social/follow
+Content-Type: application/json
+
+{
+  "followUnfollow": true,
+  "userFollowedId": "{{user3Id}}",
+  "userFollowId": "{{user1Id}}"
+}
+
+### ================== Posts ==================
+
+### -- User2 Posts --
+
+###
+# @name User2 Post 1
+POST http://localhost:8082/api/posts/createPost
+userId: {{user2Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User2 - Post1",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user2post1Id", response.body._id);
+%}
+
+###
+# @name User2 Post 2
+POST http://localhost:8082/api/posts/createPost
+userId: {{user2Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User2 - Post2",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user2post2Id", response.body._id);
+%}
+
+###
+# @name User2 Post 3
+POST http://localhost:8082/api/posts/createPost
+userId: {{user2Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User2 - Post3",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user2post3Id", response.body._id);
+%}
+
+### -- User3 Posts --
+
+###
+# @name User3 Post 1
+POST http://localhost:8082/api/posts/createPost
+userId: {{user3Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User3 - Post1",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user3post1Id", response.body._id);
+%}
+
+###
+# @name User3 Post 2
+POST http://localhost:8082/api/posts/createPost
+userId: {{user3Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User3 - Post2",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user3post2Id", response.body._id);
+%}
+
+###
+# @name User3 Post 3
+POST http://localhost:8082/api/posts/createPost
+userId: {{user3Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User3 - Post3",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user3post3Id", response.body._id);
+%}
+
+### -- User4 Posts (Suggested) --
+
+###
+# @name User4 Post 1
+POST http://localhost:8082/api/posts/createPost
+userId: {{user4Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User4 - Post1",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user4post1Id", response.body._id);
+%}
+
+###
+# @name User4 Post 2
+POST http://localhost:8082/api/posts/createPost
+userId: {{user4Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User4 - Post2",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user4post2Id", response.body._id);
+%}
+
+###
+# @name User4 Post 3
+POST http://localhost:8082/api/posts/createPost
+userId: {{user4Id}}
+Content-Type: application/json
+
+{
+  "postType": "post",
+  "content": "User4 - Post3",
+  "mediaPath": ""
+}
+> {%
+    client.global.set("user4post3Id", response.body._id);
+%}
+
+### ================== Timeline Check ==================
+
+###
+# @name Get User1's timeline
+GET http://localhost:8086/api/timeline/home/{{user1Id}}
+Content-Type: application/json
+
+> {%
+    client.test("Timeline includes posts from followed users and suggested user4", function() {
+        const ids = response.body.timeline.map(p => p.postId);
+
+        // User2 Posts
+        client.assert(ids.includes(client.global.get("user2post1Id")), "User2 - Post1 should appear");
+        client.assert(ids.includes(client.global.get("user2post2Id")), "User2 - Post2 should appear");
+        client.assert(ids.includes(client.global.get("user2post3Id")), "User2 - Post3 should appear");
+
+        // User3 Posts
+        client.assert(ids.includes(client.global.get("user3post1Id")), "User3 - Post1 should appear");
+        client.assert(ids.includes(client.global.get("user3post2Id")), "User3 - Post2 should appear");
+        client.assert(ids.includes(client.global.get("user3post3Id")), "User3 - Post3 should appear");
+
+        // Suggestion from User4 (even if not followed)
+        const suggestionFound = ids.includes(client.global.get("user4post1Id"))
+            || ids.includes(client.global.get("user4post2Id"))
+            || ids.includes(client.global.get("user4post3Id"));
+        client.assert(suggestionFound, "At least one post from User4 (suggestion) should appear");
+    });
+%}

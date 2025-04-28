@@ -22,8 +22,9 @@ public class HomeTimelineConverter {
     @Inject
     Logger logger;
 
-    public static HomeTimelinePost toPost(final HomeTimelineEntry entry) {
-        return new HomeTimelinePost(entry.getUserFollowedId(), entry.getPostId(), entry.getPostType(), entry.getDate());
+    public static HomeTimelinePost toPost(final HomeTimelineEntry entry, Boolean isSuggestion) {
+        return new HomeTimelinePost(entry.getUserFollowedId(), entry.getPostId(), 
+        entry.getPostType(), isSuggestion, entry.getDate());
     }
     /**
      * Converts a {@code SocialHomeTimelineLike} to a {@code HomeTimelineEntry} entity.

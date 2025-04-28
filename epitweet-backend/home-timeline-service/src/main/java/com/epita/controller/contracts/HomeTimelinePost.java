@@ -27,5 +27,10 @@ public class HomeTimelinePost {
      */
     EntryType type;
 
+    /**
+     * Is suggestion or already on basic timeline
+     */
+    Boolean isSuggestion;
+
     Instant postOrLikeTime;
 }

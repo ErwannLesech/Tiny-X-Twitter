@@ -25,8 +25,10 @@ import org.jboss.resteasy.reactive.RestResponse;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing HomeTimeline entry.
@@ -55,26 +57,104 @@ public class HomeTimelineService {
      * @return The {@code List<HomeTimelinePost>} timeline wrapped in {@code Response}
      */
     public HomeTimelineResponse getHomeTimeline(final ObjectId userId) {
+
         logger.infof("Getting home timeline for %s", userId);
+
         List<HomeTimelinePost> timeline = homeRepository.getTimeline(userId).stream()
-                .map(HomeTimelineConverter::toPost)
+                .sorted(Comparator.comparing(HomeTimelineEntry::getDate).reversed())
+                .map(entry -> HomeTimelineConverter.toPost(entry, false))
                 .toList();
+
         return new HomeTimelineResponse(userId, timeline);
     }
 
+    public HomeTimelineResponse getHomeTimelineWithRandom(final ObjectId userId) {
+        logger.infof("Getting home timeline with random for %s", userId);
+
+        List<HomeTimelinePost> userTimeline = homeRepository.getTimeline(userId).stream()
+                .sorted(Comparator.comparing(HomeTimelineEntry::getDate).reversed())
+                .map(entry -> HomeTimelineConverter.toPost(entry, false))
+                .toList();
+
+        List<HomeTimelinePost> randomTimeline = homeRepository.getRandomTimeline(userId).stream()
+                .sorted(Comparator.comparing(HomeTimelineEntry::getDate).reversed())
+                .map(entry -> HomeTimelineConverter.toPost(entry, true))
+                .toList();
+
+        List<HomeTimelinePost> finalTimeline = new ArrayList<>();
+
+        int userTimelineIndex = 0;
+        int randomTimelineIndex = 0;
+        int userTimelineCount = userTimeline.size();
+        int randomTimelineCount = randomTimeline.size();
+        int finalTimelineCount = 0;
+
+        while (userTimelineIndex < userTimelineCount && finalTimelineCount < 50) {
+
+            int userPostsToAdd = 3;
+            while (userPostsToAdd > 0 && userTimelineIndex < userTimelineCount) {
+                finalTimeline.add(userTimeline.get(userTimelineIndex));
+                userTimelineIndex++;
+                userPostsToAdd--;
+            }
+
+            if (randomTimelineIndex < randomTimelineCount) {
+                finalTimeline.add(randomTimeline.get(randomTimelineIndex));
+                randomTimelineIndex++;
+                finalTimelineCount += 4;
+            }
+            else {
+                finalTimelineCount += 3;
+            }
+        }
+
+        // Limiter à 50 entrées
+        finalTimeline = finalTimeline.stream().limit(50).collect(Collectors.toList());
+
+        return new HomeTimelineResponse(userId,  finalTimeline);
+    }
+
     /**
-     * Add/Remove a post from a user timeline when a post is either create or delete.
-     *
+     * Add/Remove a post from a user timeline when a post is either created or deleted.
+     *s
      * @param message The {@code PostHomeTimeline} message received
      */
     public void updateOnPost(PostHomeTimeline message) {
 
-        List<ObjectId> followers = socialRestClient
-                .getFollowers(message.getPost().getUserId().toString())
-                .getEntity().stream()
-                .map(ObjectId::new)
-                .toList();
+        int followerCount = 0;
+        List<ObjectId> followers = new ArrayList<>();
+
+        try {
+            followers = socialRestClient
+                    .getFollowers(message.getPost().getUserId().toString())
+                    .getEntity().stream()
+                    .map(ObjectId::new)
+                    .toList();
+
+            logger.infof("Followers %s", followers);
+            followerCount = followers.size();
+        } catch (Exception e) {
+            logger.errorf("Failed to update post for user %s: %s",
+                    message.getPost().getUserId(), e.getMessage(), e);
+        }
+
+        if (followerCount == 0) {
+            // Add it without link to someone for suggestion
+            if (Objects.equals(message.getMethod(), "creation")) {
+                HomeTimelineEntry entry = HomeTimelineConverter.PostToEntry(message, new ObjectId());
+                homeRepository.addHomeEntry(entry);
+            }
+            else {
+                ObjectId postUserId = message.getPost().getUserId();
+                ObjectId postId = message.getPost().get_id();
+                HomeTimelineEntry entry = entryToDelete(new ObjectId(), postUserId, postId);
+                homeRepository.removeHomeEntryWithoutLink(entry, EntryType.POST);
+                homeRepository.removeHomeEntryWithoutLink(entry, EntryType.LIKE);
+            }
+        }
+
         logger.info("Update user timeline on creation/deletion post");
+
         for (ObjectId followerId : followers) {
             if (Objects.equals(message.getMethod(), "creation")) {
                 logger.infof("Add post %s to the home timeline of %s", message.getPost().get_id(), followerId);
@@ -98,18 +178,32 @@ public class HomeTimelineService {
      * @param message The {@code SocialHomeTimelineLike} message received
      */
     public void updateOnLike(SocialHomeTimelineLike message) {
+
         PostResponse post = postRestClient
                 .getPost(message.getPostId())
                 .getEntity();
+
         if (post != null) {
             logger.info("Update user timeline on liked/unliked post");
+
+            post.setCreatedAt(message.getPostLikeDate().atZone(ZoneId.systemDefault()).toInstant());
+            HomeTimelineEntry entry = HomeTimelineConverter.LikeToEntry(message, message.getUserId(), post);
+
+            if (Objects.equals(message.getMethod(), "like")){
+                homeRepository.addHomeEntry(entry);
+            }
+            else
+            {
+                homeRepository.removeHomeEntry(entry, EntryType.LIKE);
+            }
+
             List<ObjectId> followers = socialRestClient.getFollowers(message.getUserId().toString())
                     .getEntity().stream()
                     .map(ObjectId::new)
                     .toList();
+
             for (ObjectId followerId : followers) {
-                post.setCreatedAt(message.getPostLikeDate().atZone(ZoneId.systemDefault()).toInstant());
-                HomeTimelineEntry entry = HomeTimelineConverter.LikeToEntry(message, followerId, post);
+                entry = HomeTimelineConverter.LikeToEntry(message, followerId, post);
 
                 BlockedRelationRequest request = new BlockedRelationRequest(followerId, post.getUserId());
                 BlockedRelationResponse blockedRelationResponse = socialRestClient
