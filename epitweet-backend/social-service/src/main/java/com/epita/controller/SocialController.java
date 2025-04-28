@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("/api/social")
@@ -82,8 +83,7 @@ public class SocialController {
 
         List<String> follows = socialService.getFollows(userId);
         if (follows == null) {
-            logger.warnf("GetFollows response 404 - Users not found during request");
-            return Response.status(Response.Status.NOT_FOUND).build();
+            follows = new ArrayList<>();
         }
         logger.infof("GetFollows response 200 - Request done successfully");
         return Response.ok(follows).build();
@@ -113,8 +113,7 @@ public class SocialController {
 
         List<String> followers = socialService.getFollowers(userId);
         if (followers == null) {
-            logger.warnf("GetFollowers response 404 - Users not found during request");
-            return Response.status(Response.Status.NOT_FOUND).build();
+            followers = new ArrayList<>();
         }
         logger.infof("GetFollowers response 200 - Request done successfully");
         return Response.ok(followers).build();
@@ -176,8 +175,7 @@ public class SocialController {
 
         List<String> blockedUsers = socialService.getBlockedUsers(userId);
         if (blockedUsers == null) {
-            logger.warnf("GetBlocked response 404 - Users not found during request");
-            return Response.status(Response.Status.NOT_FOUND).build();
+            blockedUsers = new ArrayList<>();
         }
         logger.infof("GetBlocked response 200 - Request done successfully");
         return Response.ok(blockedUsers).build();
@@ -207,8 +205,7 @@ public class SocialController {
 
         List<String> usersWhoBlocked = socialService.getUsersWhoBlocked(userId);
         if (usersWhoBlocked == null) {
-            logger.warnf("GetBlock response 404 - Users not found during request");
-            return Response.status(Response.Status.NOT_FOUND).build();
+            usersWhoBlocked = new ArrayList<>();
         }
         logger.infof("GetBlock response 200 - Request done successfully");
         return Response.ok(usersWhoBlocked).build();
@@ -269,8 +266,7 @@ public class SocialController {
 
         List<String> users = socialService.getLikeUsers(postId);
         if (users == null) {
-            logger.warnf("GetLikeUsers response 404 - Users not found during request");
-            return Response.status(Response.Status.NOT_FOUND).build();
+            users = new ArrayList<>();
         }
         logger.infof("GetLikeUsers response 200 - Request done successfully");
         return Response.ok(users).build();
@@ -300,8 +296,7 @@ public class SocialController {
 
         List<LikedPostInfo> likedPosts = socialService.getLikesPosts(userId);
         if (likedPosts == null) {
-            logger.warnf("GetLikedPosts response 404 - Users not found during request");
-            return Response.status(Response.Status.NOT_FOUND).build();
+            likedPosts = new ArrayList<>();
         }
         logger.infof("GetLikedPosts response 200 - Request done successfully");
         return Response.ok(likedPosts).build();
