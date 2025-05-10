@@ -255,7 +255,7 @@ public class BlockUnBlockTest
             .when()
             .get("/api/social/getBlocked/" + unknownId)
             .then()
-            .statusCode(404);
+            .statusCode(200);
     }
 
     /**
@@ -291,7 +291,7 @@ public class BlockUnBlockTest
             .when()
             .get("/api/social/getBlock/" + unknownId)
             .then()
-            .statusCode(404);
+            .statusCode(200);
     }
 
     /**

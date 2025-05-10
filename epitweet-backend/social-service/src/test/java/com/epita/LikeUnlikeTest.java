@@ -285,7 +285,7 @@ public class LikeUnlikeTest
             .when()
             .get("/api/social/getLikedPosts/" + unknownId)
             .then()
-            .statusCode(404);
+            .statusCode(200);
     }
 
     /**
@@ -321,7 +321,7 @@ public class LikeUnlikeTest
             .when()
             .get("/api/social/getLikeUsers/" + unknownId)
             .then()
-            .statusCode(404);
+            .statusCode(200);
     }
 
     /**

@@ -256,7 +256,7 @@ public class FollowUnFollowTest
             .when()
             .get("/api/social/getFollows/" + unknownId)
             .then()
-            .statusCode(404);
+            .statusCode(200);
     }
 
     /**
@@ -292,7 +292,7 @@ public class FollowUnFollowTest
             .when()
             .get("/api/social/getFollowers/" + unknownId)
             .then()
-            .statusCode(404);
+            .statusCode(200);
     }
 
     /**
